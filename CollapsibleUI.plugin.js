@@ -35,13 +35,13 @@ module.exports = class CollapsibleUI {
     }
     
     start() {
-        console.log(this.getName() + " version " + this.getVersion() + " has started.");
+        console.log("[CollapsibleUI] version 1.0.0 has started.");
         this.initialize();
     }
        
     stop() {
         document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
-        console.log(this.getName() + " version " + this.getVersion() + " has stopped.");
+        console.log("[CollapsibleUI] version 1.0.0 has stopped.");
     }
 
     onSwitch() {

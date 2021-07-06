@@ -64,8 +64,8 @@ module.exports = class CollapsibleUI {
 
     // Initialize the plugin when it is enabled
     start() {
-        console.log("[CollapsibleUI] version 1.0.0 has started.");
         this.initialize();
+        console.log("[CollapsibleUI] version 1.0.0 has started.");
     }
 
     // Remove the icons created by the plugin when it is disabled

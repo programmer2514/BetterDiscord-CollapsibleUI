@@ -3,8 +3,8 @@
  * @author programmer2514
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
  * @version 1.0.0
- * @website https://github.com/programmer2514/BetterDiscord-ModularUI
- * @source placeholder
+ * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
+ * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
 
 module.exports = class CollapsibleUI {

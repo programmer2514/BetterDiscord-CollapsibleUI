@@ -2,7 +2,7 @@
  * @name CollapsibleUI
  * @author programmer2514
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 1.1.0
+ * @version 1.1.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -64,14 +64,13 @@ module.exports = class CollapsibleUI {
 
     // Initialize the plugin when it is enabled
     start() {
-        this.initialize();
-        console.log("[CollapsibleUI] version 1.0.0 has started.");
+        this.startPlugin();
     }
 
     // Remove the icons created by the plugin when it is disabled
     stop() {
         document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
-        console.log("[CollapsibleUI] version 1.0.0 has stopped.");
+        console.log("[CollapsibleUI] version 1.1.1 has stopped.");
     }
 
     // Re-initialize the plugin on channel/server switch to maintain icon availability
@@ -105,6 +104,21 @@ module.exports = class CollapsibleUI {
         // Return DOM Element of newly-created toolbar icon
         return newToolbarIcon;
 
+    }
+    
+    // Starts the plugin
+    startPlugin() {
+        
+        // Recursively attempts to start the plugin until it works
+        // Using this crappy method of doing it because the window load event is activated before Discord actually starts
+        try {
+            this.initialize();
+            console.log("[CollapsibleUI] version 1.1.1 has started.");
+        }
+        catch {
+            this.startPlugin();
+        }
+        
     }
 
 }

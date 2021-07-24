@@ -2,7 +2,7 @@
  * @name CollapsibleUI
  * @author programmer2514
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 1.1.1
+ * @version 1.2.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -14,35 +14,63 @@ module.exports = class CollapsibleUI {
 
         // Purge CollapsibleUI toolbar icons
         document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
+        
+        // Apply transitions to UI elements
+        document.querySelector('.sidebar-2K8pFh').style.transition = 'width 500ms';
+        document.querySelector('.wrapper-3NnKdC').style.transition = 'width 500ms';
 
         // Define & add new toolbar icons
         var serverListButton = this.addToolbarIcon('Server List', '<path fill="currentColor" d="M2,3v18c0,0.6,0.4,1,1,1h5V2H3C2.4,2,2,2.4,2,3z M21,2H10v9h12V3C22,2.4,21.6,2,21,2z M10,22h11c0.6,0,1-0.4,1-1v-8H10V22z"/>', '0 0 24 24');
         var channelListButton = this.addToolbarIcon('Channel List', '<path fill="currentColor" d="M7,8h14c0.6,0,1-0.4,1-1s-0.4-1-1-1H7C6.4,6,6,6.4,6,7S6.4,8,7,8z M21,11H7c-0.6,0-1,0.4-1,1s0.4,1,1,1h14c0.6,0,1-0.4,1-1S21.6,11,21,11z M21,16H7c-0.6,0-1,0.4-1,1s0.4,1,1,1h14c0.6,0,1-0.4,1-1S21.6,16,21,16z M3.7,6.3C3.6,6.2,3.5,6.1,3.4,6.1C3,5.9,2.6,6,2.3,6.3C2.2,6.4,2.1,6.5,2.1,6.6C2,6.9,2,7.1,2.1,7.4c0.1,0.1,0.1,0.2,0.2,0.3c0.1,0.1,0.2,0.2,0.3,0.2C2.7,8,2.9,8,3,8c0.3,0,0.5-0.1,0.7-0.3c0.1-0.1,0.2-0.2,0.2-0.3C4,7.1,4,6.9,3.9,6.6C3.9,6.5,3.8,6.4,3.7,6.3z M3.7,11.3C3.4,11,3,10.9,2.6,11.1c-0.1,0.1-0.2,0.1-0.3,0.2c-0.1,0.1-0.2,0.2-0.2,0.3c-0.1,0.2-0.1,0.5,0,0.8c0.1,0.1,0.1,0.2,0.2,0.3c0.1,0.1,0.2,0.2,0.3,0.2C2.7,13,2.9,13,3,13c0.1,0,0.3,0,0.4-0.1c0.1-0.1,0.2-0.1,0.3-0.2c0.1-0.1,0.2-0.2,0.2-0.3c0.1-0.2,0.1-0.5,0-0.8C3.9,11.5,3.8,11.4,3.7,11.3z M3.7,16.3c-0.1-0.1-0.2-0.2-0.3-0.2c-0.2-0.1-0.5-0.1-0.8,0c-0.1,0-0.2,0.1-0.3,0.2c-0.1,0.1-0.2,0.2-0.2,0.3C1.9,17,2,17.4,2.3,17.7c0.1,0.1,0.2,0.2,0.3,0.2C2.7,18,2.9,18,3,18c0.1,0,0.3,0,0.4-0.1c0.1-0.1,0.2-0.1,0.3-0.2C4,17.4,4.1,17,3.9,16.6C3.9,16.5,3.8,16.4,3.7,16.3z"/>', '0 0 24 24');
-
+        if (document.querySelector('.form-2fGMdU')) {
+            var msgBarButton = this.addToolbarIcon('Message Bar', '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
+        } else {
+            var msgBarButton = false;
+        }
+        
         // Read stored user data to decide active state of Server List button
-        if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === true) {
+        if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === false) {
+            serverListButton.classList.remove('selected-1GqIat');
+            document.querySelector('.wrapper-3NnKdC').style.width = "0px";
+        } else if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === true) {
             serverListButton.classList.add('selected-1GqIat');
         } else {
-            serverListButton.classList.remove('selected-1GqIat');
-            document.querySelector('[aria-label="Servers sidebar"]').style.display = "none";
+            BdApi.setData('CollapsibleUI', 'serverListButtonActive', true);
+            serverListButton.classList.add('selected-1GqIat');
         }
 
         // Read stored user data to decide active state of Channel List button
-        if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === true) {
+        if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === false) {
+            channelListButton.classList.remove('selected-1GqIat');
+            document.querySelector('.sidebar-2K8pFh').style.width = "0px";
+        } else if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === true) {
             channelListButton.classList.add('selected-1GqIat');
         } else {
-            channelListButton.classList.remove('selected-1GqIat');
-            document.querySelector('.sidebar-2K8pFh').style.display = "none";
+            BdApi.setData('CollapsibleUI', 'channelListButtonActive', true);
+            channelListButton.classList.add('selected-1GqIat');
+        }
+
+        // Read stored user data to decide active state of Message Bar button
+        if (msgBarButton) {
+            if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === false) {
+                msgBarButton.classList.remove('selected-1GqIat');
+                document.querySelector('.form-2fGMdU').style.width = "0px";
+            } else if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === true) {
+                msgBarButton.classList.add('selected-1GqIat');
+            } else {
+                BdApi.setData('CollapsibleUI', 'msgBarButtonActive', true);
+                msgBarButton.classList.add('selected-1GqIat');
+            }
         }
 
         // Add event listener to the Server List button to update the icon, UI, & settings on click
         serverListButton.addEventListener('click', function(){
             if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === true) {
-                document.querySelector('[aria-label="Servers sidebar"]').style.display = "none";
+                document.querySelector('.wrapper-3NnKdC').style.width = "0px";
                 BdApi.setData('CollapsibleUI', 'serverListButtonActive', false);
                 this.classList.remove('selected-1GqIat');
             } else {
-                document.querySelector('[aria-label="Servers sidebar"]').style.display = "initial";
+                document.querySelector('.wrapper-3NnKdC').style.width = "72px";
                 BdApi.setData('CollapsibleUI', 'serverListButtonActive', true);
                 this.classList.add('selected-1GqIat');
             }
@@ -51,15 +79,30 @@ module.exports = class CollapsibleUI {
         // Add event listener to the Channel List button to update the icon, UI, & settings on click
         channelListButton.addEventListener('click', function(){
             if (BdApi.getData('CollapsibleUI', 'channelListButtonActive')) {
-                document.querySelector('.sidebar-2K8pFh').style.display = "none";
+                document.querySelector('.sidebar-2K8pFh').style.width = "0px";
                 BdApi.setData('CollapsibleUI', 'channelListButtonActive', false);
                 this.classList.remove('selected-1GqIat');
             } else {
-                document.querySelector('.sidebar-2K8pFh').style.display = "flex";
+                document.querySelector('.sidebar-2K8pFh').style.width = "240px";
                 BdApi.setData('CollapsibleUI', 'channelListButtonActive', true);
                 this.classList.add('selected-1GqIat');
             }
         });
+
+        // Add event listener to the Message Bar button to update the icon, UI, & settings on click
+        if (msgBarButton) {
+            msgBarButton.addEventListener('click', function(){
+                if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive')) {
+                    document.querySelector('.form-2fGMdU').style.display = "none";
+                    BdApi.setData('CollapsibleUI', 'msgBarButtonActive', false);
+                    this.classList.remove('selected-1GqIat');
+                } else {
+                    document.querySelector('.form-2fGMdU').style.display = "block";
+                    BdApi.setData('CollapsibleUI', 'msgBarButtonActive', true);
+                    this.classList.add('selected-1GqIat');
+                }
+            });
+        }
     }
 
     // Initialize the plugin when it is enabled
@@ -71,13 +114,13 @@ module.exports = class CollapsibleUI {
         }
         
         this.initialize();
-        console.log("[CollapsibleUI] version 1.1.1 has started.");
+        console.log("[CollapsibleUI] version 1.2.1 has started.");
     }
 
     // Remove the icons created by the plugin when it is disabled
     stop() {
         document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
-        console.log("[CollapsibleUI] version 1.1.1 has stopped.");
+        console.log("[CollapsibleUI] version 1.2.1 has stopped.");
     }
 
     // Re-initialize the plugin on channel/server switch to maintain icon availability
@@ -98,7 +141,7 @@ module.exports = class CollapsibleUI {
             newToolbarIcon.setAttribute('tabindex', '0');
             newToolbarIcon.innerHTML = '<svg x="0" y="0" class="icon-22AiRD" aria-hidden="false" width="24" height="24" viewBox="' + viewBox + '">' + rawSVGData + '</svg>';
 
-        var memberListIcon = document.querySelector('[aria-label="Member List"]');
+        var memberListIcon = document.querySelector('.search-36MZv-').previousElementSibling;
 
         // Check for existence of "Member List" icon to decide where to insert the new icon
         // This maintains logical order of icons between servers, group chats, and DMs

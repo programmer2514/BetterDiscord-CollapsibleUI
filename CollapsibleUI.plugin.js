@@ -66,7 +66,7 @@ module.exports = class CollapsibleUI {
     async start() {
         
         // Wait for the toolbar to load
-        while (!document.querySelector(".toolbar-1t6TWxF")) {
+        while (!document.querySelector(".toolbar-1t6TWx")) {
             await new Promise(resolve => requestAnimationFrame(resolve));
         }
         

@@ -2,7 +2,7 @@
  * @name CollapsibleUI
  * @author programmer2514
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 2.0.0
+ * @version 2.0.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -29,8 +29,8 @@ module.exports = class CollapsibleUI {
         }
         
         if (document.querySelector('.form-2fGMdU')) {
-            document.querySelector('.form-2fGMdU').style.maxHeight = '80px';
-            document.querySelector('.form-2fGMdU').style.transition = 'max-height 555ms';
+            document.querySelector('.form-2fGMdU').style.maxHeight = '400px';
+            document.querySelector('.form-2fGMdU').style.transition = 'max-height 500ms';
         }
 
         // Define & add new toolbar icons
@@ -146,7 +146,7 @@ module.exports = class CollapsibleUI {
                     BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'false');
                     this.classList.remove('selected-1GqIat');
                 } else {
-                    document.querySelector('.form-2fGMdU').style.maxHeight = '80px';
+                    document.querySelector('.form-2fGMdU').style.maxHeight = '400px';
                     BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
                     this.classList.add('selected-1GqIat');
                 }
@@ -202,7 +202,7 @@ module.exports = class CollapsibleUI {
         await new Promise(resolve => setTimeout(resolve, 1000))
         
         this.initialize();
-        console.log('[CollapsibleUI] version 2.0.0 has started.');
+        console.log('[CollapsibleUI] version 2.0.1 has started.');
     }
 
     // Restore the default UI when the plugin is disabled
@@ -236,7 +236,7 @@ module.exports = class CollapsibleUI {
             document.querySelector('.form-2fGMdU').style.removeProperty('transition');
         }
         
-        console.log('[CollapsibleUI] version 2.0.0 has stopped.');
+        console.log('[CollapsibleUI] version 2.0.1 has stopped.');
     }
 
     // Re-initialize the plugin on channel/server switch to maintain icon availability

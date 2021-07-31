@@ -9,7 +9,7 @@
  */
 
 module.exports = (() => {
-    
+
     // Define plugin configuration
     const config = {
         info: {
@@ -26,7 +26,6 @@ module.exports = (() => {
         },
         changelog: [{
 			title: '2.1.1',
-            type: 'fixed',
 			items: [
 				'Added ZeresPluginLibrary support'
 			]
@@ -70,7 +69,7 @@ module.exports = (() => {
 			]
 		}]
     };
-    
+
     // Check for ZeresPluginLibrary
     if (!window.ZeresPluginLibrary) {
         return class {
@@ -101,17 +100,18 @@ module.exports = (() => {
         }
     }
 
+    // Build plugin
     const [Plugin, Api] = ZeresPluginLibrary.buildPlugin(config);
-    const { DiscordSelectors, Logger, Patcher, Settings, PluginUtilities } = Api;
-    
+
+    // Define plugin class
     return class CollapsibleUI extends Plugin {
-    
+
         // Main plugin code, called by start() and onSwitch()
         initialize() {
-    
+
             // Purge CollapsibleUI toolbar icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
-            
+
             // Apply transitions to UI elements
             document.querySelector('.sidebar-2K8pFh').style.transition = 'width 500ms';
             document.querySelector('.wrapper-3NnKdC').style.transition = 'width 500ms';
@@ -124,12 +124,12 @@ module.exports = (() => {
                 document.querySelector('.membersWrap-2h-GB4').style.transition = 'max-width 500ms, min-width 500ms';
                 document.querySelector('.search-36MZv-').previousElementSibling.style.display = 'none';
             }
-            
+
             if (document.querySelector('.form-2fGMdU')) {
                 document.querySelector('.form-2fGMdU').style.maxHeight = '400px';
                 document.querySelector('.form-2fGMdU').style.transition = 'max-height 500ms';
             }
-    
+
             // Define & add new toolbar icons
             // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
             var serverListButton = this.addToolbarIcon('Server List', '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
@@ -145,7 +145,7 @@ module.exports = (() => {
                 var membersListButton = false;
             }
             var windowBarButton = this.addToolbarIcon('Window Bar', '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
-            
+
             // Read stored user data to decide active state of Server List button
             if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
                 serverListButton.classList.remove('selected-1GqIat');
@@ -156,7 +156,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
                 serverListButton.classList.add('selected-1GqIat');
             }
-    
+
             // Read stored user data to decide active state of Channel List button
             if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
                 channelListButton.classList.remove('selected-1GqIat');
@@ -167,7 +167,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
                 channelListButton.classList.add('selected-1GqIat');
             }
-    
+
             // Read stored user data to decide active state of Message Bar button
             if (msgBarButton) {
                 if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
@@ -180,7 +180,7 @@ module.exports = (() => {
                     msgBarButton.classList.add('selected-1GqIat');
                 }
             }
-    
+
             // Read stored user data to decide active state of Members List button
             if (membersListButton) {
                 if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
@@ -194,7 +194,7 @@ module.exports = (() => {
                     membersListButton.classList.add('selected-1GqIat');
                 }
             }
-    
+
             // Read stored user data to decide active state of Window Bar button
             if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
                 windowBarButton.classList.remove('selected-1GqIat');
@@ -208,7 +208,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
                 windowBarButton.classList.add('selected-1GqIat');
             }
-    
+
             // Add event listener to the Server List button to update the icon, UI, & settings on click
             serverListButton.addEventListener('click', function(){
                 if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
@@ -221,7 +221,7 @@ module.exports = (() => {
                     this.classList.add('selected-1GqIat');
                 }
             });
-    
+
             // Add event listener to the Channel List button to update the icon, UI, & settings on click
             channelListButton.addEventListener('click', function(){
                 if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
@@ -234,7 +234,7 @@ module.exports = (() => {
                     this.classList.add('selected-1GqIat');
                 }
             });
-    
+
             // Add event listener to the Message Bar button to update the icon, UI, & settings on click
             if (msgBarButton) {
                 msgBarButton.addEventListener('click', function(){
@@ -249,7 +249,7 @@ module.exports = (() => {
                     }
                 });
             }
-    
+
             // Add event listener to the Members List button to update the icon, UI, & settings on click
             if (membersListButton) {
                 membersListButton.addEventListener('click', function(){
@@ -266,7 +266,7 @@ module.exports = (() => {
                     }
                 });
             }
-    
+
             // Add event listener to the Window Bar button to update the icon, UI, & settings on click
             windowBarButton.addEventListener('click', function(){
                 if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
@@ -286,31 +286,31 @@ module.exports = (() => {
                 }
             });
         }
-    
+
         // Initialize the plugin when it is enabled
         async start() {
-            
+
             // Wait for current user session to finish loading
             while (!document.body.hasAttribute('data-current-user-id')) {
                 await new Promise(resolve => requestAnimationFrame(resolve));
             }
-            
+
             // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
             await new Promise(resolve => setTimeout(resolve, 1000))
-            
+
             this.initialize();
             console.log('[CollapsibleUI] version 2.1.1 has started.');
         }
-    
+
         // Restore the default UI when the plugin is disabled
         stop() {
-            
+
             // Remove CollapsibleUI icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
-            
+
             // Re-enable the original Members List icon
             document.querySelector('.search-36MZv-').previousElementSibling.style.removeProperty('display');
-            
+
             // Expand any collapsed elements & remove transitions
             document.querySelector('.wordmark-2iDDfm').style.removeProperty('display');
             document.querySelector('.sidebar-2K8pFh').style.removeProperty('width');
@@ -332,18 +332,18 @@ module.exports = (() => {
                 document.querySelector('.form-2fGMdU').style.removeProperty('max-height');
                 document.querySelector('.form-2fGMdU').style.removeProperty('transition');
             }
-            
+
             console.log('[CollapsibleUI] version 2.1.1 has stopped.');
         }
-    
+
         // Re-initialize the plugin on channel/server switch to maintain icon availability
         onSwitch() {
             this.initialize();
         }
-    
+
         // Adds a new SVG icon to the toolbar
         addToolbarIcon(ariaLabel, rawSVGData, viewBox) {
-    
+
             // Create the icon and define properties
             var newToolbarIcon = document.createElement('div');
                 newToolbarIcon.classList.add('iconWrapper-2OrFZ1');
@@ -353,13 +353,13 @@ module.exports = (() => {
                 newToolbarIcon.setAttribute('aria-label', ariaLabel);
                 newToolbarIcon.setAttribute('tabindex', '0');
                 newToolbarIcon.innerHTML = '<svg x="0" y="0" class="icon-22AiRD" aria-hidden="false" width="24" height="24" viewBox="' + viewBox + '">' + rawSVGData + '</svg>';
-            
+
             // Insert icon to the left of the search bar
             document.querySelector('.toolbar-1t6TWx').insertBefore(newToolbarIcon, document.querySelector('.search-36MZv-'));
-    
+
             // Return DOM Element of newly-created toolbar icon
             return newToolbarIcon;
-    
+
         }
     }
 

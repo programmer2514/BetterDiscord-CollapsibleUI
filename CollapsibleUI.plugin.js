@@ -25,49 +25,49 @@ module.exports = (() => {
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/dev/CollapsibleUI.plugin.js'
         },
         changelog: [{
-			title: '2.1.1',
-			items: [
-				'Added ZeresPluginLibrary support'
-			]
-		}, {
-			title: '2.0.1',
-			items: [
-				'Adjusted some pixel measurements to prevent cutting off the message bar while typing multiline messages'
-			]
-		}, {
-			title: '2.0.0',
-			items: [
-				'Added a button to collapse the window title bar',
+            title: '2.1.1',
+            items: [
+                'Added ZeresPluginLibrary support'
+            ]
+        }, {
+            title: '2.0.1',
+            items: [
+                'Adjusted some pixel measurements to prevent cutting off the message bar while typing multiline messages'
+            ]
+        }, {
+            title: '2.0.0',
+            items: [
+                'Added a button to collapse the window title bar',
                 'Updated the button icons to be more consistent',
                 'Finished adding transitions to collapsible elements',
                 'Fixed issues with persistent button states',
                 'Actually fixed plugin crashing on reload',
                 'Fixed handling of plugin being disabled'
-			]
-		}, {
-			title: '1.2.1',
-			items: [
-				'Added a button to collapse the message bar',
+            ]
+        }, {
+            title: '1.2.1',
+            items: [
+                'Added a button to collapse the message bar',
                 'Added transitions to some elements',
                 'Improved support for non-english locales',
                 'Improved handling of missing config'
-			]
-		}, {
-			title: '1.1.1',
-			items: [
-				'Fixed plugin crashing on reload (sorta)'
-			]
-		}, {
-			title: '1.1.0',
-			items: [
-				'Added persistent button states'
-			]
-		}, {
-			title: '1.0.0',
-			items: [
-				'Initial release'
-			]
-		}]
+            ]
+        }, {
+            title: '1.1.1',
+            items: [
+                'Fixed plugin crashing on reload (sorta)'
+            ]
+        }, {
+            title: '1.1.0',
+            items: [
+                'Added persistent button states'
+            ]
+        }, {
+            title: '1.0.0',
+            items: [
+                'Initial release'
+            ]
+        }]
     };
 
     // Check for ZeresPluginLibrary

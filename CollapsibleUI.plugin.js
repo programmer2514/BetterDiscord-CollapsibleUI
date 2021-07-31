@@ -5,7 +5,7 @@
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
  * @version 2.1.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
- * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/dev/CollapsibleUI.plugin.js
+ * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
 
 module.exports = (() => {
@@ -22,7 +22,7 @@ module.exports = (() => {
             version: '2.1.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
-            github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/dev/CollapsibleUI.plugin.js'
+            github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
             title: '2.1.1',

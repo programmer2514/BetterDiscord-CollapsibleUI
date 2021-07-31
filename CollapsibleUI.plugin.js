@@ -193,6 +193,11 @@ module.exports = class CollapsibleUI {
     // Initialize the plugin when it is enabled
     async start() {
         
+        // Check for updates
+        if (!global.ZeresPluginLibrary)
+            return window.BdApi.alert("Library Missing",`The library plugin needed for CollapsibleUI is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
+        ZLibrary.PluginUpdater.checkForUpdate("CollapsibleUI", "2.0.1", "LINK_TO_RAW_CODE");
+        
         // Wait for current user session to finish loading
         while (!document.body.hasAttribute('data-current-user-id')) {
             await new Promise(resolve => requestAnimationFrame(resolve));

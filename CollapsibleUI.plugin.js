@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 3.0.1
+ * @version 4.0.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '3.0.1',
+            version: '4.0.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.0',
+            items: [
+                'Small animation tweaks',
+                'Fixed a lot of bugs'
+            ]
+        }, {
             title: '3.0.1',
             items: [
                 'Fixed BetterDiscord repo integration'
@@ -148,7 +154,7 @@ module.exports = (() => {
             let buttonsOrder = [1,2,4,5,6,3];
             
             let settingsButtonsMaxWidth = 100;
-            let toolbarIconMaxWidth = 100;
+            let toolbarIconMaxWidth = 300;
             let membersListMaxWidth = 240;
             let userAreaMaxHeight = 100;
             let msgBarMaxHeight = 400;
@@ -211,7 +217,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', settingsButtonsMaxWidth.toString());
             }
             
-            // toolbarIconMaxWidth [Default: 100]
+            // toolbarIconMaxWidth [Default: 300]
             if (typeof(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth')) === 'string') {
                 toolbarIconMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'));
             } else {

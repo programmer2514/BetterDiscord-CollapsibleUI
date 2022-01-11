@@ -28,6 +28,7 @@ module.exports = (() => {
             title: '4.0.0',
             items: [
                 'Small animation tweaks',
+                'Added dynamic uncollapse feature',
                 'Fixed a lot of bugs'
             ]
         }, {
@@ -149,6 +150,9 @@ module.exports = (() => {
             let disableToolbarCollapse = false;
             let disableSettingsCollapse = false;
             
+            let dynamicUncollapse = true;
+            let dynamicUncollapseDistance = 20;
+            
             let resizableChannelList = true;
             
             let buttonsOrder = [1,2,4,5,6,3];
@@ -159,6 +163,30 @@ module.exports = (() => {
             let userAreaMaxHeight = 100;
             let msgBarMaxHeight = 400;
             let windowBarHeight = 18;
+            
+            // Load isNear function into local scope and define mouse tracking variables
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            // Abstract modified elements
+            this.toolBar = document.querySelector('.toolbar-3_r2xA');
+            this.searchBar = document.querySelector('.search-39IXmY');
+            this.settingsContainer = document.querySelector('.flex-2S1XBF');
+            this.windowBar = document.querySelector('.typeWindows-2-g3UY');
+            this.wordMark = document.querySelector('.wordmark-2u86JB');
+            this.msgBar = document.querySelector('.form-3gdLxP');
+            this.userArea = document.querySelector('.panels-3wFtMD');
+            this.membersList = document.querySelector('.membersWrap-3NUR2t');
+            this.serverList = document.querySelector('.wrapper-1_HaEi');
+            this.channelList = document.querySelector('.sidebar-1tnWFu');
+            
+            // Abstract used classes
+            this.classSelected = 'selected-29KTGM';
+            this.classIconWrapper = 'iconWrapper-2awDjA';
+            this.classClickable = 'clickable-ZD7xvu';
+            
+            // Abstract CollapsibleUI as a variable
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
             
             // disableTransitions [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'false') {
@@ -192,6 +220,22 @@ module.exports = (() => {
                 disableSettingsCollapse = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
+            }
+            
+            // dynamicUncollapse [Default: true]
+            if (BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'false') {
+                dynamicUncollapse = false;
+            } else if (BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true') {
+                dynamicUncollapse = true;
+            } else {
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
+            }
+            
+            // dynamicUncollapseDistance [Default: 20]
+            if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')) === 'string') {
+                dynamicUncollapseDistance = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'));
+            } else {
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', dynamicUncollapseDistance.toString());
             }
             
             // resizableChannelList [Default: true]
@@ -257,12 +301,20 @@ module.exports = (() => {
             // Purge CollapsibleUI toolbar icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
             
+            // Surpress obnoxious ZeresPluginLibrary spam
+            this.zeresWarnOld = BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn;
+            BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = function (module, ...message) {
+                if (module !== 'DOMTools' && !message.includes('These custom functions on HTMLElement will be removed.')) {
+                    this.zeresWarnOld(module, message);
+                }
+            };
+            
             // Hide default Members List button
-            if (document.querySelector('.membersWrap-3NUR2t')) {
-                if (document.querySelector('.search-39IXmY').previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB')) {
-                document.querySelector('.search-39IXmY').previousElementSibling.style.display = 'none';
+            if (this.membersList) {
+                if (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB')) {
+                this.searchBar.previousElementSibling.style.display = 'none';
                 } else {
-                    document.querySelector('.search-39IXmY').previousElementSibling.previousElementSibling.style.display = 'none';
+                    this.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
                 }
             }
             
@@ -278,7 +330,7 @@ module.exports = (() => {
                 toolbarContainer.innerHTML = '<div id="cui-icon-insert-point" style="display: none;"></div>';
 
             // Insert icon to the left of the search bar
-            document.querySelector('.toolbar-3_r2xA').insertBefore(toolbarContainer, document.querySelector('.search-39IXmY'));
+            this.toolBar.insertBefore(toolbarContainer, this.searchBar);
 
             // Define & add new toolbar icons
             // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
@@ -301,7 +353,7 @@ module.exports = (() => {
                     }
                 }
                 if (i == buttonsOrder[2]) {
-                    if (buttonsOrder[2] && document.querySelector('.form-3gdLxP')) {
+                    if (buttonsOrder[2] && this.msgBar) {
                         var msgBarButton = this.addToolbarIcon('Message Bar', '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
                     } else {
                         var msgBarButton = false;
@@ -309,7 +361,7 @@ module.exports = (() => {
                     }
                 }
                 if (i == buttonsOrder[3]) {
-                    if (buttonsOrder[3] && document.querySelector('.typeWindows-2-g3UY')) {
+                    if (buttonsOrder[3] && this.windowBar) {
                         var windowBarButton = this.addToolbarIcon('Window Bar', '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
                     } else {
                         var windowBarButton = false;
@@ -317,7 +369,7 @@ module.exports = (() => {
                     }
                 }
                 if (i == buttonsOrder[4]) {
-                    if (buttonsOrder[4] && document.querySelector('.membersWrap-3NUR2t')) {
+                    if (buttonsOrder[4] && this.membersList) {
                         var membersListButton = this.addToolbarIcon('Members List', '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
                     } else {
                         var membersListButton = false;
@@ -325,7 +377,7 @@ module.exports = (() => {
                     }
                 }
                 if (i == buttonsOrder[5]) {
-                    if (buttonsOrder[5] && document.querySelector('.panels-3wFtMD')) {
+                    if (buttonsOrder[5] && this.userArea) {
                         var userAreaButton = this.addToolbarIcon('User Area', '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
                     } else {
                         var userAreaButton = false;
@@ -398,9 +450,8 @@ module.exports = (() => {
             
             // Collapse settings buttons
             if (!disableSettingsCollapse) {
-                // Define settings buttons array and container
-                var settingsContainer = document.querySelector('.flex-2S1XBF')
-                var settingsButtons = settingsContainer.children;
+                // Define settings buttons array
+                var settingsButtons = this.settingsContainer.children;
                 
                 // Collapse settings buttons
                 for (let i = 0; i < (settingsButtons.length - 1); i++) {
@@ -417,154 +468,226 @@ module.exports = (() => {
             
             // Adjust UI element styling in preparation for transitions
             if (!disableTransitions) {
-                if (document.querySelector('.typeWindows-2-g3UY')) {
-                    document.querySelector('.typeWindows-2-g3UY').style.overflow = 'hidden';
-                    document.querySelector('.typeWindows-2-g3UY').style.height = windowBarHeight + 'px';
+                if (this.windowBar) {
+                    this.windowBar.style.overflow = 'hidden';
+                    this.windowBar.style.height = windowBarHeight + 'px';
                 }
-                if (document.querySelector('.membersWrap-3NUR2t')) {
-                    document.querySelector('.membersWrap-3NUR2t').style.overflow = 'hidden';
-                    document.querySelector('.membersWrap-3NUR2t').style.maxWidth = membersListMaxWidth + 'px';
+                if (this.membersList) {
+                    this.membersList.style.overflow = 'hidden';
+                    this.membersList.style.maxWidth = membersListMaxWidth + 'px';
+                    this.membersList.style.minHeight = '100%';
                 }
 
-                if (document.querySelector('.form-3gdLxP')) {
-                    document.querySelector('.form-3gdLxP').style.maxHeight = msgBarMaxHeight + 'px';
+                if (this.msgBar) {
+                    this.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                 }
             }
 
             // Read stored user data to decide active state of Server List button
             if (serverListButton) {
                 if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
-                    serverListButton.classList.remove('selected-29KTGM');
+                    serverListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
-                        document.querySelector('.wrapper-1_HaEi').style.display = 'none';
+                        this.serverList.style.display = 'none';
                     } else {
-                        document.querySelector('.wrapper-1_HaEi').style.width = '0px';
+                        this.serverList.style.width = '0px';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
-                    serverListButton.classList.add('selected-29KTGM');
+                    serverListButton.classList.add(this.classSelected);
                 } else {
                     BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
-                    serverListButton.classList.add('selected-29KTGM');
+                    serverListButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Channel List button
             if (channelListButton) {
                 if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
-                    channelListButton.classList.remove('selected-29KTGM');
+                    channelListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
-                        document.querySelector('.sidebar-1tnWFu').style.display = 'none';
+                        this.channelList.style.display = 'none';
                     } else {
-                        document.querySelector('.sidebar-1tnWFu').style.width = '0px';
+                        this.channelList.style.width = '0px';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
-                    channelListButton.classList.add('selected-29KTGM');
+                    channelListButton.classList.add(this.classSelected);
                 } else {
                     BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
-                    channelListButton.classList.add('selected-29KTGM');
+                    channelListButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Message Bar button
             if (msgBarButton) {
                 if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
-                    msgBarButton.classList.remove('selected-29KTGM');
+                    msgBarButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
-                        document.querySelector('.form-3gdLxP').style.display = 'none';
+                        this.msgBar.style.display = 'none';
                     } else {
-                        document.querySelector('.form-3gdLxP').style.maxHeight = '0px';
+                        this.msgBar.style.maxHeight = '0px';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
-                    msgBarButton.classList.add('selected-29KTGM');
+                    msgBarButton.classList.add(this.classSelected);
                 } else {
                     BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
-                    msgBarButton.classList.add('selected-29KTGM');
+                    msgBarButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Window Bar button
             if (windowBarButton) {
                 if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
-                    windowBarButton.classList.remove('selected-29KTGM');
+                    windowBarButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
-                        document.querySelector('.typeWindows-2-g3UY').style.display = 'none';
+                        this.windowBar.style.display = 'none';
                     } else {
-                        document.querySelector('.typeWindows-2-g3UY').style.height = '0px';
-                        document.querySelector('.typeWindows-2-g3UY').style.padding = '0';
-                        document.querySelector('.typeWindows-2-g3UY').style.margin = '0';
-                        document.querySelector('.wordmark-2u86JB').style.display = 'none';
+                        this.windowBar.style.height = '0px';
+                        this.windowBar.style.padding = '0';
+                        this.windowBar.style.margin = '0';
+                        this.wordMark.style.display = 'none';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
-                    windowBarButton.classList.add('selected-29KTGM');
+                    windowBarButton.classList.add(this.classSelected);
                 } else {
                     BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
-                    windowBarButton.classList.add('selected-29KTGM');
+                    windowBarButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Members List button
             if (membersListButton) {
                 if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
-                    membersListButton.classList.remove('selected-29KTGM');
+                    membersListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
-                        document.querySelector('.membersWrap-3NUR2t').style.display = 'none';
+                        this.membersList.style.display = 'none';
                     } else {
-                        document.querySelector('.membersWrap-3NUR2t').style.maxWidth = '0px';
-                        document.querySelector('.membersWrap-3NUR2t').style.minWidth = '0px';
+                        this.membersList.style.maxWidth = '0px';
+                        this.membersList.style.minWidth = '0px';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
-                    membersListButton.classList.add('selected-29KTGM');
+                    membersListButton.classList.add(this.classSelected);
                 } else {
                     BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
-                    membersListButton.classList.add('selected-29KTGM');
+                    membersListButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of User Area button
             if (userAreaButton) {
                 if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') {
-                    userAreaButton.classList.remove('selected-29KTGM');
+                    userAreaButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
-                        document.querySelector('.panels-3wFtMD').style.display = 'none';
+                        this.userArea.style.display = 'none';
                     } else {
-                        document.querySelector('.panels-3wFtMD').style.maxHeight = '0px';
+                        this.userArea.style.maxHeight = '0px';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
-                    userAreaButton.classList.add('selected-29KTGM');
+                    userAreaButton.classList.add(this.classSelected);
                 } else {
                     BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
-                    userAreaButton.classList.add('selected-29KTGM');
+                    userAreaButton.classList.add(this.classSelected);
                 }
             }
 
             // Apply transitions to UI elements
             if (!disableTransitions) {
-                document.querySelector('.sidebar-1tnWFu').style.transition = 'width ' + transitionSpeed + 'ms';
+                this.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
                 if (resizableChannelList) {
-                    document.querySelector('.sidebar-1tnWFu').style.resize = 'horizontal';
-                    document.querySelector('.sidebar-1tnWFu').addEventListener('mouseenter', function (){
-                        document.querySelector('.sidebar-1tnWFu').style.transition = 'none';
+                    this.channelList.style.resize = 'horizontal';
+                    this.channelList.addEventListener('mouseenter', function (){
+                        this.style.transition = 'none';
                     });
-                    document.querySelector('.sidebar-1tnWFu').addEventListener('mouseleave', function (){
-                        document.querySelector('.sidebar-1tnWFu').style.transition = 'width ' + transitionSpeed + 'ms';
+                    this.channelList.addEventListener('mouseleave', function (){
+                        this.style.transition = 'width ' + transitionSpeed + 'ms';
                     });
                 }
                 
-                document.querySelector('.wrapper-1_HaEi').style.transition = 'width ' + transitionSpeed + 'ms';
-                if (document.querySelector('.typeWindows-2-g3UY')) {
-                    document.querySelector('.typeWindows-2-g3UY').style.transition = 'height ' + transitionSpeed + 'ms';
+                this.serverList.style.transition = 'width ' + transitionSpeed + 'ms';
+                if (this.windowBar) {
+                    this.windowBar.style.transition = 'height ' + transitionSpeed + 'ms';
                 }
-                if (document.querySelector('.membersWrap-3NUR2t')) {
-                    document.querySelector('.membersWrap-3NUR2t').style.transition = 'max-width ' + transitionSpeed + 'ms, min-width ' + transitionSpeed + 'ms';
-                }
-
-                if (document.querySelector('.form-3gdLxP')) {
-                    document.querySelector('.form-3gdLxP').style.transition = 'max-height ' + transitionSpeed + 'ms';
+                if (this.membersList) {
+                    this.membersList.style.transition = 'max-width ' + transitionSpeed + 'ms, min-width ' + transitionSpeed + 'ms';
                 }
 
-                if (document.querySelector('.panels-3wFtMD')) {
-                    document.querySelector('.panels-3wFtMD').style.transition = 'max-height ' + transitionSpeed + 'ms';
+                if (this.msgBar) {
+                    this.msgBar.style.transition = 'max-height ' + transitionSpeed + 'ms';
                 }
+
+                if (this.userArea) {
+                    this.userArea.style.transition = 'max-height ' + transitionSpeed + 'ms';
+                }
+            }
+            
+            // Implement dynamic uncollapse feature
+            if (dynamicUncollapse && !disableTransitions) {
+                // Add event listener to document body to track cursor location & check if it is near collapsed elements
+                document.body.addEventListener('mousemove', function(event){
+                    mouseX = event.pageX;
+                    mouseY = event.pageY;
+                    
+                    // Server List
+                    if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
+                        if (cui.isNear(cui.serverList, dynamicUncollapseDistance, mouseX, mouseY)) {
+                            cui.serverList.style.removeProperty('width');
+                        } else {
+                            cui.serverList.style.width = '0px';
+                        }
+                    }
+                    
+                    // Channel List
+                    if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
+                        if (cui.isNear(cui.channelList, dynamicUncollapseDistance, mouseX, mouseY)) {
+                            cui.channelList.style.removeProperty('width');
+                        } else {
+                            cui.channelList.style.width = '0px';
+                        }
+                    }
+                    
+                    // Message Bar
+                    if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
+                        if (cui.isNear(cui.msgBar, dynamicUncollapseDistance, mouseX, mouseY)) {
+                            cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
+                        } else {
+                            cui.msgBar.style.maxHeight = '0px';
+                        }
+                    }
+                    
+                    // Window Bar
+                    if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
+                        if (cui.isNear(cui.windowBar, dynamicUncollapseDistance, mouseX, mouseY)) {
+                            cui.windowBar.style.height = windowBarHeight + 'px';
+                            cui.windowBar.style.removeProperty('padding');
+                            cui.windowBar.style.removeProperty('margin');
+                            cui.wordMark.style.removeProperty('display');
+                        } else {
+                            cui.windowBar.style.height = '0px';
+                            cui.windowBar.style.padding = '0';
+                            cui.windowBar.style.margin = '0';
+                            cui.wordMark.style.display = 'none';
+                        }
+                    }
+                    
+                    // Members List
+                    if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
+                        if (cui.isNear(cui.membersList, dynamicUncollapseDistance, mouseX, mouseY)) {
+                            cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
+                            cui.membersList.style.removeProperty('min-width');
+                        } else {
+                            cui.membersList.style.maxWidth = '0px';
+                            cui.membersList.style.minWidth = '0px';
+                        }
+                    }
+                    
+                    // User Area
+                    if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') {
+                        if (cui.isNear(cui.userArea, dynamicUncollapseDistance, mouseX, mouseY)) {
+                            cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
+                        } else {
+                            cui.userArea.style.maxHeight = '0px';
+                        }
+                    }
+                });
             }
             
             // Add event listeners to the Toolbar Container to update on hover
@@ -665,12 +788,12 @@ module.exports = (() => {
             
             // Add event listeners to the Settings Container to update on hover
             if (!disableSettingsCollapse) {
-                settingsContainer.addEventListener('mouseenter', function(){
+                this.settingsContainer.addEventListener('mouseenter', function(){
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = settingsButtonsMaxWidth + 'px';
                     }
                 });
-                settingsContainer.addEventListener('mouseleave', function(){
+                this.settingsContainer.addEventListener('mouseleave', function(){
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = '0px';
                     }
@@ -682,20 +805,20 @@ module.exports = (() => {
                 serverListButton.addEventListener('click', function(){
                     if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
                         if (disableTransitions) {
-                            document.querySelector('.wrapper-1_HaEi').style.display = 'none';
+                            cui.serverList.style.display = 'none';
                         } else {
-                            document.querySelector('.wrapper-1_HaEi').style.width = '0px';
+                            cui.serverList.style.width = '0px';
                         }
                         BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'false');
-                        this.classList.remove('selected-29KTGM');
+                        this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            document.querySelector('.wrapper-1_HaEi').style.display = 'initial';
+                            cui.serverList.style.display = 'initial';
                         } else {
-                            document.querySelector('.wrapper-1_HaEi').style.removeProperty('width');
+                            cui.serverList.style.removeProperty('width');
                         }
                         BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
-                        this.classList.add('selected-29KTGM');
+                        this.classList.add(cui.classSelected);
                     }
                 });
             }
@@ -705,20 +828,20 @@ module.exports = (() => {
                 channelListButton.addEventListener('click', function(){
                     if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
                         if (disableTransitions) {
-                            document.querySelector('.sidebar-1tnWFu').style.display = 'none';
+                            cui.channelList.style.display = 'none';
                         } else {
-                            document.querySelector('.sidebar-1tnWFu').style.width = '0px';
+                            cui.channelList.style.width = '0px';
                         }
                         BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'false');
-                        this.classList.remove('selected-29KTGM');
+                        this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            document.querySelector('.sidebar-1tnWFu').style.display = 'initial';
+                            cui.channelList.style.display = 'initial';
                         } else {
-                            document.querySelector('.sidebar-1tnWFu').style.removeProperty('width');
+                            cui.channelList.style.removeProperty('width');
                         }
                         BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
-                        this.classList.add('selected-29KTGM');
+                        this.classList.add(cui.classSelected);
                     }
                 });
             }
@@ -728,20 +851,20 @@ module.exports = (() => {
                 msgBarButton.addEventListener('click', function(){
                     if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
                         if (disableTransitions) {
-                            document.querySelector('.form-3gdLxP').style.display = 'none';
+                            cui.msgBar.style.display = 'none';
                         } else {
-                            document.querySelector('.form-3gdLxP').style.maxHeight = '0px';
+                            cui.msgBar.style.maxHeight = '0px';
                         }
                         BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'false');
-                        this.classList.remove('selected-29KTGM');
+                        this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            document.querySelector('.form-3gdLxP').style.display = 'initial';
+                            cui.msgBar.style.display = 'initial';
                         } else {
-                            document.querySelector('.form-3gdLxP').style.maxHeight = msgBarMaxHeight + 'px';
+                            cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                         }
                         BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
-                        this.classList.add('selected-29KTGM');
+                        this.classList.add(cui.classSelected);
                     }
                 });
             }
@@ -751,26 +874,26 @@ module.exports = (() => {
                 windowBarButton.addEventListener('click', function(){
                     if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
                         if (disableTransitions) {
-                            document.querySelector('.typeWindows-2-g3UY').style.display = 'none';
+                            cui.windowBar.style.display = 'none';
                         } else {
-                            document.querySelector('.typeWindows-2-g3UY').style.height = '0px';
-                            document.querySelector('.typeWindows-2-g3UY').style.padding = '0';
-                            document.querySelector('.typeWindows-2-g3UY').style.margin = '0';
-                            document.querySelector('.wordmark-2u86JB').style.display = 'none';
+                            cui.windowBar.style.height = '0px';
+                            cui.windowBar.style.padding = '0';
+                            cui.windowBar.style.margin = '0';
+                            cui.wordMark.style.display = 'none';
                         }
                         BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'false');
-                        this.classList.remove('selected-29KTGM');
+                        this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            document.querySelector('.typeWindows-2-g3UY').style.display = 'flex';
+                            cui.windowBar.style.display = 'flex';
                         } else {
-                            document.querySelector('.typeWindows-2-g3UY').style.height = windowBarHeight + 'px';
-                            document.querySelector('.typeWindows-2-g3UY').style.removeProperty('padding');
-                            document.querySelector('.typeWindows-2-g3UY').style.removeProperty('margin');
-                            document.querySelector('.wordmark-2u86JB').style.removeProperty('display');
+                            cui.windowBar.style.height = windowBarHeight + 'px';
+                            cui.windowBar.style.removeProperty('padding');
+                            cui.windowBar.style.removeProperty('margin');
+                            cui.wordMark.style.removeProperty('display');
                         }
                         BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
-                        this.classList.add('selected-29KTGM');
+                        this.classList.add(cui.classSelected);
                     }
                 });
             }
@@ -780,22 +903,22 @@ module.exports = (() => {
                 membersListButton.addEventListener('click', function(){
                     if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
                         if (disableTransitions) {
-                            document.querySelector('.membersWrap-3NUR2t').style.display = 'none';
+                            cui.membersList.style.display = 'none';
                         } else {
-                            document.querySelector('.membersWrap-3NUR2t').style.maxWidth = '0px';
-                            document.querySelector('.membersWrap-3NUR2t').style.minWidth = '0px';
+                            cui.membersList.style.maxWidth = '0px';
+                            cui.membersList.style.minWidth = '0px';
                         }
                         BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
-                        this.classList.remove('selected-29KTGM');
+                        this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            document.querySelector('.membersWrap-3NUR2t').style.removeProperty('display');
+                            cui.membersList.style.removeProperty('display');
                         } else {
-                            document.querySelector('.membersWrap-3NUR2t').style.maxWidth = membersListMaxWidth + 'px';
-                            document.querySelector('.membersWrap-3NUR2t').style.removeProperty('min-width');
+                            cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
+                            cui.membersList.style.removeProperty('min-width');
                         }
                         BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
-                        this.classList.add('selected-29KTGM');
+                        this.classList.add(cui.classSelected);
                     }
                 });
             }
@@ -805,20 +928,20 @@ module.exports = (() => {
                 userAreaButton.addEventListener('click', function(){
                     if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
                         if (disableTransitions) {
-                            document.querySelector('.panels-3wFtMD').style.display = 'none';
+                            cui.userArea.style.display = 'none';
                         } else {
-                            document.querySelector('.panels-3wFtMD').style.maxHeight = '0px';
+                            cui.userArea.style.maxHeight = '0px';
                         }
                         BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'false');
-                        this.classList.remove('selected-29KTGM');
+                        this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            document.querySelector('.panels-3wFtMD').style.removeProperty('display');
+                            cui.userArea.style.removeProperty('display');
                         } else {
-                            document.querySelector('.panels-3wFtMD').style.maxHeight = userAreaMaxHeight + 'px';
+                            cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
                         }
                         BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
-                        this.classList.add('selected-29KTGM');
+                        this.classList.add(cui.classSelected);
                     }
                 });
             }
@@ -852,53 +975,56 @@ module.exports = (() => {
 
             // Re-enable the original Members List icon
             try {
-                document.querySelector('.search-39IXmY').previousElementSibling.style.removeProperty('display');
+                this.searchBar.previousElementSibling.style.removeProperty('display');
             } catch {
                 console.warn('[CollapsibleUI] Failed to restore Members List button. Are you sure it exists?');
             }
 
             // Expand any collapsed elements & remove transitions
-            document.querySelector('.sidebar-1tnWFu').style.removeProperty('width');
-            document.querySelector('.sidebar-1tnWFu').style.removeProperty('transition');
-            document.querySelector('.sidebar-1tnWFu').style.removeProperty('resize');
-            document.querySelector('.sidebar-1tnWFu').style.removeProperty('display');
-            document.querySelector('.wrapper-1_HaEi').style.removeProperty('width');
-            document.querySelector('.wrapper-1_HaEi').style.removeProperty('transition');
-            document.querySelector('.wrapper-1_HaEi').style.removeProperty('display');
-            if (document.querySelector('.typeWindows-2-g3UY')) {
-                document.querySelector('.wordmark-2u86JB').style.removeProperty('display');
-                document.querySelector('.typeWindows-2-g3UY').style.removeProperty('height');
-                document.querySelector('.typeWindows-2-g3UY').style.removeProperty('padding');
-                document.querySelector('.typeWindows-2-g3UY').style.removeProperty('margin');
-                document.querySelector('.typeWindows-2-g3UY').style.removeProperty('overflow');
-                document.querySelector('.typeWindows-2-g3UY').style.removeProperty('transition');
-                document.querySelector('.typeWindows-2-g3UY').style.removeProperty('display');
+            this.channelList.style.removeProperty('width');
+            this.channelList.style.removeProperty('transition');
+            this.channelList.style.removeProperty('resize');
+            this.channelList.style.removeProperty('display');
+            this.serverList.style.removeProperty('width');
+            this.serverList.style.removeProperty('transition');
+            this.serverList.style.removeProperty('display');
+            if (this.windowBar) {
+                this.wordMark.style.removeProperty('display');
+                this.windowBar.style.removeProperty('height');
+                this.windowBar.style.removeProperty('padding');
+                this.windowBar.style.removeProperty('margin');
+                this.windowBar.style.removeProperty('overflow');
+                this.windowBar.style.removeProperty('transition');
+                this.windowBar.style.removeProperty('display');
             }
-            if (document.querySelector('.membersWrap-3NUR2t')) {
-                document.querySelector('.membersWrap-3NUR2t').style.removeProperty('max-width');
-                document.querySelector('.membersWrap-3NUR2t').style.removeProperty('min-width');
-                document.querySelector('.membersWrap-3NUR2t').style.removeProperty('overflow');
-                document.querySelector('.membersWrap-3NUR2t').style.removeProperty('transition');
-                document.querySelector('.membersWrap-3NUR2t').style.removeProperty('display');
+            if (this.membersList) {
+                this.membersList.style.removeProperty('max-width');
+                this.membersList.style.removeProperty('min-width');
+                this.membersList.style.removeProperty('overflow');
+                this.membersList.style.removeProperty('transition');
+                this.membersList.style.removeProperty('display');
             }
-            if (document.querySelector('.form-3gdLxP')) {
-                document.querySelector('.form-3gdLxP').style.removeProperty('max-height');
-                document.querySelector('.form-3gdLxP').style.removeProperty('transition');
-                document.querySelector('.form-3gdLxP').style.removeProperty('display');
+            if (this.msgBar) {
+                this.msgBar.style.removeProperty('max-height');
+                this.msgBar.style.removeProperty('transition');
+                this.msgBar.style.removeProperty('display');
             }
-            if (document.querySelector('.flex-1xMQg5')) {
-                for (let i = 0; i < (document.querySelector('.flex-1xMQg5').children.length - 1); i++) {
-                    document.querySelector('.flex-1xMQg5').children[i].style.removeProperty('max-width');
-                    document.querySelector('.flex-1xMQg5').children[i].style.removeProperty('transition');
-                    document.querySelector('.flex-1xMQg5').children[i].style.removeProperty('overflow');
-                    document.querySelector('.flex-1xMQg5').children[i].style.removeProperty('display');
+            if (this.settingsContainer) {
+                for (let i = 0; i < (this.settingsContainer.children.length - 1); i++) {
+                    this.settingsContainer.children[i].style.removeProperty('max-width');
+                    this.settingsContainer.children[i].style.removeProperty('transition');
+                    this.settingsContainer.children[i].style.removeProperty('overflow');
+                    this.settingsContainer.children[i].style.removeProperty('display');
                 }
             }
-            if (document.querySelector('.panels-3wFtMD')) {
-                document.querySelector('.panels-3wFtMD').style.removeProperty('height');
-                document.querySelector('.panels-3wFtMD').style.removeProperty('transition');
-                document.querySelector('.panels-3wFtMD').style.removeProperty('display');
+            if (this.userArea) {
+                this.userArea.style.removeProperty('height');
+                this.userArea.style.removeProperty('transition');
+                this.userArea.style.removeProperty('display');
             }
+            
+            // Restore default ZeresPluginLibrary logger functionality
+            BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
             
 
             console.log('[CollapsibleUI] version 3.0.1 has stopped.');
@@ -918,8 +1044,8 @@ module.exports = (() => {
 
             // Create the icon and define properties
             var newToolbarIcon = document.createElement('div');
-                newToolbarIcon.classList.add('iconWrapper-2awDjA');
-                newToolbarIcon.classList.add('clickable-ZD7xvu');
+                newToolbarIcon.classList.add(this.classIconWrapper);
+                newToolbarIcon.classList.add(this.classClickable);
                 newToolbarIcon.classList.add('collapsible-ui-element');
                 newToolbarIcon.setAttribute('role', 'button');
                 newToolbarIcon.setAttribute('aria-label', ariaLabel);
@@ -934,6 +1060,16 @@ module.exports = (() => {
             // Return DOM Element of newly-created toolbar icon
             return newToolbarIcon;
 
+        }
+        
+        // Checks if cursor is near an element
+        isNear(element, distance, x, y) {
+            var left = element.offset().left - distance,
+                top = element.offset().top - distance,
+                right = left + element.width() + 2*distance,
+                bottom = top + element.height() + 2*distance;
+
+            return (x > left && x < right && y > top && y < bottom);
         }
     }
 

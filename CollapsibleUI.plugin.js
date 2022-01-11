@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 3.0.0
+ * @version 3.0.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '3.0.0',
+            version: '3.0.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '3.0.1',
+            items: [
+                'Fixed BetterDiscord repo integration'
+            ]
+        }, {
             title: '3.0.0',
             items: [
                 'Added GNU/Linux support',
@@ -830,7 +835,7 @@ module.exports = (() => {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e.message);
             }
             
-            console.log('[CollapsibleUI] version 2.1.1 has started.');
+            console.log('[CollapsibleUI] version 3.0.1 has started.');
         }
 
         // Restore the default UI when the plugin is disabled
@@ -890,7 +895,7 @@ module.exports = (() => {
             }
             
 
-            console.log('[CollapsibleUI] version 2.1.1 has stopped.');
+            console.log('[CollapsibleUI] version 3.0.1 has stopped.');
         }
 
         // Re-initialize the plugin on channel/server switch to maintain icon availability

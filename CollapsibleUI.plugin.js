@@ -170,12 +170,23 @@ module.exports = (() => {
             let mouseX = 0;
             let mouseY = 0;
             
+            this.tooltipOffset = 8;
+            
             // Abstract used classes
             this.classSelected = 'selected-29KTGM';
             this.classIconWrapper = 'iconWrapper-2awDjA';
             this.classClickable = 'clickable-ZD7xvu';
             this.classCallContainer = 'wrapper-1gVUIN';
             this.classConnectionArea = 'connection-3k9QeF';
+            this.classTooltipWrapper = 'layer-2aCOJ3';
+            this.classTooltipWrapperDPE = 'disabledPointerEvents-2AmYRc';
+            this.classTooltip = 'tooltip-14MtrL';
+            this.classTooltipBottom = 'tooltipBottom-2WzfVx';
+            this.classTooltipPrimary = 'tooltipPrimary-3qLMbS';
+            this.classTooltipDPE = 'tooltipDisablePointerEvents-1huO19';
+            this.classTooltipPointer = 'tooltipPointer-3L49xb';
+            this.classTooltipContent = 'tooltipContent-Nejnvh';
+            
             
             // Abstract modified elements
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
@@ -946,6 +957,14 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 });
+                
+                cui.serverListButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.serverListButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
+                });
             }
 
             // Add event listener to the Channel List button to update the icon, UI, & settings on click
@@ -969,6 +988,14 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 });
+                
+                cui.channelListButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.channelListButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
+                });
             }
 
             // Add event listener to the Message Bar button to update the icon, UI, & settings on click
@@ -991,6 +1018,14 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
+                });
+                
+                cui.msgBarButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.msgBarButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
                 });
             }
 
@@ -1021,6 +1056,14 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 });
+                
+                cui.windowBarButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.windowBarButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
+                });
             }
 
             // Add event listener to the Members List button to update the icon, UI, & settings on click
@@ -1046,6 +1089,14 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 });
+                
+                cui.membersListButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.membersListButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
+                });
             }
 
             // Add event listener to the User Area button to update the icon, UI, & settings on click
@@ -1068,6 +1119,14 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
+                });
+                
+                cui.userAreaButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.userAreaButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
                 });
             }
 
@@ -1095,6 +1154,14 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
+                });
+                
+                cui.callContainerButton.addEventListener('mouseenter', function(){
+                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                });
+                
+                cui.callContainerButton.addEventListener('mouseleave', function(){
+                    this.tooltip.remove();
                 });
             }
         }
@@ -1217,6 +1284,40 @@ module.exports = (() => {
             // Return DOM Element of newly-created toolbar icon
             return newToolbarIcon;
 
+        }
+        
+        createTooltip(msg, elem) {
+            
+            // Get location of selected element
+            var left = elem.offset().left,
+                top = elem.offset().top,
+                width = elem.offsetWidth,
+                height = elem.offsetHeight;
+            
+            // Create tooltip
+            var newTooltip = document.createElement('div');
+                newTooltip.classList.add(this.classTooltipWrapper);
+                newTooltip.classList.add(this.classTooltipWrapperDPE);
+                newTooltip.style.position = 'absolute';
+                newTooltip.innerHTML = '<div class="' + this.classTooltip + ' ' + this.classTooltipBottom + ' ' + this.classTooltipPrimary + ' ' + this.classTooltipDPE + '" style="opacity: 1; transform: none;"><div class="' + this.classTooltipPointer + '"></div><div class="' + this.classTooltipContent + '">' + msg + '</div></div>';
+                
+            // Insert tooltip into tooltip layer
+            document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);
+            
+            // Get tooltip dimensions
+            var ttwidth = newTooltip.offsetWidth,
+                ttheight = newTooltip.offsetHeight;
+                
+            // Extrapolate tooltip location
+            var x = left + (width/2) - (ttwidth/2),
+                y = top + height + this.tooltipOffset;
+                
+            // Set tooltip location
+            newTooltip.style.left = x + 'px';
+            newTooltip.style.top = y + 'px';
+            
+            // Return DOM element of newly-created tooltip
+            return newTooltip;
         }
         
         // Checks if cursor is near an element

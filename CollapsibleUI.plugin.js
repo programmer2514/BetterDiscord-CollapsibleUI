@@ -197,6 +197,43 @@ module.exports = (() => {
             // Abstract CollapsibleUI as a variable
             let cui = this;
             
+            // Clean up old settings
+            if (BdApi.getData('CollapsibleUI', 'cuiSettingsVersion') !== '2') {
+                // Clean up v1
+                BdApi.deleteData('CollapsibleUI', 'serverListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'channelListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'msgBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'windowBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'membersListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'userAreaButtonActive');
+                
+                // Clean up v2
+                BdApi.deleteData('CollapsibleUI', 'disableTransitions');
+                BdApi.deleteData('CollapsibleUI', 'transitionSpeed');
+                BdApi.deleteData('CollapsibleUI', 'disableToolbarCollapse');
+                BdApi.deleteData('CollapsibleUI', 'disableSettingsCollapse');
+                BdApi.deleteData('CollapsibleUI', 'dynamicUncollapse');
+                BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDistance');
+                BdApi.deleteData('CollapsibleUI', 'resizableChannelList');
+                BdApi.deleteData('CollapsibleUI', 'buttonsOrder');
+                BdApi.deleteData('CollapsibleUI', 'settingsButtonsMaxWidth');
+                BdApi.deleteData('CollapsibleUI', 'toolbarIconMaxWidth');
+                BdApi.deleteData('CollapsibleUI', 'membersListMaxWidth');
+                BdApi.deleteData('CollapsibleUI', 'userAreaMaxHeight');
+                BdApi.deleteData('CollapsibleUI', 'msgBarMaxHeight');
+                BdApi.deleteData('CollapsibleUI', 'windowBarHeight');
+                BdApi.deleteData('CollapsibleUI', 'cui.serverListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.channelListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.msgBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.windowBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.membersListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.userAreaButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.callContainerButtonActive');
+                
+                // Set new settings version
+                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '2');
+            }
+            
             // disableTransitions [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'false') {
                 disableTransitions = false;
@@ -1079,7 +1116,7 @@ module.exports = (() => {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
             }*/
             
-            console.log('[CollapsibleUI] version 3.0.1 has started.');
+            console.log('[CollapsibleUI] version 4.0.0 has started.');
         }
 
         // Restore the default UI when the plugin is disabled
@@ -1147,7 +1184,7 @@ module.exports = (() => {
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
             
 
-            console.log('[CollapsibleUI] version 3.0.1 has stopped.');
+            console.log('[CollapsibleUI] version 4.0.0 has stopped.');
         }
 
         // Re-initialize the plugin on channel/server switch to maintain icon availability

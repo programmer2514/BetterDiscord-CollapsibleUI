@@ -137,12 +137,12 @@ module.exports = (() => {
             
             /* BUTTON INDEX:         *
              *-----------------------*
-             * 0 - serverListButton  *
-             * 1 - channelListButton *
-             * 2 - msgBarButton      *
-             * 3 - windowBarButton   *
-             * 4 - membersListButton *
-             * 5 - userAreaButton    *
+             * 0 - cui.serverListButton  *
+             * 1 - cui.channelListButton *
+             * 2 - cui.msgBarButton      *
+             * 3 - cui.windowBarButton   *
+             * 4 - cui.membersListButton *
+             * 5 - cui.userAreaButton    *
              *-----------------------*/
             let disableTransitions = false;
             let transitionSpeed = 300;
@@ -171,7 +171,10 @@ module.exports = (() => {
             // Abstract modified elements
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
             this.searchBar = document.querySelector('.search-39IXmY');
-            this.settingsContainer = document.querySelector('.flex-2S1XBF');
+            if (document.querySelectorAll('.flex-2S1XBF')[1] && document.querySelectorAll('.flex-2S1XBF')[0].classList.contains('connection-3k9QeF'))
+                this.settingsContainer = document.querySelectorAll('.flex-2S1XBF')[1];
+            else
+                this.settingsContainer = document.querySelectorAll('.flex-2S1XBF')[0];
             this.windowBar = document.querySelector('.typeWindows-2-g3UY');
             this.wordMark = document.querySelector('.wordmark-2u86JB');
             this.msgBar = document.querySelector('.form-3gdLxP');
@@ -184,9 +187,12 @@ module.exports = (() => {
             this.classSelected = 'selected-29KTGM';
             this.classIconWrapper = 'iconWrapper-2awDjA';
             this.classClickable = 'clickable-ZD7xvu';
+            this.classCallContainer = 'callContainer-HtHELf';
+            
+            this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
             
             // Abstract CollapsibleUI as a variable
-            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
+            let cui = this;
             
             // disableTransitions [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'false') {
@@ -311,10 +317,14 @@ module.exports = (() => {
             
             // Hide default Members List button
             if (this.membersList) {
-                if (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB')) {
-                this.searchBar.previousElementSibling.style.display = 'none';
+                if (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) {
+                    if (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB')) {
+                        this.searchBar.previousElementSibling.style.display = 'none';
+                    } else {
+                        this.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
+                    }
                 } else {
-                    this.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
+                    this.searchBar.previousElementSibling.style.display = 'none';
                 }
             }
             
@@ -338,49 +348,49 @@ module.exports = (() => {
             for (let i = 1; i <= buttonsOrder.length; i++) {
                 if (i == buttonsOrder[0]) {
                     if (buttonsOrder[0]) {
-                        var serverListButton = this.addToolbarIcon('Server List', '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
+                        this.serverListButton = this.addToolbarIcon('Server List', '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
                     } else {
-                        serverListButton = false;
+                        this.serverListButton = false;
                         buttonsActive[0] = 0;
                     }
                 }
                 if (i == buttonsOrder[1]) {
                     if (buttonsOrder[1]) {
-                        var channelListButton = this.addToolbarIcon('Channel List', '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
+                        this.channelListButton = this.addToolbarIcon('Channel List', '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
                     } else {
-                        channelListButton = false;
+                        this.channelListButton = false;
                         buttonsActive[1] = 0;
                     }
                 }
                 if (i == buttonsOrder[2]) {
                     if (buttonsOrder[2] && this.msgBar) {
-                        var msgBarButton = this.addToolbarIcon('Message Bar', '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
+                        this.msgBarButton = this.addToolbarIcon('Message Bar', '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
                     } else {
-                        var msgBarButton = false;
+                        this.msgBarButton = false;
                         buttonsActive[2] = 0;
                     }
                 }
                 if (i == buttonsOrder[3]) {
                     if (buttonsOrder[3] && this.windowBar) {
-                        var windowBarButton = this.addToolbarIcon('Window Bar', '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
+                        this.windowBarButton = this.addToolbarIcon('Window Bar', '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
                     } else {
-                        var windowBarButton = false;
+                        this.windowBarButton = false;
                         buttonsActive[3] = 0;
                     }
                 }
                 if (i == buttonsOrder[4]) {
                     if (buttonsOrder[4] && this.membersList) {
-                        var membersListButton = this.addToolbarIcon('Members List', '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
+                        this.membersListButton = this.addToolbarIcon('Members List', '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
                     } else {
-                        var membersListButton = false;
+                        this.membersListButton = false;
                         buttonsActive[4] = 0;
                     }
                 }
                 if (i == buttonsOrder[5]) {
                     if (buttonsOrder[5] && this.userArea) {
-                        var userAreaButton = this.addToolbarIcon('User Area', '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
+                        this.userAreaButton = this.addToolbarIcon('User Area', '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
                     } else {
-                        var userAreaButton = false;
+                        this.userAreaButton = false;
                         buttonsActive[5] = 0;
                     }
                 }
@@ -388,61 +398,61 @@ module.exports = (() => {
             
             // Collapse toolbar buttons
             if (!disableToolbarCollapse) {
-                if (serverListButton) {
-                    serverListButton.style.maxWidth = '0px';
-                    serverListButton.style.margin = '0';
-                    serverListButton.style.padding = '0';
+                if (cui.serverListButton) {
+                    cui.serverListButton.style.maxWidth = '0px';
+                    cui.serverListButton.style.margin = '0';
+                    cui.serverListButton.style.padding = '0';
                 }
-                if (channelListButton) {
-                    channelListButton.style.maxWidth = '0px';
-                    channelListButton.style.margin = '0';
-                    channelListButton.style.padding = '0';
+                if (cui.channelListButton) {
+                    cui.channelListButton.style.maxWidth = '0px';
+                    cui.channelListButton.style.margin = '0';
+                    cui.channelListButton.style.padding = '0';
                 }
-                if (msgBarButton) {
-                    msgBarButton.style.maxWidth = '0px';
-                    msgBarButton.style.margin = '0';
-                    msgBarButton.style.padding = '0';
+                if (cui.msgBarButton) {
+                    cui.msgBarButton.style.maxWidth = '0px';
+                    cui.msgBarButton.style.margin = '0';
+                    cui.msgBarButton.style.padding = '0';
                 }
-                if (windowBarButton) {
-                    windowBarButton.style.maxWidth = '0px';
-                    windowBarButton.style.margin = '0';
-                    windowBarButton.style.padding = '0';
+                if (cui.windowBarButton) {
+                    cui.windowBarButton.style.maxWidth = '0px';
+                    cui.windowBarButton.style.margin = '0';
+                    cui.windowBarButton.style.padding = '0';
                 }
-                if (membersListButton) {
-                    membersListButton.style.maxWidth = '0px';
-                    membersListButton.style.margin = '0';
-                    membersListButton.style.padding = '0';
+                if (cui.membersListButton) {
+                    cui.membersListButton.style.maxWidth = '0px';
+                    cui.membersListButton.style.margin = '0';
+                    cui.membersListButton.style.padding = '0';
                 }
-                if (userAreaButton) {
-                    userAreaButton.style.maxWidth = '0px';
-                    userAreaButton.style.margin = '0';
-                    userAreaButton.style.padding = '0';
+                if (cui.userAreaButton) {
+                    cui.userAreaButton.style.maxWidth = '0px';
+                    cui.userAreaButton.style.margin = '0';
+                    cui.userAreaButton.style.padding = '0';
                 }
                 
-                if (membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
-                    membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    membersListButton.style.removeProperty('margin');
-                    membersListButton.style.removeProperty('padding');
-                } else if (windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
-                    windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    windowBarButton.style.removeProperty('margin');
-                    windowBarButton.style.removeProperty('padding');
-                } else if (msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
-                    msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    msgBarButton.style.removeProperty('margin');
-                    msgBarButton.style.removeProperty('padding');
-                } else if (channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
-                    channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    channelListButton.style.removeProperty('margin');
-                    channelListButton.style.removeProperty('padding');
-                } else if (serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
-                    serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    serverListButton.style.removeProperty('margin');
-                    serverListButton.style.removeProperty('padding');
-                } else if (userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
-                    userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    userAreaButton.style.removeProperty('margin');
-                    userAreaButton.style.removeProperty('padding');
+                if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
+                    cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    cui.membersListButton.style.removeProperty('margin');
+                    cui.membersListButton.style.removeProperty('padding');
+                } else if (cui.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
+                    cui.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    cui.windowBarButton.style.removeProperty('margin');
+                    cui.windowBarButton.style.removeProperty('padding');
+                } else if (cui.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
+                    cui.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    cui.msgBarButton.style.removeProperty('margin');
+                    cui.msgBarButton.style.removeProperty('padding');
+                } else if (cui.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
+                    cui.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    cui.channelListButton.style.removeProperty('margin');
+                    cui.channelListButton.style.removeProperty('padding');
+                } else if (cui.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
+                    cui.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    cui.serverListButton.style.removeProperty('margin');
+                    cui.serverListButton.style.removeProperty('padding');
+                } else if (cui.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
+                    cui.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    cui.userAreaButton.style.removeProperty('margin');
+                    cui.userAreaButton.style.removeProperty('padding');
                 } else {
                     document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.display = 'none');
                 }
@@ -484,60 +494,60 @@ module.exports = (() => {
             }
 
             // Read stored user data to decide active state of Server List button
-            if (serverListButton) {
-                if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
-                    serverListButton.classList.remove(this.classSelected);
+            if (cui.serverListButton) {
+                if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') {
+                    cui.serverListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
                         this.serverList.style.display = 'none';
                     } else {
                         this.serverList.style.width = '0px';
                     }
-                } else if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
-                    serverListButton.classList.add(this.classSelected);
+                } else if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
+                    cui.serverListButton.classList.add(this.classSelected);
                 } else {
-                    BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
-                    serverListButton.classList.add(this.classSelected);
+                    BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
+                    cui.serverListButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Channel List button
-            if (channelListButton) {
-                if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
-                    channelListButton.classList.remove(this.classSelected);
+            if (cui.channelListButton) {
+                if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') {
+                    cui.channelListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
                         this.channelList.style.display = 'none';
                     } else {
                         this.channelList.style.width = '0px';
                     }
-                } else if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
-                    channelListButton.classList.add(this.classSelected);
+                } else if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true') {
+                    cui.channelListButton.classList.add(this.classSelected);
                 } else {
-                    BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
-                    channelListButton.classList.add(this.classSelected);
+                    BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
+                    cui.channelListButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Message Bar button
-            if (msgBarButton) {
-                if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
-                    msgBarButton.classList.remove(this.classSelected);
+            if (cui.msgBarButton) {
+                if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') {
+                    cui.msgBarButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
                         this.msgBar.style.display = 'none';
                     } else {
                         this.msgBar.style.maxHeight = '0px';
                     }
-                } else if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
-                    msgBarButton.classList.add(this.classSelected);
+                } else if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'true') {
+                    cui.msgBarButton.classList.add(this.classSelected);
                 } else {
-                    BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
-                    msgBarButton.classList.add(this.classSelected);
+                    BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
+                    cui.msgBarButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Window Bar button
-            if (windowBarButton) {
-                if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
-                    windowBarButton.classList.remove(this.classSelected);
+            if (cui.windowBarButton) {
+                if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') {
+                    cui.windowBarButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
                         this.windowBar.style.display = 'none';
                     } else {
@@ -546,46 +556,46 @@ module.exports = (() => {
                         this.windowBar.style.margin = '0';
                         this.wordMark.style.display = 'none';
                     }
-                } else if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
-                    windowBarButton.classList.add(this.classSelected);
+                } else if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'true') {
+                    cui.windowBarButton.classList.add(this.classSelected);
                 } else {
-                    BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
-                    windowBarButton.classList.add(this.classSelected);
+                    BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
+                    cui.windowBarButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of Members List button
-            if (membersListButton) {
-                if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
-                    membersListButton.classList.remove(this.classSelected);
+            if (cui.membersListButton) {
+                if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') {
+                    cui.membersListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
                         this.membersList.style.display = 'none';
                     } else {
                         this.membersList.style.maxWidth = '0px';
                         this.membersList.style.minWidth = '0px';
                     }
-                } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
-                    membersListButton.classList.add(this.classSelected);
+                } else if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'true') {
+                    cui.membersListButton.classList.add(this.classSelected);
                 } else {
-                    BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
-                    membersListButton.classList.add(this.classSelected);
+                    BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
+                    cui.membersListButton.classList.add(this.classSelected);
                 }
             }
 
             // Read stored user data to decide active state of User Area button
-            if (userAreaButton) {
-                if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') {
-                    userAreaButton.classList.remove(this.classSelected);
+            if (cui.userAreaButton) {
+                if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') {
+                    cui.userAreaButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
                         this.userArea.style.display = 'none';
                     } else {
                         this.userArea.style.maxHeight = '0px';
                     }
-                } else if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
-                    userAreaButton.classList.add(this.classSelected);
+                } else if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'true') {
+                    cui.userAreaButton.classList.add(this.classSelected);
                 } else {
-                    BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
-                    userAreaButton.classList.add(this.classSelected);
+                    BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
+                    cui.userAreaButton.classList.add(this.classSelected);
                 }
             }
 
@@ -619,6 +629,12 @@ module.exports = (() => {
                 }
             }
             
+            // Add call checking event
+            setInterval(function() {
+                if ((cui.callContainerExists && !(document.querySelector('.' + cui.classCallContainer))) || (document.querySelector('.' + cui.classCallContainer) && !(cui.callContainerExists)))
+                    cui.initialize();
+            }, 250);
+            
             // Implement dynamic uncollapse feature
             if (dynamicUncollapse && !disableTransitions) {
                 // Add event listener to document body to track cursor location & check if it is near collapsed elements
@@ -627,7 +643,7 @@ module.exports = (() => {
                     mouseY = event.pageY;
                     
                     // Server List
-                    if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         if (cui.isNear(cui.serverList, dynamicUncollapseDistance, mouseX, mouseY)) {
                             cui.serverList.style.removeProperty('width');
                         } else {
@@ -636,7 +652,7 @@ module.exports = (() => {
                     }
                     
                     // Channel List
-                    if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
                         if (cui.isNear(cui.channelList, dynamicUncollapseDistance, mouseX, mouseY)) {
                             cui.channelList.style.removeProperty('width');
                         } else {
@@ -645,7 +661,7 @@ module.exports = (() => {
                     }
                     
                     // Message Bar
-                    if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
                         if (cui.isNear(cui.msgBar, dynamicUncollapseDistance, mouseX, mouseY)) {
                             cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                         } else {
@@ -654,7 +670,7 @@ module.exports = (() => {
                     }
                     
                     // Window Bar
-                    if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
                         if (cui.isNear(cui.windowBar, dynamicUncollapseDistance, mouseX, mouseY)) {
                             cui.windowBar.style.height = windowBarHeight + 'px';
                             cui.windowBar.style.removeProperty('padding');
@@ -669,7 +685,7 @@ module.exports = (() => {
                     }
                     
                     // Members List
-                    if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
                         if (cui.isNear(cui.membersList, dynamicUncollapseDistance, mouseX, mouseY)) {
                             cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
                             cui.membersList.style.removeProperty('min-width');
@@ -680,7 +696,7 @@ module.exports = (() => {
                     }
                     
                     // User Area
-                    if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
                         if (cui.isNear(cui.userArea, dynamicUncollapseDistance, mouseX, mouseY)) {
                             cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
                         } else {
@@ -693,93 +709,93 @@ module.exports = (() => {
             // Add event listeners to the Toolbar Container to update on hover
             if (!disableToolbarCollapse) {
                 toolbarContainer.addEventListener('mouseenter', function(){
-                    if (serverListButton) {
-                        serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        serverListButton.style.removeProperty('margin');
-                        serverListButton.style.removeProperty('padding');
+                    if (cui.serverListButton) {
+                        cui.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.serverListButton.style.removeProperty('margin');
+                        cui.serverListButton.style.removeProperty('padding');
                     }
-                    if (channelListButton) {
-                        channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        channelListButton.style.removeProperty('margin');
-                        channelListButton.style.removeProperty('padding');
+                    if (cui.channelListButton) {
+                        cui.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.channelListButton.style.removeProperty('margin');
+                        cui.channelListButton.style.removeProperty('padding');
                     }
-                    if (msgBarButton) {
-                        msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        msgBarButton.style.removeProperty('margin');
-                        msgBarButton.style.removeProperty('padding');
+                    if (cui.msgBarButton) {
+                        cui.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.msgBarButton.style.removeProperty('margin');
+                        cui.msgBarButton.style.removeProperty('padding');
                     }
-                    if (windowBarButton) {
-                        windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        windowBarButton.style.removeProperty('margin');
-                        windowBarButton.style.removeProperty('padding');
+                    if (cui.windowBarButton) {
+                        cui.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.windowBarButton.style.removeProperty('margin');
+                        cui.windowBarButton.style.removeProperty('padding');
                     }
-                    if (membersListButton) {
-                        membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        membersListButton.style.removeProperty('margin');
-                        membersListButton.style.removeProperty('padding');
+                    if (cui.membersListButton) {
+                        cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.membersListButton.style.removeProperty('margin');
+                        cui.membersListButton.style.removeProperty('padding');
                     }
-                    if (userAreaButton) {
-                        userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        userAreaButton.style.removeProperty('margin');
-                        userAreaButton.style.removeProperty('padding');
+                    if (cui.userAreaButton) {
+                        cui.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.userAreaButton.style.removeProperty('margin');
+                        cui.userAreaButton.style.removeProperty('padding');
                     }
                 });
                 toolbarContainer.addEventListener('mouseleave', function(){
-                    if (serverListButton) {
-                        serverListButton.style.maxWidth = '0px';
-                        serverListButton.style.margin = '0';
-                        serverListButton.style.padding = '0';
+                    if (cui.serverListButton) {
+                        cui.serverListButton.style.maxWidth = '0px';
+                        cui.serverListButton.style.margin = '0';
+                        cui.serverListButton.style.padding = '0';
                     }
-                    if (channelListButton) {
-                        channelListButton.style.maxWidth = '0px';
-                        channelListButton.style.margin = '0';
-                        channelListButton.style.padding = '0';
+                    if (cui.channelListButton) {
+                        cui.channelListButton.style.maxWidth = '0px';
+                        cui.channelListButton.style.margin = '0';
+                        cui.channelListButton.style.padding = '0';
                     }
-                    if (msgBarButton) {
-                        msgBarButton.style.maxWidth = '0px';
-                        msgBarButton.style.margin = '0';
-                        msgBarButton.style.padding = '0';
+                    if (cui.msgBarButton) {
+                        cui.msgBarButton.style.maxWidth = '0px';
+                        cui.msgBarButton.style.margin = '0';
+                        cui.msgBarButton.style.padding = '0';
                     }
-                    if (windowBarButton) {
-                        windowBarButton.style.maxWidth = '0px';
-                        windowBarButton.style.margin = '0';
-                        windowBarButton.style.padding = '0';
+                    if (cui.windowBarButton) {
+                        cui.windowBarButton.style.maxWidth = '0px';
+                        cui.windowBarButton.style.margin = '0';
+                        cui.windowBarButton.style.padding = '0';
                     }
-                    if (membersListButton) {
-                        membersListButton.style.maxWidth = '0px';
-                        membersListButton.style.margin = '0';
-                        membersListButton.style.padding = '0';
+                    if (cui.membersListButton) {
+                        cui.membersListButton.style.maxWidth = '0px';
+                        cui.membersListButton.style.margin = '0';
+                        cui.membersListButton.style.padding = '0';
                     }
-                    if (userAreaButton) {
-                        userAreaButton.style.maxWidth = '0px';
-                        userAreaButton.style.margin = '0';
-                        userAreaButton.style.padding = '0';
+                    if (cui.userAreaButton) {
+                        cui.userAreaButton.style.maxWidth = '0px';
+                        cui.userAreaButton.style.margin = '0';
+                        cui.userAreaButton.style.padding = '0';
                     }
                 
-                    if (membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
-                        membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        membersListButton.style.removeProperty('margin');
-                        membersListButton.style.removeProperty('padding');
-                    } else if (windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
-                        windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        windowBarButton.style.removeProperty('margin');
-                        windowBarButton.style.removeProperty('padding');
-                    } else if (msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
-                        msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        msgBarButton.style.removeProperty('margin');
-                        msgBarButton.style.removeProperty('padding');
-                    } else if (channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
-                        channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        channelListButton.style.removeProperty('margin');
-                        channelListButton.style.removeProperty('padding');
-                    } else if (serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
-                        serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        serverListButton.style.removeProperty('margin');
-                        serverListButton.style.removeProperty('padding');
-                    } else if (userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
-                        userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                        userAreaButton.style.removeProperty('margin');
-                        userAreaButton.style.removeProperty('padding');
+                    if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
+                        cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.membersListButton.style.removeProperty('margin');
+                        cui.membersListButton.style.removeProperty('padding');
+                    } else if (cui.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
+                        cui.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.windowBarButton.style.removeProperty('margin');
+                        cui.windowBarButton.style.removeProperty('padding');
+                    } else if (cui.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
+                        cui.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.msgBarButton.style.removeProperty('margin');
+                        cui.msgBarButton.style.removeProperty('padding');
+                    } else if (cui.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
+                        cui.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.channelListButton.style.removeProperty('margin');
+                        cui.channelListButton.style.removeProperty('padding');
+                    } else if (cui.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
+                        cui.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.serverListButton.style.removeProperty('margin');
+                        cui.serverListButton.style.removeProperty('padding');
+                    } else if (cui.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
+                        cui.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.userAreaButton.style.removeProperty('margin');
+                        cui.userAreaButton.style.removeProperty('padding');
                     } else {
                         document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.display = 'none');
                     }
@@ -801,15 +817,15 @@ module.exports = (() => {
             }
 
             // Add event listener to the Server List button to update the icon, UI, & settings on click
-            if (serverListButton) {
-                serverListButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
+            if (cui.serverListButton) {
+                cui.serverListButton.addEventListener('click', function(){
+                    if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
                         if (disableTransitions) {
                             cui.serverList.style.display = 'none';
                         } else {
                             cui.serverList.style.width = '0px';
                         }
-                        BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'false');
+                        BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
@@ -817,22 +833,22 @@ module.exports = (() => {
                         } else {
                             cui.serverList.style.removeProperty('width');
                         }
-                        BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
                 });
             }
 
             // Add event listener to the Channel List button to update the icon, UI, & settings on click
-            if (channelListButton) {
-                channelListButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
+            if (cui.channelListButton) {
+                cui.channelListButton.addEventListener('click', function(){
+                    if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true') {
                         if (disableTransitions) {
                             cui.channelList.style.display = 'none';
                         } else {
                             cui.channelList.style.width = '0px';
                         }
-                        BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'false');
+                        BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
@@ -840,22 +856,22 @@ module.exports = (() => {
                         } else {
                             cui.channelList.style.removeProperty('width');
                         }
-                        BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
                 });
             }
 
             // Add event listener to the Message Bar button to update the icon, UI, & settings on click
-            if (msgBarButton) {
-                msgBarButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
+            if (cui.msgBarButton) {
+                cui.msgBarButton.addEventListener('click', function(){
+                    if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'true') {
                         if (disableTransitions) {
                             cui.msgBar.style.display = 'none';
                         } else {
                             cui.msgBar.style.maxHeight = '0px';
                         }
-                        BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'false');
+                        BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
@@ -863,16 +879,16 @@ module.exports = (() => {
                         } else {
                             cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                         }
-                        BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
                 });
             }
 
             // Add event listener to the Window Bar button to update the icon, UI, & settings on click
-            if (windowBarButton) {
-                windowBarButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
+            if (cui.windowBarButton) {
+                cui.windowBarButton.addEventListener('click', function(){
+                    if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'true') {
                         if (disableTransitions) {
                             cui.windowBar.style.display = 'none';
                         } else {
@@ -881,7 +897,7 @@ module.exports = (() => {
                             cui.windowBar.style.margin = '0';
                             cui.wordMark.style.display = 'none';
                         }
-                        BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'false');
+                        BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
@@ -892,23 +908,23 @@ module.exports = (() => {
                             cui.windowBar.style.removeProperty('margin');
                             cui.wordMark.style.removeProperty('display');
                         }
-                        BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
                 });
             }
 
             // Add event listener to the Members List button to update the icon, UI, & settings on click
-            if (membersListButton) {
-                membersListButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
+            if (cui.membersListButton) {
+                cui.membersListButton.addEventListener('click', function(){
+                    if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'true') {
                         if (disableTransitions) {
                             cui.membersList.style.display = 'none';
                         } else {
                             cui.membersList.style.maxWidth = '0px';
                             cui.membersList.style.minWidth = '0px';
                         }
-                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
+                        BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
@@ -917,22 +933,22 @@ module.exports = (() => {
                             cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
                             cui.membersList.style.removeProperty('min-width');
                         }
-                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
                 });
             }
 
             // Add event listener to the User Area button to update the icon, UI, & settings on click
-            if (userAreaButton) {
-                userAreaButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
+            if (cui.userAreaButton) {
+                cui.userAreaButton.addEventListener('click', function(){
+                    if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'true') {
                         if (disableTransitions) {
                             cui.userArea.style.display = 'none';
                         } else {
                             cui.userArea.style.maxHeight = '0px';
                         }
-                        BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'false');
+                        BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
@@ -940,7 +956,7 @@ module.exports = (() => {
                         } else {
                             cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
                         }
-                        BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
                 });
@@ -958,11 +974,11 @@ module.exports = (() => {
             // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
             await new Promise(resolve => setTimeout(resolve, 1000))
             
-            try {
+            //try {
                 this.initialize();
-            } catch(e) {
-                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e.message);
-            }
+            /*} catch(e) {
+                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
+            }*/
             
             console.log('[CollapsibleUI] version 3.0.1 has started.');
         }
@@ -1032,11 +1048,11 @@ module.exports = (() => {
 
         // Re-initialize the plugin on channel/server switch to maintain icon availability
         onSwitch() {
-            try {
+            //try {
                 this.initialize();
-            } catch(e) {
-                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e.message);
-            }
+            /*} catch(e) {
+                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
+            }*/
         }
 
         // Adds a new SVG icon to the toolbar

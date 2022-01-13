@@ -208,6 +208,13 @@ module.exports = (() => {
             // Abstract CollapsibleUI as a variable
             let cui = this;
             
+            // Clean up UI
+            this.stop();
+            
+            // Store eventListeners in an array
+            this.eventListenerController = new AbortController();
+            this.eventListenerSignal = this.eventListenerController.signal;
+            
             // Clean up old settings
             if (BdApi.getData('CollapsibleUI', 'cuiSettingsVersion') !== '2') {
                 // Clean up v1
@@ -700,10 +707,10 @@ module.exports = (() => {
                     this.channelList.style.resize = 'horizontal';
                     this.channelList.addEventListener('mouseenter', function (){
                         this.style.transition = 'none';
-                    });
+                    }, {signal: cui.eventListenerSignal});
                     this.channelList.addEventListener('mouseleave', function (){
                         this.style.transition = 'width ' + transitionSpeed + 'ms';
-                    });
+                    }, {signal: cui.eventListenerSignal});
                 }
                 
                 this.serverList.style.transition = 'width ' + transitionSpeed + 'ms';
@@ -809,7 +816,7 @@ module.exports = (() => {
                             document.querySelector('.' + cui.classCallContainer).style.height = '0px';
                         }
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
             }
             
             // Add event listeners to the Toolbar Container to update on hover
@@ -850,7 +857,7 @@ module.exports = (() => {
                         cui.callContainerButton.style.removeProperty('margin');
                         cui.callContainerButton.style.removeProperty('padding');
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 toolbarContainer.addEventListener('mouseleave', function(){
                     if (cui.serverListButton) {
                         cui.serverListButton.style.maxWidth = '0px';
@@ -919,7 +926,7 @@ module.exports = (() => {
                     } else {
                         document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.display = 'none');
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
             }
             
             // Add event listeners to the Settings Container to update on hover
@@ -928,12 +935,12 @@ module.exports = (() => {
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = settingsButtonsMaxWidth + 'px';
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 this.settingsContainer.addEventListener('mouseleave', function(){
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = '0px';
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the Server List button to update the icon, UI, & settings on click
@@ -956,15 +963,15 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.serverListButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.serverListButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the Channel List button to update the icon, UI, & settings on click
@@ -987,15 +994,15 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.channelListButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.channelListButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the Message Bar button to update the icon, UI, & settings on click
@@ -1018,15 +1025,15 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.msgBarButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.msgBarButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the Window Bar button to update the icon, UI, & settings on click
@@ -1055,15 +1062,15 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.windowBarButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.windowBarButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the Members List button to update the icon, UI, & settings on click
@@ -1088,15 +1095,15 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.membersListButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.membersListButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the User Area button to update the icon, UI, & settings on click
@@ -1119,15 +1126,15 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.userAreaButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.userAreaButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
 
             // Add event listener to the Call Container button to update the icon, UI, & settings on click
@@ -1154,16 +1161,18 @@ module.exports = (() => {
                         BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
                         this.classList.add(cui.classSelected);
                     }
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.callContainerButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
-                });
+                }, {signal: cui.eventListenerSignal});
                 
                 cui.callContainerButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
-                });
+                }, {signal: cui.eventListenerSignal});
             }
+            
+            // console.log('[CollapsibleUI] version 4.0.0 has started.');
         }
 
         // Initialize the plugin when it is enabled
@@ -1182,8 +1191,6 @@ module.exports = (() => {
             /*} catch(e) {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
             }*/
-            
-            console.log('[CollapsibleUI] version 4.0.0 has started.');
         }
 
         // Restore the default UI when the plugin is disabled
@@ -1250,8 +1257,12 @@ module.exports = (() => {
             // Restore default ZeresPluginLibrary logger functionality
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
             
+            // Abort event listeners
+            if (this.eventListenerController)
+                this.eventListenerController.abort();
+            
 
-            console.log('[CollapsibleUI] version 4.0.0 has stopped.');
+            // console.log('[CollapsibleUI] version 4.0.0 has stopped.');
         }
 
         // Re-initialize the plugin on channel/server switch to maintain icon availability
@@ -1261,6 +1272,283 @@ module.exports = (() => {
             /*} catch(e) {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
             }*/
+        }
+        
+        // Add settings panel
+        getSettingsPanel() {
+            let zps = ZeresPluginLibrary.Settings;
+            
+            // Create root settings node
+            var settingsRoot = new zps.SettingPanel();
+            this.settingsHandle = settingsRoot.getElement();
+            
+            // Create Main subgroup
+            var groupMain = new zps.SettingGroup('Main');
+            
+            // Create main settings
+            var settingDisableTransitions = new zps.Switch('Disable UI Transitions',
+                                                           'Disables all UI animations, but also disables Dynamic Uncollapse',
+                                                           BdApi.getData('CollapsibleUI', 'disableTransitions') === 'true');
+            var settingTransitionSpeed = new zps.Textbox('UI Transition Speed (ms)',
+                                                         'Sets the speed of UI animations',
+                                                         BdApi.getData('CollapsibleUI', 'transitionSpeed'),
+                                                         null,
+                                                         {placeholder: 'Default: 300'});
+            var settingDisableToolbarCollapse = new zps.Switch('Disable Toolbar Auto-collapse',
+                                                               'Disables the automatic collapsing of CollapsibleUI\'s toolbar icons',
+                                                               BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'true');
+            var settingDisableSettingsCollapse = new zps.Switch('Disable User Settings Auto-collapse',
+                                                                'Disables the automatic collapsing of the mute/deafen and call buttons',
+                                                                BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'true');
+            var settingDynamicUncollapse = new zps.Switch('Dynamic Uncollapse',
+                                                          'Makes collapsed UI elements expand when the mouse is near them. Does not work with transitions disabled',
+                                                          BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true');
+            var settingDynamicUncollapseDistance = new zps.Textbox('Dynamic Uncollapse Distance (px)',
+                                                                   'Sets the distance that the mouse must be from a UI element in order for it to expand',
+                                                                   BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'),
+                                                                   null,
+                                                                   {placeholder: 'Default: 20'});
+            var settingResizableChannelList = new zps.Switch('Resizable Channel List',
+                                                          'Allows the channel list to be resized horizontally by clicking-and-dragging on its bottom-right corner',
+                                                          BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
+            
+            // Append main settings to Main subgroup
+            groupMain.append(settingDisableTransitions);
+            groupMain.append(settingTransitionSpeed);
+            groupMain.append(settingDisableToolbarCollapse);
+            groupMain.append(settingDisableSettingsCollapse);
+            groupMain.append(settingDynamicUncollapse);
+            groupMain.append(settingDynamicUncollapseDistance);
+            groupMain.append(settingResizableChannelList);
+            
+            // Create Button Customization subgroup
+            var groupButtons = new zps.SettingGroup('Button Customization');
+            
+            // Create button settings
+            var settingServerList = new zps.Slider('Server List',
+                                                   '[Default = 1, Disabled = 0] - Sets order index of the Server List button (far left panel)',
+                                                   0,
+                                                   7,
+                                                   BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[0],
+                                                   null,
+                                                   {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            var settingChannelList = new zps.Slider('Channel List',
+                                                    '[Default = 2, Disabled = 0] - Sets order index of the Channel List button (big left panel)',
+                                                    0,
+                                                    7,
+                                                    BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[1],
+                                                    null,
+                                                    {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            var settingUserArea = new zps.Slider('User Area',
+                                                 '[Default = 3, Disabled = 0] - Sets order index of the User Area button (username/handle, call controls)',
+                                                 0,
+                                                 7,
+                                                 BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[5],
+                                                 null,
+                                                 {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            var settingMsgBar = new zps.Slider('Message Bar',
+                                               '[Default = 4, Disabled = 0] - Sets order index of the Message Bar button (typing area)',
+                                               0,
+                                               7,
+                                               BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[2],
+                                               null,
+                                               {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            var settingCallContainer = new zps.Slider('Call Container',
+                                                      '[Default = 5, Disabled = 0] - Sets order index of the Call Container button (video chat/call controls panel)',
+                                                      0,
+                                                      7,
+                                                      BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[6],
+                                                      null,
+                                                      {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            var settingWindowBar = new zps.Slider('Window Bar',
+                                                  '[Default = 6, Disabled = 0] - Sets order index of the Window bar button (maximize/minimize/close buttons)',
+                                                  0,
+                                                  7,
+                                                  BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[3],
+                                                  null,
+                                                  {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            var settingMembersList = new zps.Slider('Members List',
+                                                    '[Default = 7, Disabled = 0] - Sets order index of the Members List button (right panel)',
+                                                    0,
+                                                    7,
+                                                    BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[4],
+                                                    null,
+                                                    {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
+            
+            // Append button settings to Button Customization subgroup
+            groupButtons.append(settingServerList);
+            groupButtons.append(settingChannelList);
+            groupButtons.append(settingUserArea);
+            groupButtons.append(settingMsgBar);
+            groupButtons.append(settingCallContainer);
+            groupButtons.append(settingWindowBar);
+            groupButtons.append(settingMembersList);
+            
+            // Create Advanced subgroup
+            var groupAdvanced = new zps.SettingGroup('Advanced');
+            
+            // Create advanced settings
+            var settingSettingsButtonsMaxWidth = new zps.Textbox('Settings Buttons - Max Width',
+                                                                 null,
+                                                                 BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'),
+                                                                 null,
+                                                                 {placeholder: 'Default: 100'});
+            var settingToolbarIconMaxWidth = new zps.Textbox('Toolbar Icons - Max Width',
+                                                             null,
+                                                             BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'),
+                                                             null,
+                                                             {placeholder: 'Default: 300'});
+            var settingMembersListMaxWidth = new zps.Textbox('Members List - Max Width',
+                                                             null,
+                                                             BdApi.getData('CollapsibleUI', 'membersListMaxWidth'),
+                                                             null,
+                                                             {placeholder: 'Default: 240'});
+            var settingUserAreaMaxHeight = new zps.Textbox('User Area - Max Height',
+                                                           null,
+                                                           BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'),
+                                                           null,
+                                                           {placeholder: 'Default: 100'});
+            var settingMsgBarMaxHeight = new zps.Textbox('Message Bar - Max Height',
+                                                         null,
+                                                         BdApi.getData('CollapsibleUI', 'msgBarMaxHeight'),
+                                                         null,
+                                                         {placeholder: 'Default: 400'});
+            var settingWindowBarHeight = new zps.Textbox('Window Bar - Height',
+                                                         null,
+                                                         BdApi.getData('CollapsibleUI', 'windowBarHeight'),
+                                                         null,
+                                                         {placeholder: 'Default: 18'});
+            
+            // Append advanced settings to Advanced subgroup
+            groupAdvanced.append(settingSettingsButtonsMaxWidth);
+            groupAdvanced.append(settingToolbarIconMaxWidth);
+            groupAdvanced.append(settingMembersListMaxWidth);
+            groupAdvanced.append(settingUserAreaMaxHeight);
+            groupAdvanced.append(settingMsgBarMaxHeight);
+            groupAdvanced.append(settingWindowBarHeight);
+            
+            // Append subgroups to root node
+            settingsRoot.append(groupMain);
+            settingsRoot.append(groupButtons);
+            settingsRoot.append(groupAdvanced);
+            
+            // Register main settings onChange events
+            settingDisableTransitions.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'disableTransitions', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'disableTransitions', 'false');
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingTransitionSpeed.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'transitionSpeed', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDisableToolbarCollapse.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'false');
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDisableSettingsCollapse.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDynamicUncollapse.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'false');
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDynamicUncollapseDistance.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingResizableChannelList.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'resizableChannelList', 'false');
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            
+            // Register button settings onChange events
+            settingServerList.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[0] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingChannelList.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[1] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingUserArea.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[5] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingMsgBar.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[2] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingCallContainer.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[6] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingWindowBar.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[3] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingMembersList.onChange = function(result) {
+                var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                newButtonsOrder[4] = result;
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            
+            // Register advanced settings onChange events
+            settingSettingsButtonsMaxWidth.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingToolbarIconMaxWidth.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingMembersListMaxWidth.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'membersListMaxWidth', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingUserAreaMaxHeight.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingMsgBarMaxHeight.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingWindowBarHeight.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'windowBarHeight', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            
+            // Return final settings page
+            return this.settingsHandle;
         }
 
         // Adds a new SVG icon to the toolbar

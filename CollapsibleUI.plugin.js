@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.0
+ * @version 4.0.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,24 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.0',
+            version: '4.0.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.1',
+            items: [
+                'Fixed patch notes'
+            ]
+        }, {
             title: '4.0.0',
             items: [
+                'Added settings panel',
                 'Small animation tweaks',
                 'Added dynamic uncollapse feature',
                 'Made call container collapsible',
-                'With settings collapse enabled, now collapses call area buttons as well',
+                'With settings collapse enabled, now collapses call area buttons correctly',
                 'Fixed a lot of bugs'
             ]
         }, {

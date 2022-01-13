@@ -1186,11 +1186,11 @@ module.exports = (() => {
             // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
             await new Promise(resolve => setTimeout(resolve, 1000))
             
-            //try {
+            try {
                 this.initialize();
-            /*} catch(e) {
+            } catch(e) {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
-            }*/
+            }
         }
 
         // Restore the default UI when the plugin is disabled
@@ -1267,11 +1267,11 @@ module.exports = (() => {
 
         // Re-initialize the plugin on channel/server switch to maintain icon availability
         onSwitch() {
-            //try {
+            try {
                 this.initialize();
-            /*} catch(e) {
+            } catch(e) {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
-            }*/
+            }
         }
         
         // Add settings panel

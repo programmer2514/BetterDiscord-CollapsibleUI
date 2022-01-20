@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.1
+ * @version 4.0.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.1',
+            version: '4.0.2',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.2',
+            items: [
+                'Fixed UI elements not collapsing on mouse leaving the window'
+            ]
+        }, {
             title: '4.0.1',
             items: [
                 'Fixed patch notes'
@@ -821,6 +826,46 @@ module.exports = (() => {
                         } else {
                             document.querySelector('.' + cui.classCallContainer).style.height = '0px';
                         }
+                    }
+                }, {signal: cui.eventListenerSignal});
+                document.body.addEventListener('mouseleave', function(){
+                    // Server List
+                    if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
+                        cui.serverList.style.width = '0px';
+                    }
+                    
+                    // Channel List
+                    if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
+                        cui.channelList.style.width = '0px';
+                    }
+                    
+                    // Message Bar
+                    if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
+                        cui.msgBar.style.maxHeight = '0px';
+                    }
+                    
+                    // Window Bar
+                    if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
+                        cui.windowBar.style.height = '0px';
+                        cui.windowBar.style.padding = '0';
+                        cui.windowBar.style.margin = '0';
+                        cui.wordMark.style.display = 'none';
+                    }
+                    
+                    // Members List
+                    if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
+                        cui.membersList.style.maxWidth = '0px';
+                        cui.membersList.style.minWidth = '0px';
+                    }
+                    
+                    // User Area
+                    if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
+                        cui.userArea.style.maxHeight = '0px';
+                    }
+                    
+                    // Call Container
+                    if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
+                        document.querySelector('.' + cui.classCallContainer).style.height = '0px';
                     }
                 }, {signal: cui.eventListenerSignal});
             }

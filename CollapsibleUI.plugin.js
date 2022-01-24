@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.2
+ * @version 4.0.3
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.2',
+            version: '4.0.3',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.3',
+            items: [
+                'Fixed settings collapse malfunction when in a voice call',
+                'Disabled call area buttons collapsing via settings collapse'
+            ]
+        }, {
             title: '4.0.2',
             items: [
                 'Fixed UI elements not collapsing on mouse leaving the window'
@@ -202,10 +208,7 @@ module.exports = (() => {
             // Abstract modified elements
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
             this.searchBar = document.querySelector('.search-39IXmY');
-            if (document.querySelectorAll('.flex-2S1XBF')[1] && document.querySelectorAll('.flex-2S1XBF')[0].classList.contains(this.classConnectionArea))
-                this.settingsContainer = document.querySelectorAll('.flex-2S1XBF')[1];
-            else
-                this.settingsContainer = document.querySelectorAll('.flex-2S1XBF')[0];
+            this.settingsContainer = document.querySelector('.container-YkUktl').querySelector('.flex-2S1XBF');
             this.windowBar = document.querySelector('.typeWindows-2-g3UY');
             this.wordMark = document.querySelector('.wordmark-2u86JB');
             this.msgBar = document.querySelector('.form-3gdLxP');

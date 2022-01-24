@@ -151,9 +151,9 @@ module.exports = (() => {
 
         // Main plugin code, called by start() and onSwitch()
         initialize() {
-            
+
             // Initialize settings variables
-            
+
             /* BUTTON INDEX:         *
              *-----------------------*
              * 0 - cui.serverListButton  *
@@ -165,30 +165,30 @@ module.exports = (() => {
              *-----------------------*/
             let disableTransitions = false;
             let transitionSpeed = 300;
-            
+
             let disableToolbarCollapse = false;
             let disableSettingsCollapse = false;
-            
+
             let dynamicUncollapse = true;
             let dynamicUncollapseDistance = 20;
-            
+
             let resizableChannelList = true;
-            
+
             let buttonsOrder = [1,2,4,6,7,3,5];
-            
+
             let settingsButtonsMaxWidth = 100;
             let toolbarIconMaxWidth = 300;
             let membersListMaxWidth = 240;
             let userAreaMaxHeight = 100;
             let msgBarMaxHeight = 400;
             let windowBarHeight = 18;
-            
+
             // Load isNear function into local scope and define mouse tracking variables
             let mouseX = 0;
             let mouseY = 0;
-            
+
             this.tooltipOffset = 8;
-            
+
             // Abstract used classes
             this.classSelected = 'selected-29KTGM';
             this.classIconWrapper = 'iconWrapper-2awDjA';
@@ -203,8 +203,8 @@ module.exports = (() => {
             this.classTooltipDPE = 'tooltipDisablePointerEvents-1huO19';
             this.classTooltipPointer = 'tooltipPointer-3L49xb';
             this.classTooltipContent = 'tooltipContent-Nejnvh';
-            
-            
+
+
             // Abstract modified elements
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
             this.searchBar = document.querySelector('.search-39IXmY');
@@ -216,19 +216,19 @@ module.exports = (() => {
             this.membersList = document.querySelector('.membersWrap-3NUR2t');
             this.serverList = document.querySelector('.wrapper-1_HaEi');
             this.channelList = document.querySelector('.sidebar-1tnWFu');
-            
+
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
-            
+
             // Abstract CollapsibleUI as a variable
             let cui = this;
-            
+
             // Clean up UI
             this.stop();
-            
+
             // Store eventListeners in an array
             this.eventListenerController = new AbortController();
             this.eventListenerSignal = this.eventListenerController.signal;
-            
+
             // Clean up old settings
             if (BdApi.getData('CollapsibleUI', 'cuiSettingsVersion') !== '2') {
                 // Clean up v1
@@ -238,7 +238,7 @@ module.exports = (() => {
                 BdApi.deleteData('CollapsibleUI', 'windowBarButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'membersListButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'userAreaButtonActive');
-                
+
                 // Clean up v2
                 BdApi.deleteData('CollapsibleUI', 'disableTransitions');
                 BdApi.deleteData('CollapsibleUI', 'transitionSpeed');
@@ -261,11 +261,11 @@ module.exports = (() => {
                 BdApi.deleteData('CollapsibleUI', 'cui.membersListButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'cui.userAreaButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'cui.callContainerButtonActive');
-                
+
                 // Set new settings version
                 BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '2');
             }
-            
+
             // disableTransitions [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'false') {
                 disableTransitions = false;
@@ -274,14 +274,14 @@ module.exports = (() => {
             } else {
                 BdApi.setData('CollapsibleUI', 'disableTransitions', 'false');
             }
-            
+
             // transitionSpeed [Default: 300]
             if (typeof(BdApi.getData('CollapsibleUI', 'transitionSpeed')) === 'string') {
                 transitionSpeed = parseInt(BdApi.getData('CollapsibleUI', 'transitionSpeed'));
             } else {
                 BdApi.setData('CollapsibleUI', 'transitionSpeed', transitionSpeed.toString());
             }
-            
+
             // disableToolbarCollapse [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'false') {
                 disableToolbarCollapse = false;
@@ -290,7 +290,7 @@ module.exports = (() => {
             } else {
                 BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'false');
             }
-            
+
             // disableSettingsCollapse [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'false') {
                 disableSettingsCollapse = false;
@@ -299,7 +299,7 @@ module.exports = (() => {
             } else {
                 BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
             }
-            
+
             // dynamicUncollapse [Default: true]
             if (BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'false') {
                 dynamicUncollapse = false;
@@ -308,14 +308,14 @@ module.exports = (() => {
             } else {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
             }
-            
+
             // dynamicUncollapseDistance [Default: 20]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')) === 'string') {
                 dynamicUncollapseDistance = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'));
             } else {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', dynamicUncollapseDistance.toString());
             }
-            
+
             // resizableChannelList [Default: true]
             if (BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'false') {
                 resizableChannelList = false;
@@ -324,7 +324,7 @@ module.exports = (() => {
             } else {
                 BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
             }
-            
+
             // buttonsOrder [Default: [1,2,4,6,7,3,5]]
             if (typeof(BdApi.getData('CollapsibleUI', 'buttonsOrder')) === 'string') {
                 if (BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number).length = buttonsOrder.length)
@@ -334,54 +334,54 @@ module.exports = (() => {
             } else {
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', buttonsOrder.toString());
             }
-            
+
             // settingsButtonsMaxWidth [Default: 100]
             if (typeof(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth')) === 'string') {
                 settingsButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'));
             } else {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', settingsButtonsMaxWidth.toString());
             }
-            
+
             // toolbarIconMaxWidth [Default: 300]
             if (typeof(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth')) === 'string') {
                 toolbarIconMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'));
             } else {
                 BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', toolbarIconMaxWidth.toString());
             }
-            
+
             // membersListMaxWidth [Default: 240]
             if (typeof(BdApi.getData('CollapsibleUI', 'membersListMaxWidth')) === 'string') {
                 membersListMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'membersListMaxWidth'));
             } else {
                 BdApi.setData('CollapsibleUI', 'membersListMaxWidth', membersListMaxWidth.toString());
             }
-            
+
             // userAreaMaxHeight [Default: 100]
             if (typeof(BdApi.getData('CollapsibleUI', 'userAreaMaxHeight')) === 'string') {
                 userAreaMaxHeight = parseInt(BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'));
             } else {
                 BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', userAreaMaxHeight.toString());
             }
-            
+
             // msgBarMaxHeight [Default: 400]
             if (typeof(BdApi.getData('CollapsibleUI', 'msgBarMaxHeight')) === 'string') {
                 msgBarMaxHeight = parseInt(BdApi.getData('CollapsibleUI', 'msgBarMaxHeight'));
             } else {
                 BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', msgBarMaxHeight.toString());
             }
-            
+
             // windowBarHeight [Default: 18]
             if (typeof(BdApi.getData('CollapsibleUI', 'windowBarHeight')) === 'string') {
                 windowBarHeight = parseInt(BdApi.getData('CollapsibleUI', 'windowBarHeight'));
             } else {
                 BdApi.setData('CollapsibleUI', 'windowBarHeight', windowBarHeight.toString());
             }
-            
-            
+
+
 
             // Purge CollapsibleUI toolbar icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
-            
+
             // Surpress obnoxious ZeresPluginLibrary spam
             this.zeresWarnOld = BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn;
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = function (module, ...message) {
@@ -389,7 +389,7 @@ module.exports = (() => {
                     this.zeresWarnOld(module, message);
                 }
             };
-            
+
             // Hide default Members List button
             if (this.membersList) {
                 try {
@@ -406,7 +406,7 @@ module.exports = (() => {
                     this.searchBar.previousElementSibling.style.display = 'none';
                 }
             }
-            
+
             // Define & add toolbar container
             var toolbarContainer = document.createElement('div');
                 toolbarContainer.setAttribute('id', 'cui-toolbar-container');
@@ -482,7 +482,7 @@ module.exports = (() => {
                     }
                 }
             }
-            
+
             // Collapse toolbar buttons
             if (!disableToolbarCollapse) {
                 if (cui.serverListButton) {
@@ -520,7 +520,7 @@ module.exports = (() => {
                     cui.callContainerButton.style.margin = '0';
                     cui.callContainerButton.style.padding = '0';
                 }
-                
+
                 if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
                     cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
                     cui.membersListButton.style.removeProperty('margin');
@@ -553,12 +553,12 @@ module.exports = (() => {
                     document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.display = 'none');
                 }
             }
-            
+
             // Collapse settings buttons
             if (!disableSettingsCollapse) {
                 // Define settings buttons array
                 var settingsButtons = this.settingsContainer.children;
-                
+
                 // Collapse settings buttons
                 for (let i = 0; i < (settingsButtons.length - 1); i++) {
                     settingsButtons[i].style.maxWidth = '0px';
@@ -567,11 +567,11 @@ module.exports = (() => {
                     settingsButtons[i].style.overflow = 'hidden';
                 }
             }
-            
+
             if (!disableTransitions) {
                 document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + transitionSpeed + 'ms, margin ' + transitionSpeed + 'ms, padding ' + transitionSpeed + 'ms');
             }
-            
+
             // Adjust UI element styling in preparation for transitions
             if (!disableTransitions) {
                 if (this.windowBar) {
@@ -726,7 +726,7 @@ module.exports = (() => {
                         this.style.transition = 'width ' + transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
                 }
-                
+
                 this.serverList.style.transition = 'width ' + transitionSpeed + 'ms';
                 if (this.windowBar) {
                     this.windowBar.style.transition = 'height ' + transitionSpeed + 'ms';
@@ -746,20 +746,20 @@ module.exports = (() => {
                     document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + transitionSpeed + 'ms';
                 }
             }
-            
+
             // Add call checking event
             setInterval(function() {
                 if ((cui.callContainerExists && !(document.querySelector('.' + cui.classCallContainer))) || (document.querySelector('.' + cui.classCallContainer) && !(cui.callContainerExists)))
                     cui.initialize();
             }, 250);
-            
+
             // Implement dynamic uncollapse feature
             if (dynamicUncollapse && !disableTransitions) {
                 // Add event listener to document body to track cursor location & check if it is near collapsed elements
                 document.body.addEventListener('mousemove', function(event){
                     mouseX = event.pageX;
                     mouseY = event.pageY;
-                    
+
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         if (cui.isNear(cui.serverList, dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -768,7 +768,7 @@ module.exports = (() => {
                             cui.serverList.style.width = '0px';
                         }
                     }
-                    
+
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
                         if (cui.isNear(cui.channelList, dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -777,7 +777,7 @@ module.exports = (() => {
                             cui.channelList.style.width = '0px';
                         }
                     }
-                    
+
                     // Message Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
                         if (cui.isNear(cui.msgBar, dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -786,7 +786,7 @@ module.exports = (() => {
                             cui.msgBar.style.maxHeight = '0px';
                         }
                     }
-                    
+
                     // Window Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
                         if (cui.isNear(cui.windowBar, dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -801,7 +801,7 @@ module.exports = (() => {
                             cui.wordMark.style.display = 'none';
                         }
                     }
-                    
+
                     // Members List
                     if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
                         if (cui.isNear(cui.membersList, dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -812,7 +812,7 @@ module.exports = (() => {
                             cui.membersList.style.minWidth = '0px';
                         }
                     }
-                    
+
                     // User Area
                     if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
                         if (cui.isNear(cui.userArea, dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -821,7 +821,7 @@ module.exports = (() => {
                             cui.userArea.style.maxHeight = '0px';
                         }
                     }
-                    
+
                     // Call Container
                     if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
                         if (cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, mouseX, mouseY)) {
@@ -836,17 +836,17 @@ module.exports = (() => {
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         cui.serverList.style.width = '0px';
                     }
-                    
+
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
                         cui.channelList.style.width = '0px';
                     }
-                    
+
                     // Message Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
                         cui.msgBar.style.maxHeight = '0px';
                     }
-                    
+
                     // Window Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
                         cui.windowBar.style.height = '0px';
@@ -854,25 +854,25 @@ module.exports = (() => {
                         cui.windowBar.style.margin = '0';
                         cui.wordMark.style.display = 'none';
                     }
-                    
+
                     // Members List
                     if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
                         cui.membersList.style.maxWidth = '0px';
                         cui.membersList.style.minWidth = '0px';
                     }
-                    
+
                     // User Area
                     if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
                         cui.userArea.style.maxHeight = '0px';
                     }
-                    
+
                     // Call Container
                     if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
                         document.querySelector('.' + cui.classCallContainer).style.height = '0px';
                     }
                 }, {signal: cui.eventListenerSignal});
             }
-            
+
             // Add event listeners to the Toolbar Container to update on hover
             if (!disableToolbarCollapse) {
                 toolbarContainer.addEventListener('mouseenter', function(){
@@ -948,7 +948,7 @@ module.exports = (() => {
                         cui.callContainerButton.style.margin = '0';
                         cui.callContainerButton.style.padding = '0';
                     }
-                
+
                     if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
                         cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
                         cui.membersListButton.style.removeProperty('margin');
@@ -982,7 +982,7 @@ module.exports = (() => {
                     }
                 }, {signal: cui.eventListenerSignal});
             }
-            
+
             // Add event listeners to the Settings Container to update on hover
             if (!disableSettingsCollapse) {
                 this.settingsContainer.addEventListener('mouseenter', function(){
@@ -1018,11 +1018,11 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.serverListButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.serverListButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
@@ -1049,11 +1049,11 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.channelListButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.channelListButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
@@ -1080,11 +1080,11 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.msgBarButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.msgBarButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
@@ -1117,11 +1117,11 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.windowBarButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.windowBarButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
@@ -1150,11 +1150,11 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.membersListButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.membersListButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
@@ -1181,11 +1181,11 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.userAreaButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.userAreaButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
@@ -1216,16 +1216,16 @@ module.exports = (() => {
                         this.classList.add(cui.classSelected);
                     }
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.callContainerButton.addEventListener('mouseenter', function(){
                     this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
                 }, {signal: cui.eventListenerSignal});
-                
+
                 cui.callContainerButton.addEventListener('mouseleave', function(){
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
             }
-            
+
             // console.log('[CollapsibleUI] version 4.0.0 has started.');
         }
 
@@ -1239,7 +1239,7 @@ module.exports = (() => {
 
             // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
             await new Promise(resolve => setTimeout(resolve, 1000))
-            
+
             try {
                 this.initialize();
             } catch(e) {
@@ -1307,14 +1307,14 @@ module.exports = (() => {
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('transition');
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('display');
             }
-            
+
             // Restore default ZeresPluginLibrary logger functionality
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
-            
+
             // Abort event listeners
             if (this.eventListenerController)
                 this.eventListenerController.abort();
-            
+
 
             // console.log('[CollapsibleUI] version 4.0.0 has stopped.');
         }
@@ -1327,18 +1327,18 @@ module.exports = (() => {
                 console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
             }
         }
-        
+
         // Add settings panel
         getSettingsPanel() {
             let zps = ZeresPluginLibrary.Settings;
-            
+
             // Create root settings node
             var settingsRoot = new zps.SettingPanel();
             this.settingsHandle = settingsRoot.getElement();
-            
+
             // Create Main subgroup
             var groupMain = new zps.SettingGroup('Main');
-            
+
             // Create main settings
             var settingDisableTransitions = new zps.Switch('Disable UI Transitions',
                                                            'Disables all UI animations, but also disables Dynamic Uncollapse',
@@ -1365,7 +1365,7 @@ module.exports = (() => {
             var settingResizableChannelList = new zps.Switch('Resizable Channel List',
                                                           'Allows the channel list to be resized horizontally by clicking-and-dragging on its bottom-right corner',
                                                           BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
-            
+
             // Append main settings to Main subgroup
             groupMain.append(settingDisableTransitions);
             groupMain.append(settingTransitionSpeed);
@@ -1374,10 +1374,10 @@ module.exports = (() => {
             groupMain.append(settingDynamicUncollapse);
             groupMain.append(settingDynamicUncollapseDistance);
             groupMain.append(settingResizableChannelList);
-            
+
             // Create Button Customization subgroup
             var groupButtons = new zps.SettingGroup('Button Customization');
-            
+
             // Create button settings
             var settingServerList = new zps.Slider('Server List',
                                                    '[Default = 1, Disabled = 0] - Sets order index of the Server List button (far left panel)',
@@ -1428,7 +1428,7 @@ module.exports = (() => {
                                                     BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[4],
                                                     null,
                                                     {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
-            
+
             // Append button settings to Button Customization subgroup
             groupButtons.append(settingServerList);
             groupButtons.append(settingChannelList);
@@ -1437,10 +1437,10 @@ module.exports = (() => {
             groupButtons.append(settingCallContainer);
             groupButtons.append(settingWindowBar);
             groupButtons.append(settingMembersList);
-            
+
             // Create Advanced subgroup
             var groupAdvanced = new zps.SettingGroup('Advanced');
-            
+
             // Create advanced settings
             var settingSettingsButtonsMaxWidth = new zps.Textbox('Settings Buttons - Max Width',
                                                                  null,
@@ -1472,7 +1472,7 @@ module.exports = (() => {
                                                          BdApi.getData('CollapsibleUI', 'windowBarHeight'),
                                                          null,
                                                          {placeholder: 'Default: 18'});
-            
+
             // Append advanced settings to Advanced subgroup
             groupAdvanced.append(settingSettingsButtonsMaxWidth);
             groupAdvanced.append(settingToolbarIconMaxWidth);
@@ -1480,12 +1480,12 @@ module.exports = (() => {
             groupAdvanced.append(settingUserAreaMaxHeight);
             groupAdvanced.append(settingMsgBarMaxHeight);
             groupAdvanced.append(settingWindowBarHeight);
-            
+
             // Append subgroups to root node
             settingsRoot.append(groupMain);
             settingsRoot.append(groupButtons);
             settingsRoot.append(groupAdvanced);
-            
+
             // Register main settings onChange events
             settingDisableTransitions.onChange = function(result) {
                 if (result)
@@ -1530,7 +1530,7 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'resizableChannelList', 'false');
                 BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
-            
+
             // Register button settings onChange events
             settingServerList.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
@@ -1574,7 +1574,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
                 BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
-            
+
             // Register advanced settings onChange events
             settingSettingsButtonsMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
@@ -1600,7 +1600,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'windowBarHeight', result);
                 BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
-            
+
             // Return final settings page
             return this.settingsHandle;
         }
@@ -1627,41 +1627,41 @@ module.exports = (() => {
             return newToolbarIcon;
 
         }
-        
+
         createTooltip(msg, elem) {
-            
+
             // Get location of selected element
             var left = elem.offset().left,
                 top = elem.offset().top,
                 width = elem.offsetWidth,
                 height = elem.offsetHeight;
-            
+
             // Create tooltip
             var newTooltip = document.createElement('div');
                 newTooltip.classList.add(this.classTooltipWrapper);
                 newTooltip.classList.add(this.classTooltipWrapperDPE);
                 newTooltip.style.position = 'absolute';
                 newTooltip.innerHTML = '<div class="' + this.classTooltip + ' ' + this.classTooltipBottom + ' ' + this.classTooltipPrimary + ' ' + this.classTooltipDPE + '" style="opacity: 1; transform: none;"><div class="' + this.classTooltipPointer + '"></div><div class="' + this.classTooltipContent + '">' + msg + '</div></div>';
-                
+
             // Insert tooltip into tooltip layer
             document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);
-            
+
             // Get tooltip dimensions
             var ttwidth = newTooltip.offsetWidth,
                 ttheight = newTooltip.offsetHeight;
-                
+
             // Extrapolate tooltip location
             var x = left + (width/2) - (ttwidth/2),
                 y = top + height + this.tooltipOffset;
-                
+
             // Set tooltip location
             newTooltip.style.left = x + 'px';
             newTooltip.style.top = y + 'px';
-            
+
             // Return DOM element of newly-created tooltip
             return newTooltip;
         }
-        
+
         // Checks if cursor is near an element
         isNear(element, distance, x, y) {
             var left = element.offset().left - distance,

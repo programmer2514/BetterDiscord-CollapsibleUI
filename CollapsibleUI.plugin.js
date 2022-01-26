@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.3
+ * @version 4.0.4
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.3',
+            version: '4.0.4',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.4',
+            items: [
+                'Fixed dynamic uncollapse',
+                'Fixed tooltips not showing'
+            ]
+        }, {
             title: '4.0.3',
             items: [
                 'Fixed settings collapse malfunction when in a voice call',
@@ -1631,10 +1637,10 @@ module.exports = (() => {
         createTooltip(msg, elem) {
 
             // Get location of selected element
-            var left = elem.offset().left,
-                top = elem.offset().top,
-                width = elem.offsetWidth,
-                height = elem.offsetHeight;
+            var left = elem.getBoundingClientRect().left,
+                top = elem.getBoundingClientRect().top,
+                width = elem.getBoundingClientRect().width,
+                height = elem.getBoundingClientRect().height;
 
             // Create tooltip
             var newTooltip = document.createElement('div');
@@ -1647,8 +1653,8 @@ module.exports = (() => {
             document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);
 
             // Get tooltip dimensions
-            var ttwidth = newTooltip.offsetWidth,
-                ttheight = newTooltip.offsetHeight;
+            var ttwidth = newTooltip.getBoundingClientRect().width,
+                ttheight = newTooltip.getBoundingClientRect().height;
 
             // Extrapolate tooltip location
             var x = left + (width/2) - (ttwidth/2),
@@ -1664,10 +1670,10 @@ module.exports = (() => {
 
         // Checks if cursor is near an element
         isNear(element, distance, x, y) {
-            var left = element.offset().left - distance,
-                top = element.offset().top - distance,
-                right = left + element.width() + 2*distance,
-                bottom = top + element.height() + 2*distance;
+            var left = element.getBoundingClientRect().left - distance,
+                top = element.getBoundingClientRect().top - distance,
+                right = left + element.getBoundingClientRect().width + 2*distance,
+                bottom = top + element.getBoundingClientRect().height + 2*distance;
 
             return (x > left && x < right && y > top && y < bottom);
         }

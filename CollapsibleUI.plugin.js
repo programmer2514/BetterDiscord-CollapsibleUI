@@ -27,7 +27,7 @@ module.exports = (() => {
         changelog: [{
             title: '4.0.6',
             items: [
-                'Prevent sidebars from uncollapsing while hovering message bar'
+                'Prevent sidebars from uncollapsing while hovering over message bar'
             ]
         }, {
             title: '4.0.5',

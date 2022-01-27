@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.4
+ * @version 4.0.5
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.4',
+            version: '4.0.5',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.5',
+            items: [
+                'Fixed window bar dynamic uncollapse'
+            ]
+        }, {
             title: '4.0.4',
             items: [
                 'Fixed dynamic uncollapse',
@@ -160,15 +165,17 @@ module.exports = (() => {
 
             // Initialize settings variables
 
-            /* BUTTON INDEX:         *
-             *-----------------------*
-             * 0 - cui.serverListButton  *
-             * 1 - cui.channelListButton *
-             * 2 - cui.msgBarButton      *
-             * 3 - cui.windowBarButton   *
-             * 4 - cui.membersListButton *
-             * 5 - cui.userAreaButton    *
-             *-----------------------*/
+            /* BUTTON INDEX:               *
+             *-----------------------------*
+             * 0 - cui.serverListButton    *
+             * 1 - cui.channelListButton   *
+             * 2 - cui.msgBarButton        *
+             * 3 - cui.windowBarButton     *
+             * 4 - cui.membersListButton   *
+             * 5 - cui.userAreaButton      *
+             * 6 - cui.callContainerButton *
+             *-----------------------------*/
+
             let disableTransitions = false;
             let transitionSpeed = 300;
 
@@ -190,10 +197,11 @@ module.exports = (() => {
             let windowBarHeight = 18;
 
             // Load isNear function into local scope and define mouse tracking variables
-            let mouseX = 0;
-            let mouseY = 0;
+            this.mouseX = 0;
+            this.mouseY = 0;
 
             this.tooltipOffset = 8;
+            this.isCollapsed = [true, true, true, true, true, true, true];
 
             // Abstract used classes
             this.classSelected = 'selected-29KTGM';
@@ -763,77 +771,98 @@ module.exports = (() => {
             if (dynamicUncollapse && !disableTransitions) {
                 // Add event listener to document body to track cursor location & check if it is near collapsed elements
                 document.body.addEventListener('mousemove', function(event){
-                    mouseX = event.pageX;
-                    mouseY = event.pageY;
+                    cui.mouseX = event.pageX;
+                    cui.mouseY = event.pageY;
 
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
-                        if (cui.isNear(cui.serverList, dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.serverList.style.removeProperty('width');
-                        } else {
+                            cui.isCollapsed[0] = false;
+                        }
+                        if (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.width = '0px';
+                            cui.isCollapsed[0] = true;
                         }
                     }
 
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
-                        if (cui.isNear(cui.channelList, dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.channelList.style.removeProperty('width');
-                        } else {
+                            cui.isCollapsed[1] = false;
+                        }
+                        if (!(cui.isCollapsed[1]) && !(cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.channelList.style.width = '0px';
+                            cui.isCollapsed[1] = true;
                         }
                     }
 
                     // Message Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
-                        if (cui.isNear(cui.msgBar, dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[2] && cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
-                        } else {
+                            cui.isCollapsed[2] = false;
+                        }
+                        if (!(cui.isCollapsed[2]) && !(cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.msgBar.style.maxHeight = '0px';
+                            cui.isCollapsed[2] = true;
                         }
                     }
 
                     // Window Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
-                        if (cui.isNear(cui.windowBar, dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[3] && cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.windowBar.style.height = windowBarHeight + 'px';
                             cui.windowBar.style.removeProperty('padding');
                             cui.windowBar.style.removeProperty('margin');
                             cui.wordMark.style.removeProperty('display');
-                        } else {
+                            cui.isCollapsed[3] = false;
+                        }
+                        if (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.windowBar.style.height = '0px';
                             cui.windowBar.style.padding = '0';
                             cui.windowBar.style.margin = '0';
                             cui.wordMark.style.display = 'none';
+                            cui.isCollapsed[3] = true;
                         }
                     }
 
                     // Members List
                     if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
-                        if (cui.isNear(cui.membersList, dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[4] && cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
                             cui.membersList.style.removeProperty('min-width');
-                        } else {
+                            cui.isCollapsed[4] = false;
+                        }
+                        if (!(cui.isCollapsed[4]) && !(cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.membersList.style.maxWidth = '0px';
                             cui.membersList.style.minWidth = '0px';
+                            cui.isCollapsed[4] = true;
                         }
                     }
 
                     // User Area
                     if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
-                        if (cui.isNear(cui.userArea, dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[5] && cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
-                        } else {
+                            cui.isCollapsed[5] = false;
+                        }
+                        if (!(cui.isCollapsed[5]) && !(cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.userArea.style.maxHeight = '0px';
+                            cui.isCollapsed[5] = true;
                         }
                     }
 
                     // Call Container
                     if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
-                        if (cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, mouseX, mouseY)) {
+                        if (cui.isCollapsed[6] && cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
-                        } else {
+                            cui.isCollapsed[6] = false;
+                        }
+                        if (!(cui.isCollapsed[6]) && !(cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             document.querySelector('.' + cui.classCallContainer).style.height = '0px';
+                            cui.isCollapsed[6] = true;
                         }
                     }
                 }, {signal: cui.eventListenerSignal});
@@ -841,40 +870,47 @@ module.exports = (() => {
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         cui.serverList.style.width = '0px';
+                        cui.isCollapsed[0] = true;
                     }
 
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
                         cui.channelList.style.width = '0px';
+                        cui.isCollapsed[1] = true;
                     }
 
                     // Message Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
                         cui.msgBar.style.maxHeight = '0px';
+                        cui.isCollapsed[2] = true;
                     }
 
                     // Window Bar
-                    if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
+                    if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton && (cui.mouseY > windowBarHeight + dynamicUncollapseDistance)) {
                         cui.windowBar.style.height = '0px';
                         cui.windowBar.style.padding = '0';
                         cui.windowBar.style.margin = '0';
                         cui.wordMark.style.display = 'none';
+                        cui.isCollapsed[3] = true;
                     }
 
                     // Members List
                     if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
                         cui.membersList.style.maxWidth = '0px';
                         cui.membersList.style.minWidth = '0px';
+                        cui.isCollapsed[4] = true;
                     }
 
                     // User Area
                     if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
                         cui.userArea.style.maxHeight = '0px';
+                        cui.isCollapsed[5] = true;
                     }
 
                     // Call Container
                     if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
                         document.querySelector('.' + cui.classCallContainer).style.height = '0px';
+                        cui.isCollapsed[6] = true;
                     }
                 }, {signal: cui.eventListenerSignal});
             }

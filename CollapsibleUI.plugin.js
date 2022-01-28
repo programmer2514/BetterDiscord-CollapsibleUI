@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.1.0
+ * @version 4.1.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.1.0',
+            version: '4.1.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.1.1',
+            items: [
+                'Finish implementing Horizontal Side Bar support',
+                'Default settings tweaks (resets dynamic uncollapse distance)'
+            ]
+        }, {
             title: '4.1.0',
             items: [
                 'Implement rudimentary Horizontal Side Bar support'
@@ -198,7 +204,7 @@ module.exports = (() => {
             let disableSettingsCollapse = false;
 
             let dynamicUncollapse = true;
-            let dynamicUncollapseDistance = 20;
+            let dynamicUncollapseDistance = 35;
 
             let resizableChannelList = true;
 
@@ -260,19 +266,19 @@ module.exports = (() => {
             this.eventListenerSignal = this.eventListenerController.signal;
 
             // Initialize Horizontal Server List integration
-            this.isHSLLoaded = false;
+            this.isHSBLoaded = false;
             try {
                 for (let i = 0; i < document.styleSheets.length; i++) {
                     try {
                         if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
-                            this.isHSLLoaded = true;
+                            this.isHSBLoaded = true;
                     } catch {}
                 }
             } catch {}
 
             // Clean up old settings
-            if (BdApi.getData('CollapsibleUI', 'cuiSettingsVersion') !== '2') {
-                // Clean up v1
+            if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 2) {
+                // Clean up (v1)
                 BdApi.deleteData('CollapsibleUI', 'serverListButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'channelListButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'msgBarButtonActive');
@@ -280,7 +286,7 @@ module.exports = (() => {
                 BdApi.deleteData('CollapsibleUI', 'membersListButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'userAreaButtonActive');
 
-                // Clean up v2
+                // Clean up (v2)
                 BdApi.deleteData('CollapsibleUI', 'disableTransitions');
                 BdApi.deleteData('CollapsibleUI', 'transitionSpeed');
                 BdApi.deleteData('CollapsibleUI', 'disableToolbarCollapse');
@@ -302,9 +308,13 @@ module.exports = (() => {
                 BdApi.deleteData('CollapsibleUI', 'cui.membersListButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'cui.userAreaButtonActive');
                 BdApi.deleteData('CollapsibleUI', 'cui.callContainerButtonActive');
+            }
+            if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 3) {
+                // Clean up (v3)
+                BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDistance');
 
                 // Set new settings version
-                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '2');
+                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '3');
             }
 
             // disableTransitions [Default: false]
@@ -350,7 +360,7 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
             }
 
-            // dynamicUncollapseDistance [Default: 20]
+            // dynamicUncollapseDistance [Default: 35]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')) === 'string') {
                 dynamicUncollapseDistance = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'));
             } else {
@@ -639,7 +649,7 @@ module.exports = (() => {
                     } else {
                         this.serverList.style.width = '0px';
                     }
-                    if (cui.isHSLLoaded) {
+                    if (cui.isHSBLoaded) {
                         cui.windowBase.style.setProperty('top', '0px', 'important');
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
@@ -789,7 +799,7 @@ module.exports = (() => {
                 if (document.querySelector('.' + this.classCallContainer)) {
                     document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + transitionSpeed + 'ms';
                 }
-                if (cui.isHSLLoaded) {
+                if (cui.isHSBLoaded) {
                     cui.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
                 }
             }
@@ -807,17 +817,28 @@ module.exports = (() => {
                     cui.mouseX = event.pageX;
                     cui.mouseY = event.pageY;
 
+                    // Reiterate Horizontal Server List integration
+                    cui.isHSBLoaded = false;
+                    try {
+                        for (let i = 0; i < document.styleSheets.length; i++) {
+                            try {
+                                if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
+                                    cui.isHSBLoaded = true;
+                            } catch {}
+                        }
+                    } catch {}
+
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.removeProperty('width');
-                            if (cui.isHSLLoaded) {
+                            if (cui.isHSBLoaded) {
                                 cui.windowBase.style.removeProperty('top');
                             }
                             cui.isCollapsed[0] = false;
                         } else if (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.width = '0px';
-                            if (cui.isHSLLoaded) {
+                            if (cui.isHSBLoaded) {
                                 cui.windowBase.style.setProperty('top', '0px', 'important');
                             }
                             cui.isCollapsed[0] = true;
@@ -907,7 +928,7 @@ module.exports = (() => {
                 document.body.addEventListener('mouseleave', function(){
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
-                        if (!cui.isHSLLoaded) {
+                        if (!cui.isHSBLoaded) {
                             cui.serverList.style.width = '0px';
                             cui.isCollapsed[0] = true;
                         }
@@ -1088,7 +1109,7 @@ module.exports = (() => {
                         } else {
                             cui.serverList.style.width = '0px';
                         }
-                        if (cui.isHSLLoaded) {
+                        if (cui.isHSBLoaded) {
                             cui.windowBase.style.setProperty('top', '0px', 'important');
                         }
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'false');
@@ -1099,7 +1120,7 @@ module.exports = (() => {
                         } else {
                             cui.serverList.style.removeProperty('width');
                         }
-                        if (cui.isHSLLoaded) {
+                        if (cui.isHSBLoaded) {
                             cui.windowBase.style.removeProperty('top');
                         }
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
@@ -1395,6 +1416,10 @@ module.exports = (() => {
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('transition');
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('display');
             }
+            if (this.windowBase) {
+                this.windowBase.style.removeProperty('top');
+                this.windowBase.style.removeProperty('transition');
+            }
 
             // Restore default ZeresPluginLibrary logger functionality
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
@@ -1449,7 +1474,7 @@ module.exports = (() => {
                                                                    'Sets the distance that the mouse must be from a UI element in order for it to expand',
                                                                    BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'),
                                                                    null,
-                                                                   {placeholder: 'Default: 20'});
+                                                                   {placeholder: 'Default: 35'});
             var settingResizableChannelList = new zps.Switch('Resizable Channel List',
                                                           'Allows the channel list to be resized horizontally by clicking-and-dragging on its bottom-right corner',
                                                           BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
@@ -1753,7 +1778,7 @@ module.exports = (() => {
         // Checks if cursor is near an element
         isNear(element, distance, x, y) {
             try {
-                if (this.isHSLLoaded && this.isCollapsed[0] && (element === this.serverList)) {
+                if (this.isHSBLoaded && (element === this.serverList)) {
                     var top = 0,
                         left = element.getBoundingClientRect().left - distance,
                         right = left + element.getBoundingClientRect().width + 2*distance,
@@ -1767,6 +1792,7 @@ module.exports = (() => {
             } catch {
                 var left = -1000, top = -1000, right = -1000, bottom = -1000;
             }
+            console.log(this.isHSBLoaded);
             return (x > left && x < right && y > top && y < bottom);
         }
     }

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.1.1
+ * @version 4.1.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,21 +19,27 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.1.1',
+            version: '4.1.2',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.1.2',
+            items: [
+                'Fix dynamic enabling of Horizontal Server List',
+                'Add startup/shutdown logging'
+            ]
+        }, {
             title: '4.1.1',
             items: [
-                'Finish implementing Horizontal Side Bar support',
+                'Finish implementing Horizontal Server List support',
                 'Default settings tweaks (resets dynamic uncollapse distance)'
             ]
         }, {
             title: '4.1.0',
             items: [
-                'Implement rudimentary Horizontal Side Bar support'
+                'Implement rudimentary Horizontal Server List support'
             ]
         }, {
             title: '4.0.7',
@@ -259,19 +265,19 @@ module.exports = (() => {
             let cui = this;
 
             // Clean up UI
-            this.stop();
+            this.terminate();
 
             // Store eventListeners in an array
             this.eventListenerController = new AbortController();
             this.eventListenerSignal = this.eventListenerController.signal;
 
             // Initialize Horizontal Server List integration
-            this.isHSBLoaded = false;
+            this.isHSLLoaded = false;
             try {
                 for (let i = 0; i < document.styleSheets.length; i++) {
                     try {
                         if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
-                            this.isHSBLoaded = true;
+                            this.isHSLLoaded = true;
                     } catch {}
                 }
             } catch {}
@@ -649,7 +655,7 @@ module.exports = (() => {
                     } else {
                         this.serverList.style.width = '0px';
                     }
-                    if (cui.isHSBLoaded) {
+                    if (cui.isHSLLoaded) {
                         cui.windowBase.style.setProperty('top', '0px', 'important');
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
@@ -799,8 +805,8 @@ module.exports = (() => {
                 if (document.querySelector('.' + this.classCallContainer)) {
                     document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + transitionSpeed + 'ms';
                 }
-                if (cui.isHSBLoaded) {
-                    cui.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
+                if (this.windowBase) {
+                    this.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
                 }
             }
 
@@ -818,12 +824,12 @@ module.exports = (() => {
                     cui.mouseY = event.pageY;
 
                     // Reiterate Horizontal Server List integration
-                    cui.isHSBLoaded = false;
+                    cui.isHSLLoaded = false;
                     try {
                         for (let i = 0; i < document.styleSheets.length; i++) {
                             try {
                                 if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
-                                    cui.isHSBLoaded = true;
+                                    cui.isHSLLoaded = true;
                             } catch {}
                         }
                     } catch {}
@@ -832,13 +838,13 @@ module.exports = (() => {
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.removeProperty('width');
-                            if (cui.isHSBLoaded) {
+                            if (cui.isHSLLoaded) {
                                 cui.windowBase.style.removeProperty('top');
                             }
                             cui.isCollapsed[0] = false;
                         } else if (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.width = '0px';
-                            if (cui.isHSBLoaded) {
+                            if (cui.isHSLLoaded) {
                                 cui.windowBase.style.setProperty('top', '0px', 'important');
                             }
                             cui.isCollapsed[0] = true;
@@ -928,7 +934,7 @@ module.exports = (() => {
                 document.body.addEventListener('mouseleave', function(){
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
-                        if (!cui.isHSBLoaded) {
+                        if (!cui.isHSLLoaded) {
                             cui.serverList.style.width = '0px';
                             cui.isCollapsed[0] = true;
                         }
@@ -1109,7 +1115,7 @@ module.exports = (() => {
                         } else {
                             cui.serverList.style.width = '0px';
                         }
-                        if (cui.isHSBLoaded) {
+                        if (cui.isHSLLoaded) {
                             cui.windowBase.style.setProperty('top', '0px', 'important');
                         }
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'false');
@@ -1120,7 +1126,7 @@ module.exports = (() => {
                         } else {
                             cui.serverList.style.removeProperty('width');
                         }
-                        if (cui.isHSBLoaded) {
+                        if (cui.isHSLLoaded) {
                             cui.windowBase.style.removeProperty('top');
                         }
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
@@ -1334,30 +1340,10 @@ module.exports = (() => {
                     this.tooltip.remove();
                 }, {signal: cui.eventListenerSignal});
             }
-
-            // console.log('[CollapsibleUI] version 4.0.0 has started.');
         }
 
-        // Initialize the plugin when it is enabled
-        async start() {
-
-            // Wait for current user session to finish loading
-            while (!document.body.hasAttribute('data-current-user-id')) {
-                await new Promise(resolve => requestAnimationFrame(resolve));
-            }
-
-            // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
-            await new Promise(resolve => setTimeout(resolve, 1000))
-
-            try {
-                this.initialize();
-            } catch(e) {
-                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
-            }
-        }
-
-        // Restore the default UI when the plugin is disabled
-        stop() {
+        // Terminate the plugin and undo its effects
+        terminate() {
 
             // Remove CollapsibleUI icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
@@ -1427,9 +1413,36 @@ module.exports = (() => {
             // Abort event listeners
             if (this.eventListenerController)
                 this.eventListenerController.abort();
+        }
 
+        // Initialize the plugin when it is enabled
+        async start() {
 
-            // console.log('[CollapsibleUI] version 4.0.0 has stopped.');
+            // Wait for current user session to finish loading
+            while (!document.body.hasAttribute('data-current-user-id')) {
+                await new Promise(resolve => requestAnimationFrame(resolve));
+            }
+
+            // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
+            await new Promise(resolve => setTimeout(resolve, 1000))
+
+            // Send startup message
+            console.log('%c[CollapsibleUI] ' + '%c(v4.1.2) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+
+            try {
+                this.initialize();
+            } catch(e) {
+                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
+            }
+        }
+
+        // Restore the default UI when the plugin is disabled
+        stop() {
+            // Terminate CollapsibleUI
+            this.terminate();
+
+            // Send shutdown message
+            console.log('%c[CollapsibleUI] ' + '%c(v4.1.2) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch to maintain icon availability
@@ -1742,7 +1755,6 @@ module.exports = (() => {
         }
 
         createTooltip(msg, elem) {
-
             // Get location of selected element
             var left = elem.getBoundingClientRect().left,
                 top = elem.getBoundingClientRect().top,
@@ -1778,7 +1790,7 @@ module.exports = (() => {
         // Checks if cursor is near an element
         isNear(element, distance, x, y) {
             try {
-                if (this.isHSBLoaded && (element === this.serverList)) {
+                if (this.isHSLLoaded && (element === this.serverList)) {
                     var top = 0,
                         left = element.getBoundingClientRect().left - distance,
                         right = left + element.getBoundingClientRect().width + 2*distance,

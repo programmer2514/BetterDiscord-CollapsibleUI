@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.7
+ * @version 4.1.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.7',
+            version: '4.1.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.1.0',
+            items: [
+                'Implement rudimentary Horizontal Side Bar support'
+            ]
+        }, {
             title: '4.0.7',
             items: [
                 'Use more robust message bar hover detection (fixes some themes)'
@@ -206,7 +211,7 @@ module.exports = (() => {
             let msgBarMaxHeight = 400;
             let windowBarHeight = 18;
 
-            // Load isNear function into local scope and define mouse tracking variables
+            // Define mouse tracking variables
             this.mouseX = 0;
             this.mouseY = 0;
 
@@ -230,6 +235,7 @@ module.exports = (() => {
 
 
             // Abstract modified elements
+            this.windowBase = document.querySelector('.base-2jDfDU');
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
             this.searchBar = document.querySelector('.search-39IXmY');
             this.settingsContainer = document.querySelector('.container-YkUktl').querySelector('.flex-2S1XBF');
@@ -252,6 +258,17 @@ module.exports = (() => {
             // Store eventListeners in an array
             this.eventListenerController = new AbortController();
             this.eventListenerSignal = this.eventListenerController.signal;
+            
+            // Initialize Horizontal Server List integration
+            this.isHSLLoaded = false;
+            try {
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
+                            this.isHSLLoaded = true;
+                    } catch {}
+                }
+            } catch {}
 
             // Clean up old settings
             if (BdApi.getData('CollapsibleUI', 'cuiSettingsVersion') !== '2') {
@@ -622,6 +639,9 @@ module.exports = (() => {
                     } else {
                         this.serverList.style.width = '0px';
                     }
+                    if (cui.isHSLLoaded) {
+                        cui.windowBase.style.setProperty('top', '0px', 'important');
+                    }
                 } else if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
                     cui.serverListButton.classList.add(this.classSelected);
                 } else {
@@ -769,6 +789,9 @@ module.exports = (() => {
                 if (document.querySelector('.' + this.classCallContainer)) {
                     document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + transitionSpeed + 'ms';
                 }
+                if (cui.isHSLLoaded) {
+                    cui.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
+                }
             }
 
             // Add call checking event
@@ -788,10 +811,15 @@ module.exports = (() => {
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
                         if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.removeProperty('width');
+                            if (cui.isHSLLoaded) {
+                                cui.windowBase.style.removeProperty('top');
+                            }
                             cui.isCollapsed[0] = false;
-                        }
-                        if (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        } else if (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.width = '0px';
+                            if (cui.isHSLLoaded) {
+                                cui.windowBase.style.setProperty('top', '0px', 'important');
+                            }
                             cui.isCollapsed[0] = true;
                         }
                     }
@@ -879,8 +907,10 @@ module.exports = (() => {
                 document.body.addEventListener('mouseleave', function(){
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
-                        cui.serverList.style.width = '0px';
-                        cui.isCollapsed[0] = true;
+                        if (!cui.isHSLLoaded) {
+                            cui.serverList.style.width = '0px';
+                            cui.isCollapsed[0] = true;
+                        }
                     }
 
                     // Channel List
@@ -1058,6 +1088,9 @@ module.exports = (() => {
                         } else {
                             cui.serverList.style.width = '0px';
                         }
+                        if (cui.isHSLLoaded) {
+                            cui.windowBase.style.setProperty('top', '0px', 'important');
+                        }
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
                     } else {
@@ -1065,6 +1098,9 @@ module.exports = (() => {
                             cui.serverList.style.display = 'initial';
                         } else {
                             cui.serverList.style.removeProperty('width');
+                        }
+                        if (cui.isHSLLoaded) {
+                            cui.windowBase.style.removeProperty('top');
                         }
                         BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
@@ -1716,11 +1752,21 @@ module.exports = (() => {
 
         // Checks if cursor is near an element
         isNear(element, distance, x, y) {
-            var left = element.getBoundingClientRect().left - distance,
-                top = element.getBoundingClientRect().top - distance,
-                right = left + element.getBoundingClientRect().width + 2*distance,
-                bottom = top + element.getBoundingClientRect().height + 2*distance;
-
+            try {
+                if (this.isHSLLoaded && this.isCollapsed[0] && (element === this.serverList)) {
+                    var top = 0,
+                        left = element.getBoundingClientRect().left - distance,
+                        right = left + element.getBoundingClientRect().width + 2*distance,
+                        bottom = parseInt(BdApi.getData('CollapsibleUI', 'windowBarHeight')) + element.getBoundingClientRect().height + distance;
+                } else {
+                    var top = element.getBoundingClientRect().top - distance,
+                        left = element.getBoundingClientRect().left - distance,
+                        right = left + element.getBoundingClientRect().width + 2*distance,
+                        bottom = top + element.getBoundingClientRect().height + 2*distance;
+                }
+            } catch {
+                var left = -1000, top = -1000, right = -1000, bottom = -1000;
+            }
             return (x > left && x < right && y > top && y < bottom);
         }
     }

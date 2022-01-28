@@ -258,7 +258,7 @@ module.exports = (() => {
             // Store eventListeners in an array
             this.eventListenerController = new AbortController();
             this.eventListenerSignal = this.eventListenerController.signal;
-            
+
             // Initialize Horizontal Server List integration
             this.isHSLLoaded = false;
             try {

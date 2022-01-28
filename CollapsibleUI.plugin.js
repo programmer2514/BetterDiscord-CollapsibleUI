@@ -1792,7 +1792,6 @@ module.exports = (() => {
             } catch {
                 var left = -1000, top = -1000, right = -1000, bottom = -1000;
             }
-            console.log(this.isHSBLoaded);
             return (x > left && x < right && y > top && y < bottom);
         }
     }

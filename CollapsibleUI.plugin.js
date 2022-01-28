@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.0.6
+ * @version 4.0.7
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.0.6',
+            version: '4.0.7',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.0.7',
+            items: [
+                'Use more robust message bar hover detection (fixes some themes)'
+            ]
+        }, {
             title: '4.0.6',
             items: [
                 'Prevent sidebars from uncollapsing while hovering over message bar'
@@ -781,7 +786,7 @@ module.exports = (() => {
 
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
-                        if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && cui.isCollapsed[2]) {
+                        if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.removeProperty('width');
                             cui.isCollapsed[0] = false;
                         }
@@ -793,7 +798,7 @@ module.exports = (() => {
 
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
-                        if (cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && cui.isCollapsed[2]) {
+                        if (cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.channelList.style.removeProperty('width');
                             cui.isCollapsed[1] = false;
                         }
@@ -835,7 +840,7 @@ module.exports = (() => {
 
                     // Members List
                     if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
-                        if (cui.isCollapsed[4] && cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && cui.isCollapsed[2]) {
+                        if (cui.isCollapsed[4] && cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
                             cui.membersList.style.removeProperty('min-width');
                             cui.isCollapsed[4] = false;

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.2.0
+ * @version 4.3.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.2.0',
+            version: '4.3.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.3.0',
+            items: [
+                'Added language localization'
+            ]
+        }, {
             title: '4.2.0',
             items: [
                 'Added new advanced option to leave elements partially uncollapsed'
@@ -279,6 +284,15 @@ module.exports = (() => {
 
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
 
+            this.localeLabels = {
+                                serverList: 'Server List',
+                                channelList: 'Channel List',
+                                msgBar: 'Message Bar',
+                                windowBar: 'Window Bar',
+                                membersList: 'Members List',
+                                userArea: 'User Area',
+                                callContainer: 'Call Container'};
+
             // Abstract CollapsibleUI as a variable
             let cui = this;
 
@@ -509,6 +523,9 @@ module.exports = (() => {
 
             // Insert icon to the left of the search bar
             this.toolBar.insertBefore(toolbarContainer, this.searchBar);
+            
+            // Update locale strings
+            this.getLabels();
 
             // Define & add new toolbar icons
             // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
@@ -516,7 +533,7 @@ module.exports = (() => {
             for (let i = 1; i <= buttonsOrder.length; i++) {
                 if (i == buttonsOrder[0]) {
                     if (buttonsOrder[0]) {
-                        this.serverListButton = this.addToolbarIcon('Server List', '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
+                        this.serverListButton = this.addToolbarIcon(this.localeLabels.serverList, '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
                     } else {
                         this.serverListButton = false;
                         buttonsActive[0] = 0;
@@ -524,7 +541,7 @@ module.exports = (() => {
                 }
                 if (i == buttonsOrder[1]) {
                     if (buttonsOrder[1]) {
-                        this.channelListButton = this.addToolbarIcon('Channel List', '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
+                        this.channelListButton = this.addToolbarIcon(this.localeLabels.channelList, '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
                     } else {
                         this.channelListButton = false;
                         buttonsActive[1] = 0;
@@ -532,7 +549,7 @@ module.exports = (() => {
                 }
                 if (i == buttonsOrder[2]) {
                     if (buttonsOrder[2] && this.msgBar) {
-                        this.msgBarButton = this.addToolbarIcon('Message Bar', '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
+                        this.msgBarButton = this.addToolbarIcon(this.localeLabels.msgBar, '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
                     } else {
                         this.msgBarButton = false;
                         buttonsActive[2] = 0;
@@ -540,7 +557,7 @@ module.exports = (() => {
                 }
                 if (i == buttonsOrder[3]) {
                     if (buttonsOrder[3] && this.windowBar) {
-                        this.windowBarButton = this.addToolbarIcon('Window Bar', '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
+                        this.windowBarButton = this.addToolbarIcon(this.localeLabels.windowBar, '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
                     } else {
                         this.windowBarButton = false;
                         buttonsActive[3] = 0;
@@ -548,7 +565,7 @@ module.exports = (() => {
                 }
                 if (i == buttonsOrder[4]) {
                     if (buttonsOrder[4] && this.membersList) {
-                        this.membersListButton = this.addToolbarIcon('Members List', '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
+                        this.membersListButton = this.addToolbarIcon(this.localeLabels.membersList, '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
                     } else {
                         this.membersListButton = false;
                         buttonsActive[4] = 0;
@@ -556,7 +573,7 @@ module.exports = (() => {
                 }
                 if (i == buttonsOrder[5]) {
                     if (buttonsOrder[5] && this.userArea) {
-                        this.userAreaButton = this.addToolbarIcon('User Area', '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
+                        this.userAreaButton = this.addToolbarIcon(this.localeLabels.userArea, '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
                     } else {
                         this.userAreaButton = false;
                         buttonsActive[5] = 0;
@@ -564,7 +581,7 @@ module.exports = (() => {
                 }
                 if (i == buttonsOrder[6]) {
                     if (buttonsOrder[6] && document.querySelector('.' + cui.classConnectionArea)) {
-                        this.callContainerButton = this.addToolbarIcon('Call Container', '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.189-0.149c-0.028,0.021-0.055,0.045-0.079,0.07L0.006,0.875C-0.597,1.48-0.82,2.336-0.556,3.087c1.095,3.11,2.875,5.933,5.21,8.259c2.328,2.336,5.15,4.116,8.26,5.21c0.752,0.264,1.606,0.042,2.212-0.562l1.292-1.294c0.332-0.329,0.332-0.866,0.002-1.196c-0.024-0.026-0.052-0.049-0.08-0.07l-2.884-2.244c-0.205-0.158-0.474-0.215-0.725-0.151l-2.737,0.684c-0.744,0.186-1.53-0.032-2.071-0.573l-3.07-3.072C4.311,7.536,4.092,6.75,4.278,6.007l0.685-2.738C5.026,3.017,4.97,2.75,4.81,2.543L2.567-0.34z M0.354-1.361c0.852-0.852,2.234-0.852,3.085,0C3.504-1.297,3.564-1.229,3.62-1.158l2.242,2.883c0.412,0.529,0.557,1.218,0.394,1.868L5.573,6.33C5.501,6.618,5.585,6.923,5.795,7.134l3.071,3.071c0.21,0.21,0.516,0.295,0.806,0.222l2.734-0.684c0.651-0.161,1.34-0.017,1.868,0.395l2.883,2.242c1.035,0.806,1.131,2.338,0.204,3.264l-1.293,1.292c-0.925,0.925-2.307,1.332-3.596,0.879c-3.299-1.162-6.293-3.05-8.763-5.525C1.234,9.82-0.654,6.826-1.815,3.527C-2.267,2.24-1.861,0.856-0.936-0.069l1.292-1.292H0.354z"/>', '-4 -4 24 24');
+                        this.callContainerButton = this.addToolbarIcon(this.localeLabels.callContainer, '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.189-0.149c-0.028,0.021-0.055,0.045-0.079,0.07L0.006,0.875C-0.597,1.48-0.82,2.336-0.556,3.087c1.095,3.11,2.875,5.933,5.21,8.259c2.328,2.336,5.15,4.116,8.26,5.21c0.752,0.264,1.606,0.042,2.212-0.562l1.292-1.294c0.332-0.329,0.332-0.866,0.002-1.196c-0.024-0.026-0.052-0.049-0.08-0.07l-2.884-2.244c-0.205-0.158-0.474-0.215-0.725-0.151l-2.737,0.684c-0.744,0.186-1.53-0.032-2.071-0.573l-3.07-3.072C4.311,7.536,4.092,6.75,4.278,6.007l0.685-2.738C5.026,3.017,4.97,2.75,4.81,2.543L2.567-0.34z M0.354-1.361c0.852-0.852,2.234-0.852,3.085,0C3.504-1.297,3.564-1.229,3.62-1.158l2.242,2.883c0.412,0.529,0.557,1.218,0.394,1.868L5.573,6.33C5.501,6.618,5.585,6.923,5.795,7.134l3.071,3.071c0.21,0.21,0.516,0.295,0.806,0.222l2.734-0.684c0.651-0.161,1.34-0.017,1.868,0.395l2.883,2.242c1.035,0.806,1.131,2.338,0.204,3.264l-1.293,1.292c-0.925,0.925-2.307,1.332-3.596,0.879c-3.299-1.162-6.293-3.05-8.763-5.525C1.234,9.82-0.654,6.826-1.815,3.527C-2.267,2.24-1.861,0.856-0.936-0.069l1.292-1.292H0.354z"/>', '-4 -4 24 24');
                     } else {
                         this.callContainerButton = false;
                         buttonsActive[6] = 0;
@@ -1471,7 +1488,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000))
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.2.0) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v4.3.0) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             try {
                 this.initialize();
@@ -1486,10 +1503,10 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.2.0) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v4.3.0) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
-        // Re-initialize the plugin on channel/server switch to maintain icon availability
+        // Re-initialize the plugin on channel/server switch
         onSwitch() {
             try {
                 this.initialize();
@@ -1859,6 +1876,301 @@ module.exports = (() => {
                 var left = -1000, top = -1000, right = -1000, bottom = -1000;
             }
             return (x > left && x < right && y > top && y < bottom);
+        }
+        
+        // Returns the correct language strings for each locale
+        getLabels() {
+            switch (document.documentElement.getAttribute("lang")) {
+                case "da":
+                    this.localeLabels = {
+                        serverList: 'Serverliste',
+                        channelList: 'Kanalliste',
+                        msgBar: 'Meddelelsesbjælke',
+                        windowBar: 'Vinduesbjælke',
+                        membersList: 'Medlemmerliste',
+                        userArea: 'Brugerområdet',
+                        callContainer: 'Opkaldsbeholder'};
+                    break;
+                case "de":
+                    this.localeLabels = {
+                        serverList: 'Server-Liste',
+                        channelList: 'Kanal-Liste',
+                        msgBar: 'Nachrichten-Bar',
+                        windowBar: 'Fenster-Bar',
+                        membersList: 'Mitglieder-Liste',
+                        userArea: 'Benutzer-Bereich',
+                        callContainer: 'Anruf-Container'};
+                    break;
+                case "es-ES":
+                    this.localeLabels = {
+                        serverList: 'Lista de Servidores',
+                        channelList: 'Lista de Canales',
+                        msgBar: 'Barra de Mensajes',
+                        windowBar: 'Barra de Ventana',
+                        membersList: 'Lista de Miembros',
+                        userArea: 'Área de Usuario',
+                        callContainer: 'Contenedor Llamadas'};
+                    break;
+                case "fr":
+                    this.localeLabels = {
+                        serverList: 'Liste des Serveurs',
+                        channelList: 'Liste des Chaînes',
+                        msgBar: 'Barre de Messages',
+                        windowBar: 'Barre de Fenêtre',
+                        membersList: 'Liste des Membres',
+                        userArea: 'Espace Utilisateur',
+                        callContainer: 'Conteneur D&apos;appel'};
+                    break;
+                case "hr":
+                    this.localeLabels = {
+                        serverList: 'Popis Poslužitelja',
+                        channelList: 'Popis Kanala',
+                        msgBar: 'Traka Poruke',
+                        windowBar: 'Traka Prozora',
+                        membersList: 'Popis Članova',
+                        userArea: 'Korisničko Područje',
+                        callContainer: 'Spremnik Poziva'};
+                    break;
+                case "it":
+                    this.localeLabels = {
+                        serverList: 'Elenco Server',
+                        channelList: 'Elenco Canali',
+                        msgBar: 'Barra Messaggi',
+                        windowBar: 'Barra Finestra',
+                        membersList: 'Elenco Membri',
+                        userArea: 'Area Utente',
+                        callContainer: 'Chiama Contenitore'};
+                    break;
+                case "lt":
+                    this.localeLabels = {
+                        serverList: 'Serverių Sąrašas',
+                        channelList: 'Kanalų Sąrašas',
+                        msgBar: 'Žinučių Juosta',
+                        windowBar: 'Langų Juosta',
+                        membersList: 'Narių Sąrašas',
+                        userArea: 'Naudotojo Sritis',
+                        callContainer: 'Skambučių Konteineris'};
+                    break;
+                case "hu":
+                    this.localeLabels = {
+                        serverList: 'Szerver Lista',
+                        channelList: 'Csatorna Lista',
+                        msgBar: 'Üzenetsáv',
+                        windowBar: 'Ablaksáv',
+                        membersList: 'Tagok Lista',
+                        userArea: 'Felhasználói Rész',
+                        callContainer: 'Hívás Konténer'};
+                    break;
+                case "nl":
+                    this.localeLabels = {
+                        serverList: 'Serverlijst',
+                        channelList: 'Kanaallijst',
+                        msgBar: 'Berichtbar',
+                        windowBar: 'Vensterbar',
+                        membersList: 'Ledenlijst',
+                        userArea: 'Gebruikersgebied',
+                        callContainer: 'Bel Container'};
+                    break;
+                case "no":
+                    this.localeLabels = {
+                        serverList: 'Liste over Servere',
+                        channelList: 'Liste over Kanaler',
+                        msgBar: 'Meldingsfelt',
+                        windowBar: 'Vinduslinje',
+                        membersList: 'Liste over Medlemmer',
+                        userArea: 'Bruker-Området',
+                        callContainer: 'Kall Beholder'};
+                    break;
+                case "pl":
+                    this.localeLabels = {
+                        serverList: 'Lista Serwerów',
+                        channelList: 'Lista Kanałów',
+                        msgBar: 'Pasek Komunikatów',
+                        windowBar: 'Pasek Okna',
+                        membersList: 'Lista Członków',
+                        userArea: 'Obszar Użytkownika',
+                        callContainer: 'Pojemnik na Telefony'};
+                    break;
+                case "pt-BR":
+                    this.localeLabels = {
+                        serverList: 'Lista de Servidores',
+                        channelList: 'Lista de Canais',
+                        msgBar: 'Barra de Mensagens',
+                        windowBar: 'Barra de Janela',
+                        membersList: 'Lista de Membros',
+                        userArea: 'Área do Usuário',
+                        callContainer: 'Container de Chamadas'};
+                    break;
+                case "ro":
+                    this.localeLabels = {
+                        serverList: 'Lista de Servere',
+                        channelList: 'Lista de Canale',
+                        msgBar: 'Bara de Mesaje',
+                        windowBar: 'Bara de Fereastră',
+                        membersList: 'Lista Membrilor',
+                        userArea: 'Zona de Utilizator',
+                        callContainer: 'Apelare Container'};
+                    break;
+                case "fi":
+                    this.localeLabels = {
+                        serverList: 'Palvelinluettelo',
+                        channelList: 'Kanavaluettelo',
+                        msgBar: 'Viestipalkki',
+                        windowBar: 'Ikkunapalkki',
+                        membersList: 'Jäsenluettelo',
+                        userArea: 'Käyttäjäalue',
+                        callContainer: 'Kutsukontti'};
+                    break;
+                case "sv-SE":
+                    this.localeLabels = {
+                        serverList: 'Serverlista',
+                        channelList: 'Kanallista',
+                        msgBar: 'Meddelandefält',
+                        windowBar: 'Fönsterfält',
+                        membersList: 'Medlemslista',
+                        userArea: 'Användarområde',
+                        callContainer: 'Samtalsbehållare'};
+                    break;
+                case "vi":
+                    this.localeLabels = {
+                        serverList: 'Danh sách Máy Chủ',
+                        channelList: 'Danh sách Kênh',
+                        msgBar: 'Thanh Thông Báo',
+                        windowBar: 'Thanh Cửa Sổ',
+                        membersList: 'Danh sách Thành Viên',
+                        userArea: 'Vùng Người Dùng',
+                        callContainer: 'Container Cuộc Gọi'};
+                    break;
+                case "tr":
+                    this.localeLabels = {
+                        serverList: 'Sunucu Listesi',
+                        channelList: 'Kanal Listesi',
+                        msgBar: 'İleti Çubuğu',
+                        windowBar: 'Pencere Çubuğu',
+                        membersList: 'Üye Listesi',
+                        userArea: 'Kullanıcı Alanı',
+                        callContainer: 'Arama Kapsayıcısı'};
+                    break;
+                case "cs":
+                    this.localeLabels = {
+                        serverList: 'Seznam Serverů',
+                        channelList: 'Seznam Kanálů',
+                        msgBar: 'Panel Zpráv',
+                        windowBar: 'Panel Oken',
+                        membersList: 'Seznam Členů',
+                        userArea: 'Uživatelská Oblast',
+                        callContainer: 'Kontejner Volání'};
+                    break;
+                case "el":
+                    this.localeLabels = {
+                        serverList: 'Λίστα Διακομιστών',
+                        channelList: 'Λίστα Καναλιών',
+                        msgBar: 'Γραμμή Μηνυμάτων',
+                        windowBar: 'Γραμμή Παραθύρων',
+                        membersList: 'Λίστα Μελών',
+                        userArea: 'Περιοχή Χρήστη',
+                        callContainer: 'Δοχείο Κλήσεων'};
+                    break;
+                case "bg":
+                    this.localeLabels = {
+                        serverList: 'Списък на Сървърите',
+                        channelList: 'Списък на Каналите',
+                        msgBar: 'Лента за Съобщения',
+                        windowBar: 'Лента на Прозореца',
+                        membersList: 'Списък на Членовете',
+                        userArea: 'Потребителска Зона',
+                        callContainer: 'Контейнер за Повиквания'};
+                    break;
+                case "ru":
+                    this.localeLabels = {
+                        serverList: 'Список Серверов',
+                        channelList: 'Список Каналов',
+                        msgBar: 'Панель Сообщений',
+                        windowBar: 'Панель Окон',
+                        membersList: 'Список Участников',
+                        userArea: 'Область Пользователя',
+                        callContainer: 'Контейнер Вызовов'};
+                    break;
+                case "uk":
+                    this.localeLabels = {
+                        serverList: 'Список Серверів',
+                        channelList: 'Список Каналів',
+                        msgBar: 'Рядок Повідомлень',
+                        windowBar: 'Рядок Вікна',
+                        membersList: 'Список Учасників',
+                        userArea: 'Область Користувача',
+                        callContainer: 'Контейнер Викликів'};
+                    break;
+                case "hi":
+                    this.localeLabels = {
+                        serverList: 'सर्वर सूची',
+                        channelList: 'चैनल सूची',
+                        msgBar: 'संदेश पट्टी',
+                        windowBar: 'विंडो पट्टी',
+                        membersList: 'सदस्यों की सूची',
+                        userArea: 'उपयोगकर्ता क्षेत्र',
+                        callContainer: 'कॉल कंटेनर'};
+                    break;
+                case "th":
+                    this.localeLabels = {
+                        serverList: 'รายการเซิร์ฟเวอร์',
+                        channelList: 'รายการแชนเนล',
+                        msgBar: 'แถบข้อความ',
+                        windowBar: 'แถบหน้าต่าง',
+                        membersList: 'รายชื่อสมาชิก',
+                        userArea: 'พื้นที่ผู้ใช้',
+                        callContainer: 'คอนเทนเนอร์การโทร'};
+                    break;
+                case "zh-CN":
+                    this.localeLabels = {
+                        serverList: '服务器列表',
+                        channelList: '频道列表',
+                        msgBar: '信息栏',
+                        windowBar: '窗口栏',
+                        membersList: '成员列表',
+                        userArea: '用户区',
+                        callContainer: '呼叫容器'};
+                    break;
+                case "ja":
+                    this.localeLabels = {
+                        serverList: 'サーバー一覧',
+                        channelList: 'チャンネル一覧',
+                        msgBar: 'メッセージバー',
+                        windowBar: 'ウィンドウズ・バー',
+                        membersList: 'メンバーリスト',
+                        userArea: 'ユーザーエリア',
+                        callContainer: 'コールコンテナ'};
+                    break;
+                case "zh-TW":
+                    this.localeLabels = {
+                        serverList: '伺服器清單',
+                        channelList: '通道清單',
+                        msgBar: '消息列',
+                        windowBar: '視窗列',
+                        membersList: '成員清單',
+                        userArea: '用戶區',
+                        callContainer: '呼叫容器'};
+                    break;
+                case "ko":
+                    this.localeLabels = {
+                        serverList: '서버 목록',
+                        channelList: '채널 목록',
+                        msgBar: '메시지 표시줄',
+                        windowBar: '창 바',
+                        membersList: '멤버 목록',
+                        userArea: '사용자 영역',
+                        callContainer: '통화 컨테이너'};
+                    break;
+                default:
+                    this.localeLabels = {
+                        serverList: 'Server List',
+                        channelList: 'Channel List',
+                        msgBar: 'Message Bar',
+                        windowBar: 'Window Bar',
+                        membersList: 'Members List',
+                        userArea: 'User Area',
+                        callContainer: 'Call Container'};
+            }
         }
     }
 

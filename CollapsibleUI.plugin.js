@@ -1,6 +1,6 @@
 /**
  * @name CollapsibleUI
- * @author programmer2514
+ * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
  * @version 4.3.0

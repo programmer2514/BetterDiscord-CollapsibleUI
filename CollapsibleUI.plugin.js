@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.3.1',
+            version: '4.4.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.4.1',
+            items: [
+                'Make channel list resize state persistent'
+            ]
+        }, {
             title: '4.3.1',
             items: [
                 'Fix small tooltip error'
@@ -238,6 +243,7 @@ module.exports = (() => {
             let dynamicUncollapseDistance = 35;
 
             let resizableChannelList = true;
+            let channelListWidth = 0;
 
             let buttonsOrder = [1,2,4,6,7,3,5];
 
@@ -424,6 +430,13 @@ module.exports = (() => {
                 resizableChannelList = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
+            }
+
+            // channelListWidth [Default: 0]
+            if (typeof(BdApi.getData('CollapsibleUI', 'channelListWidth')) === 'string') {
+                channelListWidth = parseInt(BdApi.getData('CollapsibleUI', 'channelListWidth'));
+            } else {
+                BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
             }
 
             // buttonsOrder [Default: [1,2,4,6,7,3,5]]
@@ -844,6 +857,18 @@ module.exports = (() => {
                     this.channelList.addEventListener('mouseleave', function (){
                         this.style.transition = 'width ' + transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
+                    setInterval(function(){
+                        if (parseInt(cui.channelList.style.width)) {
+                            channelListWidth = parseInt(cui.channelList.style.width);
+                        } else if (channelListWidth != 0) {
+                            cui.channelList.style.transition = 'none';
+                            cui.channelList.style.width = channelListWidth + 'px';
+                            cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                        } else {
+                            cui.channelList.style.removeProperty('width');
+                        }
+                        BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                    }, 100);
                 }
 
                 this.serverList.style.transition = 'width ' + transitionSpeed + 'ms';
@@ -1493,7 +1518,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000))
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.3.1) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v4.4.1) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             try {
                 this.initialize();
@@ -1508,7 +1533,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.3.1) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v4.4.1) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch

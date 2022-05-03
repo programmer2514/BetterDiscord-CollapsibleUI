@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.4.1
+ * @version 4.4.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.4.1',
+            version: '4.4.2',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '4.4.2',
+            items: [
+                'Fix channel list not collapsing'
+            ]
+        }, {
             title: '4.4.1',
             items: [
                 'Make channel list resize state persistent'
@@ -858,16 +863,18 @@ module.exports = (() => {
                         this.style.transition = 'width ' + transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
                     setInterval(function(){
-                        if (parseInt(cui.channelList.style.width)) {
-                            channelListWidth = parseInt(cui.channelList.style.width);
-                        } else if (channelListWidth != 0) {
-                            cui.channelList.style.transition = 'none';
-                            cui.channelList.style.width = channelListWidth + 'px';
-                            cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
-                        } else {
-                            cui.channelList.style.removeProperty('width');
+                        if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
+                            if (parseInt(cui.channelList.style.width)) {
+                                channelListWidth = parseInt(cui.channelList.style.width);
+                            } else if (channelListWidth != 0) {
+                                cui.channelList.style.transition = 'none';
+                                cui.channelList.style.width = channelListWidth + 'px';
+                                cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                            } else {
+                                cui.channelList.style.removeProperty('width');
+                            }
+                            BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
                         }
-                        BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
                     }, 100);
                 }
 
@@ -1518,7 +1525,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000))
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.4.1) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v4.4.2) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             try {
                 this.initialize();
@@ -1533,7 +1540,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.4.1) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v4.4.2) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch

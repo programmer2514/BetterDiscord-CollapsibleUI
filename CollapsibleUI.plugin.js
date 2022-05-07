@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 4.4.2
+ * @version 5.0.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,117 +19,53 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '4.4.2',
+            version: '5.0.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '4.4.2',
+            title: '5.0.0',
             items: [
-                'Fix channel list not collapsing'
+                'Decreased number of writes to the config file',
+                'Fixed plugin animations and events while on a call',
+                'Added ability to reset channel list size to default',
+                'Added ability to selectively enable Dynamic Uncollapse',
+                'Added option to make vanilla Discord toolbar collapsible as well as CollapsibleUI\'s'
             ]
         }, {
-            title: '4.4.1',
-            items: [
-                'Make channel list resize state persistent'
-            ]
-        }, {
-            title: '4.3.1',
-            items: [
-                'Fix small tooltip error'
-            ]
-        }, {
-            title: '4.3.0',
-            items: [
-                'Add language localization'
-            ]
-        }, {
-            title: '4.2.0',
-            items: [
-                'Add new advanced option to leave elements partially uncollapsed'
-            ]
-        }, {
-            title: '4.1.4',
-            items: [
-                'Fix collapsing call container hiding the toolbar'
-            ]
-        }, {
-            title: '4.1.3',
-            items: [
-                'Fix user area not fully uncollapsing while in a call'
-            ]
-        }, {
-            title: '4.1.2',
-            items: [
-                'Fix dynamic enabling of Horizontal Server List',
-                'Add startup/shutdown logging'
-            ]
-        }, {
-            title: '4.1.1',
-            items: [
-                'Finish implementing Horizontal Server List support',
-                'Default settings tweaks (resets dynamic uncollapse distance)'
-            ]
-        }, {
-            title: '4.1.0',
-            items: [
-                'Implement rudimentary Horizontal Server List support'
-            ]
-        }, {
-            title: '4.0.7',
-            items: [
-                'Use more robust message bar hover detection (fixes some themes)'
-            ]
-        }, {
-            title: '4.0.6',
-            items: [
-                'Prevent sidebars from uncollapsing while hovering over message bar'
-            ]
-        }, {
-            title: '4.0.5',
-            items: [
-                'Fixed window bar dynamic uncollapse'
-            ]
-        }, {
-            title: '4.0.4',
-            items: [
-                'Fixed dynamic uncollapse',
-                'Fixed tooltips not showing'
-            ]
-        }, {
-            title: '4.0.3',
-            items: [
-                'Fixed settings collapse malfunction when in a voice call',
-                'Disabled call area buttons collapsing via settings collapse'
-            ]
-        }, {
-            title: '4.0.2',
-            items: [
-                'Fixed UI elements not collapsing on mouse leaving the window'
-            ]
-        }, {
-            title: '4.0.1',
-            items: [
-                'Fixed patch notes'
-            ]
-        }, {
-            title: '4.0.0',
+            title: '4.0.0 - 4.4.2',
             items: [
                 'Added settings panel',
                 'Small animation tweaks',
                 'Added dynamic uncollapse feature',
                 'Made call container collapsible',
                 'With settings collapse enabled, now collapses call area buttons correctly',
-                'Fixed a lot of bugs'
+                'Fixed a lot of bugs',
+                'Fixed patch notes',
+                'Fixed UI elements not collapsing on mouse leaving the window',
+                'Fixed settings collapse malfunction when in a voice call',
+                'Disabled call area buttons collapsing via settings collapse',
+                'Fixed dynamic uncollapse',
+                'Fixed tooltips not showing',
+                'Fixed window bar dynamic uncollapse',
+                'Prevented sidebars from uncollapsing while hovering over message bar',
+                'Used more robust message bar hover detection (fixes some themes)',
+                'Implemented rudimentary Horizontal Server List support',
+                'Finished implementing Horizontal Server List support',
+                'Default settings tweaks (reset dynamic uncollapse distance)',
+                'Fixed dynamic enabling of Horizontal Server List',
+                'Added startup/shutdown logging',
+                'Fixed user area not fully uncollapsing while in a call',
+                'Fixed collapsing call container hiding the toolbar',
+                'Added new advanced option to leave elements partially uncollapsed',
+                'Added language localization',
+                'Fixed small tooltip error',
+                'Made channel list resize state persistent',
+                'Fixed channel list not collapsing'
             ]
         }, {
-            title: '3.0.1',
-            items: [
-                'Fixed BetterDiscord repo integration'
-            ]
-        }, {
-            title: '3.0.0',
+            title: '3.0.0 - 3.0.1',
             items: [
                 'Added GNU/Linux support',
                 'Added theme support',
@@ -138,50 +74,31 @@ module.exports = (() => {
                 'Added collapsible button panel feature',
                 'Added settings options in JSON file for advanced tweaking',
                 'Fixed styles on new Discord update',
-                'Fixed many, many bugs'
+                'Fixed many, many bugs',
+                'Fixed BetterDiscord repo integration'
             ]
         }, {
-            title: '2.1.1',
-            items: [
-                'Added ZeresPluginLibrary support'
-            ]
-        }, {
-            title: '2.0.1',
-            items: [
-                'Adjusted some pixel measurements to prevent cutting off the message bar while typing multiline messages'
-            ]
-        }, {
-            title: '2.0.0',
+            title: '2.0.0 - 2.1.1',
             items: [
                 'Added a button to collapse the window title bar',
                 'Updated the button icons to be more consistent',
                 'Finished adding transitions to collapsible elements',
                 'Fixed issues with persistent button states',
                 'Actually fixed plugin crashing on reload',
-                'Fixed handling of plugin being disabled'
+                'Fixed handling of plugin being disabled',
+                'Adjusted some pixel measurements to prevent cutting off the message bar while typing multiline messages',
+                'Added ZeresPluginLibrary support'
             ]
         }, {
-            title: '1.2.1',
+            title: '1.0.0 - 1.2.1',
             items: [
+                'Initial release',
+                'Added persistent button states',
+                'Fixed plugin crashing on reload (sorta)',
                 'Added a button to collapse the message bar',
                 'Added transitions to some elements',
                 'Improved support for non-english locales',
                 'Improved handling of missing config'
-            ]
-        }, {
-            title: '1.1.1',
-            items: [
-                'Fixed plugin crashing on reload (sorta)'
-            ]
-        }, {
-            title: '1.1.0',
-            items: [
-                'Added persistent button states'
-            ]
-        }, {
-            title: '1.0.0',
-            items: [
-                'Initial release'
             ]
         }]
     };
@@ -243,6 +160,7 @@ module.exports = (() => {
 
             let disableToolbarCollapse = false;
             let disableSettingsCollapse = false;
+            let enableFullToolbarCollapse = false;
 
             let dynamicUncollapse = true;
             let dynamicUncollapseDistance = 35;
@@ -251,10 +169,12 @@ module.exports = (() => {
             let channelListWidth = 0;
 
             let buttonsOrder = [1,2,4,6,7,3,5];
+            let dynamicUncollapseEnabled = [true,true,true,true,true,true,true];
 
             let settingsButtonsMaxWidth = 100;
             let toolbarIconMaxWidth = 300;
             let membersListMaxWidth = 240;
+            let toolbarMaxWidth = 800;
             let userAreaMaxHeight = 300;
             let msgBarMaxHeight = 400;
             let windowBarHeight = 18;
@@ -275,6 +195,7 @@ module.exports = (() => {
             this.classCallHeaderWrapper = 'headerWrapper-1ULEPv';
             this.classCallUserWrapper = 'voiceCallWrapper-3UtDiC';
             this.classConnectionArea = 'connection-3k9QeF';
+            this.classDMElement = 'channel-1Shao0';
             this.classTooltipWrapper = 'layer-2aCOJ3';
             this.classTooltipWrapperDPE = 'disabledPointerEvents-2AmYRc';
             this.classTooltip = 'tooltip-14MtrL';
@@ -311,6 +232,8 @@ module.exports = (() => {
 
             // Abstract CollapsibleUI as a variable
             let cui = this;
+
+            console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
 
             // Clean up UI
             this.terminate();
@@ -412,6 +335,15 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
             }
 
+            // enableFullToolbarCollapse [Default: false]
+            if (BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'false') {
+                enableFullToolbarCollapse = false;
+            } else if (BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'true') {
+                enableFullToolbarCollapse = true;
+            } else {
+                BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'false');
+            }
+
             // dynamicUncollapse [Default: true]
             if (BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'false') {
                 dynamicUncollapse = false;
@@ -454,6 +386,16 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', buttonsOrder.toString());
             }
 
+            // dynamicUncollapseEnabled [Default: [true,true,true,true,true,true,true]]
+            if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')) === 'string') {
+                if (BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false).length = dynamicUncollapseEnabled.length)
+                    dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                else
+                    BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+            } else {
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+            }
+
             // settingsButtonsMaxWidth [Default: 100]
             if (typeof(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth')) === 'string') {
                 settingsButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'));
@@ -473,6 +415,13 @@ module.exports = (() => {
                 membersListMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'membersListMaxWidth'));
             } else {
                 BdApi.setData('CollapsibleUI', 'membersListMaxWidth', membersListMaxWidth.toString());
+            }
+
+            // toolbarMaxWidth [Default: 800]
+            if (typeof(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth')) === 'string') {
+                toolbarMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'));
+            } else {
+                BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', toolbarMaxWidth.toString());
             }
 
             // userAreaMaxHeight [Default: 300]
@@ -546,7 +495,7 @@ module.exports = (() => {
 
             // Insert icon to the left of the search bar
             this.toolBar.insertBefore(toolbarContainer, this.searchBar);
-            
+
             // Update locale strings
             this.getLabels();
 
@@ -612,72 +561,78 @@ module.exports = (() => {
                 }
             }
 
+            // Collapse toolbar
+            if (enableFullToolbarCollapse) {
+                var singleButtonWidth = this.serverListButton.getBoundingClientRect().width + parseInt(window.getComputedStyle(this.serverListButton).marginRight) + 'px';
+                this.toolBar.style.maxWidth = singleButtonWidth;
+            }
+
             // Collapse toolbar buttons
             if (!disableToolbarCollapse) {
-                if (cui.serverListButton) {
-                    cui.serverListButton.style.maxWidth = '0px';
-                    cui.serverListButton.style.margin = '0px';
-                    cui.serverListButton.style.padding = '0px';
+                if (this.serverListButton) {
+                    this.serverListButton.style.maxWidth = '0px';
+                    this.serverListButton.style.margin = '0px';
+                    this.serverListButton.style.padding = '0px';
                 }
-                if (cui.channelListButton) {
-                    cui.channelListButton.style.maxWidth = '0px';
-                    cui.channelListButton.style.margin = '0px';
-                    cui.channelListButton.style.padding = '0px';
+                if (this.channelListButton) {
+                    this.channelListButton.style.maxWidth = '0px';
+                    this.channelListButton.style.margin = '0px';
+                    this.channelListButton.style.padding = '0px';
                 }
-                if (cui.msgBarButton) {
-                    cui.msgBarButton.style.maxWidth = '0px';
-                    cui.msgBarButton.style.margin = '0px';
-                    cui.msgBarButton.style.padding = '0px';
+                if (this.msgBarButton) {
+                    this.msgBarButton.style.maxWidth = '0px';
+                    this.msgBarButton.style.margin = '0px';
+                    this.msgBarButton.style.padding = '0px';
                 }
-                if (cui.windowBarButton) {
-                    cui.windowBarButton.style.maxWidth = '0px';
-                    cui.windowBarButton.style.margin = '0px';
-                    cui.windowBarButton.style.padding = '0px';
+                if (this.windowBarButton) {
+                    this.windowBarButton.style.maxWidth = '0px';
+                    this.windowBarButton.style.margin = '0px';
+                    this.windowBarButton.style.padding = '0px';
                 }
-                if (cui.membersListButton) {
-                    cui.membersListButton.style.maxWidth = '0px';
-                    cui.membersListButton.style.margin = '0px';
-                    cui.membersListButton.style.padding = '0px';
+                if (this.membersListButton) {
+                    this.membersListButton.style.maxWidth = '0px';
+                    this.membersListButton.style.margin = '0px';
+                    this.membersListButton.style.padding = '0px';
                 }
-                if (cui.userAreaButton) {
-                    cui.userAreaButton.style.maxWidth = '0px';
-                    cui.userAreaButton.style.margin = '0px';
-                    cui.userAreaButton.style.padding = '0px';
+                if (this.userAreaButton) {
+                    this.userAreaButton.style.maxWidth = '0px';
+                    this.userAreaButton.style.margin = '0px';
+                    this.userAreaButton.style.padding = '0px';
                 }
-                if (cui.callContainerButton) {
-                    cui.callContainerButton.style.maxWidth = '0px';
-                    cui.callContainerButton.style.margin = '0px';
-                    cui.callContainerButton.style.padding = '0px';
+                if (this.callContainerButton) {
+                    this.callContainerButton.style.maxWidth = '0px';
+                    this.callContainerButton.style.margin = '0px';
+                    this.callContainerButton.style.padding = '0px';
                 }
 
-                if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
-                    cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.membersListButton.style.removeProperty('margin');
-                    cui.membersListButton.style.removeProperty('padding');
-                } else if (cui.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
-                    cui.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.windowBarButton.style.removeProperty('margin');
-                    cui.windowBarButton.style.removeProperty('padding');
-                } else if (cui.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
-                    cui.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.msgBarButton.style.removeProperty('margin');
-                    cui.msgBarButton.style.removeProperty('padding');
-                } else if (cui.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
-                    cui.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.channelListButton.style.removeProperty('margin');
-                    cui.channelListButton.style.removeProperty('padding');
-                } else if (cui.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
-                    cui.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.serverListButton.style.removeProperty('margin');
-                    cui.serverListButton.style.removeProperty('padding');
-                } else if (cui.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
-                    cui.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.userAreaButton.style.removeProperty('margin');
-                    cui.userAreaButton.style.removeProperty('padding');
-                } else if (cui.callContainerButton && (buttonsActive[6] == Math.max.apply(Math, buttonsActive))) {
-                    cui.callContainerButton.style.maxWidth = toolbarIconMaxWidth + 'px';
-                    cui.callContainerButton.style.removeProperty('margin');
-                    cui.callContainerButton.style.removeProperty('padding');
+                if (this.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
+                    this.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.membersListButton.style.removeProperty('margin');
+                    this.membersListButton.style.removeProperty('padding');
+                } else if (this.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
+                    this.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.windowBarButton.style.removeProperty('margin');
+                    this.windowBarButton.style.removeProperty('padding');
+                } else if (this.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
+                    this.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.msgBarButton.style.removeProperty('margin');
+                    this.msgBarButton.style.removeProperty('padding');
+                } else if (this.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
+                    this.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.channelListButton.style.removeProperty('margin');
+                    this.channelListButton.style.removeProperty('padding');
+                } else if (this.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
+                    this.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.serverListButton.style.removeProperty('margin');
+                    this.serverListButton.style.removeProperty('padding');
+                } else if (this.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
+                    this.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.userAreaButton.style.removeProperty('margin');
+                    this.userAreaButton.style.removeProperty('padding');
+                } else if (this.callContainerButton && (buttonsActive[6] == Math.max.apply(Math, buttonsActive))) {
+                    this.callContainerButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.callContainerButton.style.removeProperty('margin');
+                    this.callContainerButton.style.removeProperty('padding');
                 } else {
                     document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.display = 'none');
                 }
@@ -697,12 +652,11 @@ module.exports = (() => {
                 }
             }
 
-            if (!disableTransitions) {
-                document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + transitionSpeed + 'ms, margin ' + transitionSpeed + 'ms, padding ' + transitionSpeed + 'ms');
-            }
-
             // Adjust UI element styling in preparation for transitions
             if (!disableTransitions) {
+                document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + transitionSpeed + 'ms, margin ' + transitionSpeed + 'ms, padding ' + transitionSpeed + 'ms');
+                this.toolBar.style.transition = 'max-width ' + transitionSpeed + 'ms';
+
                 if (this.windowBar) {
                     this.windowBar.style.overflow = 'hidden';
                     this.windowBar.style.height = windowBarHeight + 'px';
@@ -719,6 +673,10 @@ module.exports = (() => {
 
                 if (this.callContainerExists) {
                     document.querySelector('.' + this.classCallContainer).style.minHeight = '0px';
+                }
+
+                if (document.querySelector('.' + this.classDMElement)) {
+                    document.querySelectorAll('.' + this.classDMElement).forEach(e => e.style.maxWidth = '200000px');
                 }
             }
 
@@ -853,17 +811,43 @@ module.exports = (() => {
 
             // Apply transitions to UI elements
             if (!disableTransitions) {
-                this.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+
+                // Handle resizing channel list
                 if (resizableChannelList) {
                     this.channelList.style.resize = 'horizontal';
-                    this.channelList.addEventListener('mouseenter', function (){
-                        this.style.transition = 'none';
+                    document.body.addEventListener('mousedown', function (){
+                        cui.channelList.style.transition = 'none';
                     }, {signal: cui.eventListenerSignal});
-                    this.channelList.addEventListener('mouseleave', function (){
-                        this.style.transition = 'width ' + transitionSpeed + 'ms';
+                    document.body.addEventListener('mouseup', function (){
+                        cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
-                    setInterval(function(){
+                    this.channelList.addEventListener('contextmenu', function (event){
+                        if(event.target !== event.currentTarget) return;
+                        clearInterval(cui.channelListWidthChecker);
+                        channelListWidth = 0;
+                        BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                        cui.channelList.style.removeProperty('width');
+                        cui.channelListWidthChecker = setInterval(function(){
+                            if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
+                                let oldChannelListWidth = channelListWidth;
+                                if (parseInt(cui.channelList.style.width)) {
+                                    channelListWidth = parseInt(cui.channelList.style.width);
+                                } else if (channelListWidth != 0) {
+                                    cui.channelList.style.transition = 'none';
+                                    cui.channelList.style.width = channelListWidth + 'px';
+                                    cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                                } else {
+                                    cui.channelList.style.removeProperty('width');
+                                }
+                                if (oldChannelListWidth != channelListWidth)
+                                    BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                            }
+                        }, 100);
+                        event.preventDefault();
+                    }, {signal: cui.eventListenerSignal});
+                    this.channelListWidthChecker = setInterval(function(){
                         if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
+                            let oldChannelListWidth = channelListWidth;
                             if (parseInt(cui.channelList.style.width)) {
                                 channelListWidth = parseInt(cui.channelList.style.width);
                             } else if (channelListWidth != 0) {
@@ -873,10 +857,16 @@ module.exports = (() => {
                             } else {
                                 cui.channelList.style.removeProperty('width');
                             }
-                            BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                            if (oldChannelListWidth != channelListWidth)
+                                BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
                         }
                     }, 100);
                 }
+                if (channelListWidth != 0) {
+                    this.channelList.style.transition = 'none';
+                    this.channelList.style.width = channelListWidth + 'px';
+                }
+                this.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
 
                 this.serverList.style.transition = 'width ' + transitionSpeed + 'ms';
                 if (this.windowBar) {
@@ -902,10 +892,10 @@ module.exports = (() => {
             }
 
             // Add call checking event
-            setInterval(function() {
+            this.callContainerChecker = setInterval(function() {
                 if ((cui.callContainerExists && !(document.querySelector('.' + cui.classCallContainer))) || (document.querySelector('.' + cui.classCallContainer) && !(cui.callContainerExists)))
                     cui.initialize();
-            }, 250);
+            }, 100);
 
             // Implement dynamic uncollapse feature
             if (dynamicUncollapse && !disableTransitions) {
@@ -927,13 +917,13 @@ module.exports = (() => {
 
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverListButton) {
-                        if (cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                        if (dynamicUncollapseEnabled[0] && cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.removeProperty('width');
                             if (cui.isHSLLoaded) {
                                 cui.windowBase.style.removeProperty('top');
                             }
                             cui.isCollapsed[0] = false;
-                        } else if (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        } else if (!dynamicUncollapseEnabled[0] || (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.serverList.style.width = collapsedDistance + 'px';
                             if (cui.isHSLLoaded) {
                                 cui.windowBase.style.setProperty('top', '0px', 'important');
@@ -944,11 +934,11 @@ module.exports = (() => {
 
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelListButton) {
-                        if (cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                        if (dynamicUncollapseEnabled[1] && cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.channelList.style.removeProperty('width');
                             cui.isCollapsed[1] = false;
                         }
-                        if (!(cui.isCollapsed[1]) && !(cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        if (!dynamicUncollapseEnabled[1] || (!(cui.isCollapsed[1]) && !(cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.channelList.style.width = collapsedDistance + 'px';
                             cui.isCollapsed[1] = true;
                         }
@@ -956,11 +946,11 @@ module.exports = (() => {
 
                     // Message Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBarButton) {
-                        if (cui.isCollapsed[2] && cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                        if (dynamicUncollapseEnabled[2] && cui.isCollapsed[2] && cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                             cui.isCollapsed[2] = false;
                         }
-                        if (!(cui.isCollapsed[2]) && !(cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        if (!dynamicUncollapseEnabled[2] || (!(cui.isCollapsed[2]) && !(cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.msgBar.style.maxHeight = collapsedDistance + 'px';
                             cui.isCollapsed[2] = true;
                         }
@@ -968,14 +958,14 @@ module.exports = (() => {
 
                     // Window Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBarButton) {
-                        if (cui.isCollapsed[3] && cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                        if (dynamicUncollapseEnabled[3] && cui.isCollapsed[3] && cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.windowBar.style.height = windowBarHeight + 'px';
                             cui.windowBar.style.removeProperty('padding');
                             cui.windowBar.style.removeProperty('margin');
                             cui.wordMark.style.removeProperty('display');
                             cui.isCollapsed[3] = false;
                         }
-                        if (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        if (!dynamicUncollapseEnabled[3] || (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.windowBar.style.height = '0px';
                             cui.windowBar.style.padding = '0px';
                             cui.windowBar.style.margin = '0px';
@@ -986,12 +976,12 @@ module.exports = (() => {
 
                     // Members List
                     if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersListButton) {
-                        if (cui.isCollapsed[4] && cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                        if (dynamicUncollapseEnabled[4] && cui.isCollapsed[4] && cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
                             cui.membersList.style.removeProperty('min-width');
                             cui.isCollapsed[4] = false;
                         }
-                        if (!(cui.isCollapsed[4]) && !(cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        if (!dynamicUncollapseEnabled[4] || (!(cui.isCollapsed[4]) && !(cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.membersList.style.maxWidth = collapsedDistance + 'px';
                             cui.membersList.style.minWidth = '0px';
                             cui.isCollapsed[4] = true;
@@ -1000,11 +990,11 @@ module.exports = (() => {
 
                     // User Area
                     if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userAreaButton) {
-                        if (cui.isCollapsed[5] && cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                        if (dynamicUncollapseEnabled[5] && cui.isCollapsed[5] && cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
                             cui.isCollapsed[5] = false;
                         }
-                        if (!(cui.isCollapsed[5]) && !(cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        if (!dynamicUncollapseEnabled[5] || (!(cui.isCollapsed[5]) && !(cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.userArea.style.maxHeight = collapsedDistance + 'px';
                             cui.isCollapsed[5] = true;
                         }
@@ -1012,12 +1002,12 @@ module.exports = (() => {
 
                     // Call Container
                     if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
-                        if (cui.isCollapsed[6] && cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                        if (dynamicUncollapseEnabled[6] && cui.isCollapsed[6] && cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
                             document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
                             cui.isCollapsed[6] = false;
                         }
-                        if (!(cui.isCollapsed[6]) && !(cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY))) {
+                        if (!dynamicUncollapseEnabled[6] || (!(cui.isCollapsed[6]) && !(cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (document.querySelector('.' + cui.classCallHeaderWrapper))
                                 document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                             if (document.querySelector('.' + cui.classCallUserWrapper))
@@ -1074,6 +1064,16 @@ module.exports = (() => {
                         document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                         cui.isCollapsed[6] = true;
                     }
+                }, {signal: cui.eventListenerSignal});
+            }
+
+            // Add event listeners to the Toolbar to update on hover
+            if (enableFullToolbarCollapse) {
+                this.toolBar.addEventListener('mouseenter', function(){
+                    this.style.maxWidth = toolbarMaxWidth + 'px';
+                }, {signal: cui.eventListenerSignal});
+                this.toolBar.addEventListener('mouseleave', function(){
+                    this.style.maxWidth = singleButtonWidth;
                 }, {signal: cui.eventListenerSignal});
             }
 
@@ -1449,7 +1449,7 @@ module.exports = (() => {
             try {
                 this.searchBar.previousElementSibling.style.removeProperty('display');
             } catch {
-                console.warn('[CollapsibleUI] Failed to restore Members List button. Are you sure it exists?');
+                console.warn('%c[CollapsibleUI] ' + '%cFailed to restore Members List button. Are you sure it exists?', 'color: #3a71c1; font-weight: 700;', '');
             }
 
             // Expand any collapsed elements & remove transitions
@@ -1498,11 +1498,16 @@ module.exports = (() => {
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('height');
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('transition');
                 document.querySelector('.' + this.classCallContainer).style.removeProperty('display');
-                document.querySelector('.' + this.classCallUserWrapper).style.removeProperty('display');
+                if (document.querySelector('.' + this.classCallUserWrapper))
+                    document.querySelector('.' + this.classCallUserWrapper).style.removeProperty('display');
             }
             if (this.windowBase) {
                 this.windowBase.style.removeProperty('top');
                 this.windowBase.style.removeProperty('transition');
+            }
+            if (this.toolBar) {
+                this.toolBar.style.removeProperty('max-width');
+                this.toolBar.style.removeProperty('transition');
             }
 
             // Restore default ZeresPluginLibrary logger functionality
@@ -1511,6 +1516,10 @@ module.exports = (() => {
             // Abort event listeners
             if (this.eventListenerController)
                 this.eventListenerController.abort();
+            if (this.channelListWidthChecker)
+                clearInterval(this.channelListWidthChecker);
+            if (this.callContainerChecker)
+                clearInterval(this.callContainerChecker);
         }
 
         // Initialize the plugin when it is enabled
@@ -1522,15 +1531,15 @@ module.exports = (() => {
             }
 
             // Wait for an additional second because FSR the message bar won't collapse correctly otherwise
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.4.2) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.0.0) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             try {
                 this.initialize();
             } catch(e) {
-                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
+                console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
             }
         }
 
@@ -1540,7 +1549,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v4.4.2) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.0.0) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch
@@ -1548,7 +1557,7 @@ module.exports = (() => {
             try {
                 this.initialize();
             } catch(e) {
-                console.warn('[CollapsibleUI] Could not initialize toolbar\n  - ' + e);
+                console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
             }
         }
 
@@ -1578,6 +1587,9 @@ module.exports = (() => {
             var settingDisableSettingsCollapse = new zps.Switch('Disable User Settings Auto-collapse',
                                                                 'Disables the automatic collapsing of the mute/deafen and call buttons',
                                                                 BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'true');
+            var settingEnableFullToolbarCollapse = new zps.Switch('Enable Full Toolbar Auto-collapse',
+                                                                  'Enables the automatic collapsing of the full vanilla Discord toolbar',
+                                                                  BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'true');
             var settingDynamicUncollapse = new zps.Switch('Dynamic Uncollapse',
                                                           'Makes collapsed UI elements expand when the mouse is near them. Does not work with transitions disabled',
                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true');
@@ -1587,17 +1599,53 @@ module.exports = (() => {
                                                                    null,
                                                                    {placeholder: 'Default: 35'});
             var settingResizableChannelList = new zps.Switch('Resizable Channel List',
-                                                          'Allows the channel list to be resized horizontally by clicking-and-dragging on its bottom-right corner',
-                                                          BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
+                                                             'Allows the channel list to be resized horizontally by clicking-and-dragging on its bottom-right corner',
+                                                             BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
 
             // Append main settings to Main subgroup
             groupMain.append(settingDisableTransitions);
             groupMain.append(settingTransitionSpeed);
             groupMain.append(settingDisableToolbarCollapse);
             groupMain.append(settingDisableSettingsCollapse);
+            groupMain.append(settingEnableFullToolbarCollapse);
             groupMain.append(settingDynamicUncollapse);
             groupMain.append(settingDynamicUncollapseDistance);
             groupMain.append(settingResizableChannelList);
+
+            // Create Selective Dynamic Uncollapse subgroup
+            var groupSDU = new zps.SettingGroup('Selective Dynamic Uncollapse');
+
+            // Create selective dynamic uncollapse settings
+            var settingDUServerList = new zps.Switch('Server List',
+                                                           'Toggles Dynamic Uncollapse for the server list',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[0] === 'true');
+            var settingDUChannelList = new zps.Switch('Channel List',
+                                                           'Toggles Dynamic Uncollapse for the channel list',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[1] === 'true');
+            var settingDUUserArea = new zps.Switch('User Area',
+                                                           'Toggles Dynamic Uncollapse for the user area',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[2] === 'true');
+            var settingDUMsgBar = new zps.Switch('Message Bar',
+                                                           'Toggles Dynamic Uncollapse for the message bar',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[3] === 'true');
+            var settingDUCallContainer = new zps.Switch('Call Container',
+                                                           'Toggles Dynamic Uncollapse for the call container',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[4] === 'true');
+            var settingDUWindowBar = new zps.Switch('Window Bar',
+                                                           'Toggles Dynamic Uncollapse for the window bar',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[5] === 'true');
+            var settingDUMembersList = new zps.Switch('Members List',
+                                                           'Toggles Dynamic Uncollapse for the members list',
+                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[6] === 'true');
+
+            // Append selective dynamic uncollapse settings to Selective Dynamic Uncollapse subgroup
+            groupSDU.append(settingDUServerList);
+            groupSDU.append(settingDUChannelList);
+            groupSDU.append(settingDUUserArea);
+            groupSDU.append(settingDUMsgBar);
+            groupSDU.append(settingDUCallContainer);
+            groupSDU.append(settingDUWindowBar);
+            groupSDU.append(settingDUMembersList);
 
             // Create Button Customization subgroup
             var groupButtons = new zps.SettingGroup('Button Customization');
@@ -1681,6 +1729,11 @@ module.exports = (() => {
                                                              BdApi.getData('CollapsibleUI', 'membersListMaxWidth'),
                                                              null,
                                                              {placeholder: 'Default: 240'});
+            var settingToolbarMaxWidth = new zps.Textbox('Toolbar - Max Width',
+                                                         null,
+                                                         BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'),
+                                                         null,
+                                                         {placeholder: 'Default: 800'});
             var settingUserAreaMaxHeight = new zps.Textbox('User Area - Max Height',
                                                            null,
                                                            BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'),
@@ -1706,6 +1759,7 @@ module.exports = (() => {
             groupAdvanced.append(settingSettingsButtonsMaxWidth);
             groupAdvanced.append(settingToolbarIconMaxWidth);
             groupAdvanced.append(settingMembersListMaxWidth);
+            groupAdvanced.append(settingToolbarMaxWidth);
             groupAdvanced.append(settingUserAreaMaxHeight);
             groupAdvanced.append(settingMsgBarMaxHeight);
             groupAdvanced.append(settingWindowBarHeight);
@@ -1713,6 +1767,7 @@ module.exports = (() => {
 
             // Append subgroups to root node
             settingsRoot.append(groupMain);
+            settingsRoot.append(groupSDU);
             settingsRoot.append(groupButtons);
             settingsRoot.append(groupAdvanced);
 
@@ -1740,6 +1795,13 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingEnableFullToolbarCollapse.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'false');
                 BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingDynamicUncollapse.onChange = function(result) {
@@ -1805,6 +1867,50 @@ module.exports = (() => {
                 BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
 
+            // Register selective dynamic uncollapse settings onChange events
+            settingDUServerList.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[0] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDUChannelList.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[1] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDUUserArea.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[2] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDUMsgBar.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[3] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDUCallContainer.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[4] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDUWindowBar.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[5] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingDUMembersList.onChange = function(result) {
+                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                dynamicUncollapseEnabled[6] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+
             // Register advanced settings onChange events
             settingSettingsButtonsMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
@@ -1816,6 +1922,10 @@ module.exports = (() => {
             };
             settingMembersListMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'membersListMaxWidth', result);
+                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            settingToolbarMaxWidth.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', result);
                 BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingUserAreaMaxHeight.onChange = function(result) {
@@ -1873,7 +1983,7 @@ module.exports = (() => {
             var newTooltip = document.createElement('div');
                 newTooltip.classList.add(this.classTooltipWrapper);
                 newTooltip.classList.add(this.classTooltipWrapperDPE);
-                newTooltip.style.position = 'absolute';
+                newTooltip.style.position = 'fixed';
                 newTooltip.style.textAlign = 'center';
                 newTooltip.innerHTML = '<div class="' + this.classTooltip + ' ' + this.classTooltipBottom + ' ' + this.classTooltipPrimary + ' ' + this.classTooltipDPE + '" style="opacity: 1; transform: none;"><div class="' + this.classTooltipPointer + '"></div><div class="' + this.classTooltipContent + '">' + msg + '</div></div>';
 
@@ -1915,7 +2025,7 @@ module.exports = (() => {
             }
             return (x > left && x < right && y > top && y < bottom);
         }
-        
+
         // Returns the correct language strings for each locale
         getLabels() {
             switch (document.documentElement.getAttribute("lang")) {

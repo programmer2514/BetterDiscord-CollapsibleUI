@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.0.0
+ * @version 5.0.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.0.0',
+            version: '5.0.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '5.0.1',
+            items: [
+                'Fixed call container issues (for the 3rd time)'
+            ]
+        }, {
             title: '5.0.0',
             items: [
                 'Decreased number of writes to the config file',
@@ -1004,7 +1009,8 @@ module.exports = (() => {
                     if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
                         if (dynamicUncollapseEnabled[6] && cui.isCollapsed[6] && cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
-                            document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
+                            if (document.querySelector('.' + cui.classCallUserWrapper))
+                                document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
                             cui.isCollapsed[6] = false;
                         }
                         if (!dynamicUncollapseEnabled[6] || (!(cui.isCollapsed[6]) && !(cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
@@ -1410,7 +1416,8 @@ module.exports = (() => {
                                 document.querySelector('.' + cui.classCallContainer).style.display = 'none';
                             } else {
                                 document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
-                                document.querySelector('.' + cui.classCallUserWrapper).style.display = 'none';
+                                if (document.querySelector('.' + cui.classCallUserWrapper))
+                                    document.querySelector('.' + cui.classCallUserWrapper).style.display = 'none';
                             }
                         }
                         BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'false');
@@ -1421,7 +1428,8 @@ module.exports = (() => {
                                 document.querySelector('.' + cui.classCallContainer).style.removeProperty('display');
                             } else {
                                 document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
-                                document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
+                                if (document.querySelector('.' + cui.classCallUserWrapper))
+                                    document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
                             }
                         }
                         BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
@@ -1534,7 +1542,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.0.0) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.0.1) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             try {
                 this.initialize();
@@ -1549,7 +1557,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.0.0) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.0.1) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch

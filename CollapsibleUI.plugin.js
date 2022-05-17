@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.1.5
+ * @version 5.1.6
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,45 +19,25 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.1.5',
+            version: '5.1.6',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.1.5',
+            title: '5.1.6',
             items: [
-                'Stop relying on aria labels for tooltips'
+                'Cleaned up code'
             ]
         }, {
-            title: '5.1.4',
+            title: '5.0.0 - 5.1.5',
             items: [
-                'Fixed minor security vulnerability with tooltips'
-            ]
-        }, {
-            title: '5.1.3',
-            items: [
-                'Added KeywordTracker compatibility'
-            ]
-        }, {
-            title: '5.1.2',
-            items: [
+                'Stopped relying on aria labels for tooltips',
+                'Fixed minor security vulnerability with tooltips',
+                'Added KeywordTracker compatibility',
                 'Added OldTitleBar compatibility',
-                'Fixed elements not collapsing when their respective button is hidden'
-            ]
-        }, {
-            title: '5.0.2',
-            items: [
-                'Fixed call container issues (for the 4th time)'
-            ]
-        }, {
-            title: '5.0.1',
-            items: [
-                'Fixed call container issues (for the 3rd time)'
-            ]
-        }, {
-            title: '5.0.0',
-            items: [
+                'Fixed elements not collapsing when their respective button is hidden',
+                'Fixed call container issues',
                 'Decreased number of writes to the config file',
                 'Fixed plugin animations and events while on a call',
                 'Added ability to reset channel list size to default',
@@ -1555,7 +1535,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.5) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.6) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             // try {
                 this.initialize();
@@ -1570,7 +1550,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.5) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.6) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch
@@ -1584,7 +1564,7 @@ module.exports = (() => {
 
         // Add settings panel
         getSettingsPanel() {
-            let zps = ZeresPluginLibrary.Settings;
+            let zps = Api.Settings;
 
             // Create root settings node
             var settingsRoot = new zps.SettingPanel();
@@ -2012,8 +1992,7 @@ module.exports = (() => {
             document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);
 
             // Get tooltip dimensions
-            var ttwidth = newTooltip.getBoundingClientRect().width,
-                ttheight = newTooltip.getBoundingClientRect().height;
+            var ttwidth = newTooltip.getBoundingClientRect().width;
 
             // Extrapolate tooltip location
             var x = left + (width/2) - (ttwidth/2),

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.1.2
+ * @version 5.1.3
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.1.2',
+            version: '5.1.3',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '5.1.3',
+            items: [
+                'Added KeywordTracker compatibility'
+            ]
+        }, {
             title: '5.1.2',
             items: [
                 'Added OldTitleBar compatibility',
@@ -485,8 +490,10 @@ module.exports = (() => {
             // Hide default Members List button
             if (this.membersList) {
                 try {
-                    if ((this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
+                    if ((!BdApi.Plugins.isEnabled('KeywordTracker')) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
                         this.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
+                    } else if (BdApi.Plugins.isEnabled('KeywordTracker') && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
+                        this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.style.display = 'none';
                     } else {
                         this.searchBar.previousElementSibling.style.display = 'none';
                     }
@@ -1538,13 +1545,13 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.2) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.3) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
-            try {
+            // try {
                 this.initialize();
-            } catch(e) {
-                console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
-            }
+            // } catch(e) {
+            //     console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
+            // }
         }
 
         // Restore the default UI when the plugin is disabled
@@ -1553,16 +1560,16 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.2) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.3) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch
         onSwitch() {
-            try {
+            // try {
                 this.initialize();
-            } catch(e) {
-                console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
-            }
+            // } catch(e) {
+            //     console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
+            // }
         }
 
         // Add settings panel

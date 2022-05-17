@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.1.4
+ * @version 5.1.5
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.1.4',
+            version: '5.1.5',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '5.1.5',
+            items: [
+                'Stop relying on aria labels for tooltips'
+            ]
+        }, {
             title: '5.1.4',
             items: [
                 'Fixed minor security vulnerability with tooltips'
@@ -1244,7 +1249,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.serverListButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.serverList, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.serverListButton.addEventListener('mouseleave', function(){
@@ -1275,7 +1280,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.channelListButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.channelList, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.channelListButton.addEventListener('mouseleave', function(){
@@ -1306,7 +1311,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.msgBarButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.msgBar, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.msgBarButton.addEventListener('mouseleave', function(){
@@ -1343,7 +1348,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.windowBarButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.windowBar, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.windowBarButton.addEventListener('mouseleave', function(){
@@ -1376,7 +1381,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.membersListButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.membersList, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.membersListButton.addEventListener('mouseleave', function(){
@@ -1407,7 +1412,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.userAreaButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.userArea, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.userAreaButton.addEventListener('mouseleave', function(){
@@ -1446,7 +1451,7 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
 
                 cui.callContainerButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(this.getAttribute('aria-label'), this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.callContainer, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.callContainerButton.addEventListener('mouseleave', function(){
@@ -1550,7 +1555,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.4) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.5) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             // try {
                 this.initialize();
@@ -1565,7 +1570,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.4) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.5) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch

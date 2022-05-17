@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.1.3
+ * @version 5.1.4
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.1.3',
+            version: '5.1.4',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '5.1.4',
+            items: [
+                'Fixed minor security vulnerability with tooltips'
+            ]
+        }, {
             title: '5.1.3',
             items: [
                 'Added KeywordTracker compatibility'
@@ -1545,7 +1550,7 @@ module.exports = (() => {
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Send startup message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.3) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.4) ' + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
             // try {
                 this.initialize();
@@ -1560,7 +1565,7 @@ module.exports = (() => {
             this.terminate();
 
             // Send shutdown message
-            console.log('%c[CollapsibleUI] ' + '%c(v5.1.3) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
+            console.log('%c[CollapsibleUI] ' + '%c(v5.1.4) ' + '%chas stopped.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Re-initialize the plugin on channel/server switch
@@ -1996,7 +2001,7 @@ module.exports = (() => {
                 newTooltip.classList.add(this.classTooltipWrapperDPE);
                 newTooltip.style.position = 'fixed';
                 newTooltip.style.textAlign = 'center';
-                newTooltip.innerHTML = '<div class="' + this.classTooltip + ' ' + this.classTooltipBottom + ' ' + this.classTooltipPrimary + ' ' + this.classTooltipDPE + '" style="opacity: 1; transform: none;"><div class="' + this.classTooltipPointer + '"></div><div class="' + this.classTooltipContent + '">' + msg + '</div></div>';
+                newTooltip.innerHTML = `<div class="${this.classTooltip} ${this.classTooltipBottom} ${this.classTooltipPrimary} ${this.classTooltipDPE}" style="opacity: 1; transform: none;"><div class="${this.classTooltipPointer}"></div><div class="${this.classTooltipContent}">${msg}</div></div>`;
 
             // Insert tooltip into tooltip layer
             document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);

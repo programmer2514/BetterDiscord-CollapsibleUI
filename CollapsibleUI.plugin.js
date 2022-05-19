@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.2.7
+ * @version 5.2.8
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,19 +19,20 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.2.7',
+            version: '5.2.8',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.2.7',
+            title: '5.2.8',
             items: [
-                'Fixed incorrect settings indices for Selective Dynamic Uncollapse'
+                'Fixed unintentional console spam'
             ]
         }, {
-            title: '5.2.6',
+            title: '5.2.6 - 5.2.7',
             items: [
+                'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
                 'Fixed plugin failing to load if a collapsed element does not exist',
                 'Fixed plugin breaking on GNU/Linux'
             ]
@@ -922,8 +923,6 @@ module.exports = (() => {
                 document.body.addEventListener('mousemove', function(event){
                     cui.mouseX = event.pageX;
                     cui.mouseY = event.pageY;
-                    
-                    console.log(dynamicUncollapseEnabled);
 
                     // Reiterate Horizontal Server List integration
                     cui.isHSLLoaded = false;

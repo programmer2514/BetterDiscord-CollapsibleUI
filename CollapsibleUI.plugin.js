@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.2.8
+ * @version 5.2.9
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,19 +19,20 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.2.8',
+            version: '5.2.9',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.2.8',
+            title: '5.2.9',
             items: [
-                'Fixed unintentional console spam'
+                'Suppress false code security errors'
             ]
         }, {
-            title: '5.2.6 - 5.2.7',
+            title: '5.2.6 - 5.2.8',
             items: [
+                'Fixed unintentional console spam',
                 'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
                 'Fixed plugin failing to load if a collapsed element does not exist',
                 'Fixed plugin breaking on GNU/Linux'
@@ -521,7 +522,7 @@ module.exports = (() => {
             // Define & add new toolbar icons
             // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
             var buttonsActive = buttonsOrder;
-            for (let i = 1; i <= buttonsOrder.length; i++) {
+            for (let i = 1; i <= buttonsOrder.length; i++) { // lgtm[js/unused-index-variable]
                 if (i == buttonsOrder[0]) {
                     if (buttonsOrder[0]) {
                         this.serverListButton = this.addToolbarIcon(this.localeLabels.serverList, '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
@@ -1553,11 +1554,12 @@ module.exports = (() => {
             // Send startup message
             console.log('%c[CollapsibleUI] ' + `%c(v${BdApi.Plugins.get('CollapsibleUI').version}) ` + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
 
-            // try {
+            try {
                 this.initialize();
-            // } catch(e) {
-            //     console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
-            // }
+            } catch(e) {
+                console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar! (see below)	', 'color: #3a71c1; font-weight: 700;', '');
+                console.warn(e);
+            }
         }
 
         // Restore the default UI when the plugin is disabled
@@ -1571,11 +1573,12 @@ module.exports = (() => {
 
         // Re-initialize the plugin on channel/server switch
         onSwitch() {
-            // try {
+            try {
                 this.initialize();
-            // } catch(e) {
-            //     console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar\n  - ' + e, 'color: #3a71c1; font-weight: 700;', '');
-            // }
+            } catch(e) {
+                console.warn('%c[CollapsibleUI] ' + '%cCould not initialize toolbar! (see below)', 'color: #3a71c1; font-weight: 700;', '');
+                console.warn(e);
+            }
         }
 
         // Add settings panel

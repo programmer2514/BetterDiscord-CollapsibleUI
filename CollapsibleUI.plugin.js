@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.2.9
+ * @version 5.3.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,19 +19,20 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.2.9',
+            version: '5.3.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.2.9',
+            title: '5.3.0',
             items: [
-                'Suppress false code security errors'
+                'Added additional checks for collapsible objects'
             ]
         }, {
-            title: '5.2.6 - 5.2.8',
+            title: '5.2.6 - 5.2.9',
             items: [
+                'Suppress false code security errors',
                 'Fixed unintentional console spam',
                 'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
                 'Fixed plugin failing to load if a collapsed element does not exist',
@@ -1471,13 +1472,17 @@ module.exports = (() => {
             }
 
             // Expand any collapsed elements & remove transitions
-            this.channelList.style.removeProperty('width');
-            this.channelList.style.removeProperty('transition');
-            this.channelList.style.removeProperty('resize');
-            this.channelList.style.removeProperty('display');
-            this.serverList.style.removeProperty('width');
-            this.serverList.style.removeProperty('transition');
-            this.serverList.style.removeProperty('display');
+            if (this.channelList) {
+                this.channelList.style.removeProperty('width');
+                this.channelList.style.removeProperty('transition');
+                this.channelList.style.removeProperty('resize');
+                this.channelList.style.removeProperty('display');
+            }
+            if (this.serverList) {
+                this.serverList.style.removeProperty('width');
+                this.serverList.style.removeProperty('transition');
+                this.serverList.style.removeProperty('display');
+            }
             if (this.windowBar) {
                 this.wordMark.style.removeProperty('display');
                 this.windowBar.style.removeProperty('height');

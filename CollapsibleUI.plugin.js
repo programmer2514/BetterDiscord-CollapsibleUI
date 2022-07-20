@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.3.0
+ * @version 5.4.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,24 +19,26 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.3.0',
+            version: '5.4.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.3.0',
+            title: '5.4.0',
             items: [
-                'Added additional checks for collapsible objects'
+                'Added out-of-the-box compatibility and overrides for Dark Matter theme',
+                'Implemented compatibility fix between Dark Matter and Horizontal Server List'
             ]
         }, {
-            title: '5.2.6 - 5.2.9',
+            title: '5.2.6 - 5.3.0',
             items: [
-                'Suppress false code security errors',
+                'Suppressed false code security errors',
                 'Fixed unintentional console spam',
                 'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
                 'Fixed plugin failing to load if a collapsed element does not exist',
-                'Fixed plugin breaking on GNU/Linux'
+                'Fixed plugin breaking on GNU/Linux',
+                'Added additional checks for collapsible objects'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -232,7 +234,6 @@ module.exports = (() => {
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
             this.searchBar = document.querySelector('.search-39IXmY');
             this.inviteToolbar = document.querySelector('.inviteToolbar-2k2nqz');
-            this.settingsContainer = document.querySelector('.container-YkUktl').querySelector('.flex-2S1XBF');
             this.windowBar = document.querySelector('.typeWindows-2-g3UY');
             this.wordMark = document.querySelector('.wordmark-2u86JB');
             this.msgBar = document.querySelector('.form-3gdLxP');
@@ -240,6 +241,9 @@ module.exports = (() => {
             this.membersList = document.querySelector('.membersWrap-3NUR2t');
             this.serverList = document.querySelector('.wrapper-1_HaEi');
             this.channelList = document.querySelector('.sidebar-1tnWFu');
+            this.settingsContainerBase = document.querySelector('.container-YkUktl')
+            this.settingsContainer = this.settingsContainerBase.querySelector('.flex-2S1XBF');
+            this.spotifyContainer = document.querySelector('.container-6sXIoE');
 
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
 
@@ -274,6 +278,24 @@ module.exports = (() => {
                     } catch {}
                 }
             } catch {}
+
+            // Initialize Dark Matter List integration
+            this.isDarkMatterLoaded = false;
+            try {
+                for (let i = 0; i < document.styleSheets.length; i++) {
+                    try {
+                        if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Dark-Matter')
+                            this.isDarkMatterLoaded = true;
+                    } catch {}
+                }
+            } catch {}
+            
+            // Fix incompatibility between HSL and Dark Matter
+            if (this.isHSLLoaded && this.isDarkMatterLoaded) {
+                this.settingsContainerBase.style.width = '100%';
+                this.settingsContainerBase.style.left = '0px';
+                this.windowBase.style.minWidth = '100vw';
+            }
 
             // Clean up old settings
             if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 2) {
@@ -680,7 +702,10 @@ module.exports = (() => {
 
                 if (this.windowBar) {
                     this.windowBar.style.overflow = 'hidden';
-                    this.windowBar.style.height = windowBarHeight + 'px';
+                    if (this.isDarkMatterLoaded)
+                        this.windowBar.style.height = '26px';
+                    else
+                        this.windowBar.style.height = windowBarHeight + 'px';
                 }
                 if (this.membersList) {
                     this.membersList.style.overflow = 'hidden';
@@ -709,6 +734,11 @@ module.exports = (() => {
                         this.serverList.style.display = 'none';
                     } else {
                         this.serverList.style.width = collapsedDistance + 'px';
+                        if (cui.isDarkMatterLoaded) {
+                            cui.settingsContainerBase.style.width = '100%';
+                            cui.settingsContainerBase.style.left = '0px';
+                            cui.windowBase.style.minWidth = '100vw';
+                        }
                     }
                     if (this.isHSLLoaded) {
                         this.windowBase.style.setProperty('top', '0px', 'important');
@@ -729,6 +759,11 @@ module.exports = (() => {
                         this.channelList.style.display = 'none';
                     } else {
                         this.channelList.style.width = collapsedDistance + 'px';
+                        if (this.isDarkMatterLoaded) {
+                            this.settingsContainer.style.display = 'none';
+                            if (cui.spotifyContainer)
+                                cui.spotifyContainer.style.display = 'none';
+                        }
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true') {
                     if (this.channelListButton) this.channelListButton.classList.add(this.classSelected);
@@ -763,6 +798,8 @@ module.exports = (() => {
                         this.windowBar.style.display = 'none';
                     } else {
                         this.windowBar.style.height = '0px';
+                        if (cui.isDarkMatterLoaded)
+                            cui.windowBar.style.opacity = '0';
                         this.windowBar.style.padding = '0px';
                         this.windowBar.style.margin = '0px';
                         this.wordMark.style.display = 'none';
@@ -909,7 +946,13 @@ module.exports = (() => {
                     document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + transitionSpeed + 'ms';
                 }
                 if (this.windowBase) {
-                    this.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
+                    if (this.isDarkMatterLoaded)
+                        this.windowBase.style.transition = 'top ' + transitionSpeed + 'ms, min-width ' + transitionSpeed + 'ms';
+                    else
+                        this.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
+                }
+                if (this.isDarkMatterLoaded) {
+                    this.settingsContainerBase.style.transition = 'width ' + transitionSpeed + 'ms, left ' + transitionSpeed + 'ms';
                 }
             }
 
@@ -937,18 +980,44 @@ module.exports = (() => {
                         }
                     } catch {}
 
+                    // Reiterate Dark Matter List integration
+                    cui.isDarkMatterLoaded = false;
+                    try {
+                        for (let i = 0; i < document.styleSheets.length; i++) {
+                            try {
+                                if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Dark-Matter')
+                                    cui.isDarkMatterLoaded = true;
+                            } catch {}
+                        }
+                    } catch {}
+                    
+                    // Reiterate incompatibility fix between HSL and Dark Matter
+                    if (this.isHSLLoaded && this.isDarkMatterLoaded) {
+                        this.settingsContainerBase.style.width = '100%';
+                        this.settingsContainerBase.style.left = '0px';
+                        this.windowBase.style.minWidth = '100vw';
+                    }
+
                     // Server List
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverList) {
                         if (dynamicUncollapseEnabled[0] && cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.serverList.style.removeProperty('width');
-                            if (cui.isHSLLoaded) {
+                            if (cui.isHSLLoaded)
                                 cui.windowBase.style.removeProperty('top');
+                            else if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = 'calc(100% + 72px)';
+                                cui.settingsContainerBase.style.left = '-72px';
+                                cui.windowBase.style.minWidth = 'calc(100vw - 72px)';
                             }
                             cui.isCollapsed[0] = false;
                         } else if (!dynamicUncollapseEnabled[0] || (!(cui.isCollapsed[0]) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.serverList.style.width = collapsedDistance + 'px';
-                            if (cui.isHSLLoaded) {
+                            if (cui.isHSLLoaded)
                                 cui.windowBase.style.setProperty('top', '0px', 'important');
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = '100%';
+                                cui.settingsContainerBase.style.left = '0px';
+                                cui.windowBase.style.minWidth = '100vw';
                             }
                             cui.isCollapsed[0] = true;
                         }
@@ -958,9 +1027,19 @@ module.exports = (() => {
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelList) {
                         if (dynamicUncollapseEnabled[1] && cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             cui.channelList.style.removeProperty('width');
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.removeProperty('display');
+                                if (cui.spotifyContainer)
+                                    cui.spotifyContainer.style.removeProperty('display');
+                            }
                             cui.isCollapsed[1] = false;
                         } else if (!dynamicUncollapseEnabled[1] || (!(cui.isCollapsed[1]) && !(cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.channelList.style.width = collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.display = 'none';
+                                if (cui.spotifyContainer)
+                                    cui.spotifyContainer.style.display = 'none';
+                            }
                             cui.isCollapsed[1] = true;
                         }
                     }
@@ -979,13 +1058,19 @@ module.exports = (() => {
                     // Window Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBar) {
                         if (dynamicUncollapseEnabled[3] && cui.isCollapsed[3] && cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
-                            cui.windowBar.style.height = windowBarHeight + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.windowBar.style.height = '26px';
+                                cui.windowBar.style.removeProperty('opacity');
+                            } else
+                                cui.windowBar.style.height = windowBarHeight + 'px';
                             cui.windowBar.style.removeProperty('padding');
                             cui.windowBar.style.removeProperty('margin');
                             cui.wordMark.style.removeProperty('display');
                             cui.isCollapsed[3] = false;
                         } else if (!dynamicUncollapseEnabled[3] || (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.windowBar.style.height = '0px';
+                            if (cui.isDarkMatterLoaded)
+                                cui.windowBar.style.opacity = '0';
                             cui.windowBar.style.padding = '0px';
                             cui.windowBar.style.margin = '0px';
                             cui.wordMark.style.display = 'none';
@@ -1038,6 +1123,11 @@ module.exports = (() => {
                     if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverList) {
                         if (!cui.isHSLLoaded) {
                             cui.serverList.style.width = collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = '100%';
+                                cui.settingsContainerBase.style.left = '0px';
+                                cui.windowBase.style.minWidth = '100vw';
+                            }
                             cui.isCollapsed[0] = true;
                         }
                     }
@@ -1045,6 +1135,11 @@ module.exports = (() => {
                     // Channel List
                     if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelList) {
                         cui.channelList.style.width = collapsedDistance + 'px';
+                        if (cui.isDarkMatterLoaded) {
+                            cui.settingsContainer.style.display = 'none';
+                            if (cui.spotifyContainer)
+                                cui.spotifyContainer.style.display = 'none';
+                        }
                         cui.isCollapsed[1] = true;
                     }
 
@@ -1057,6 +1152,8 @@ module.exports = (() => {
                     // Window Bar
                     if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBar && (cui.mouseY > windowBarHeight + dynamicUncollapseDistance)) {
                         cui.windowBar.style.height = '0px';
+                        if (cui.isDarkMatterLoaded)
+                            cui.windowBar.style.opacity = '0';
                         cui.windowBar.style.padding = '0px';
                         cui.windowBar.style.margin = '0px';
                         cui.wordMark.style.display = 'none';
@@ -1226,6 +1323,11 @@ module.exports = (() => {
                             cui.serverList.style.display = 'none';
                         } else {
                             cui.serverList.style.width = collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = '100%';
+                                cui.settingsContainerBase.style.left = '0px';
+                                cui.windowBase.style.minWidth = '100vw';
+                            }
                         }
                         if (cui.isHSLLoaded) {
                             cui.windowBase.style.setProperty('top', '0px', 'important');
@@ -1237,6 +1339,11 @@ module.exports = (() => {
                             cui.serverList.style.display = 'initial';
                         } else {
                             cui.serverList.style.removeProperty('width');
+                            if ((!cui.isHSLLoaded) && cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = 'calc(100% + 72px)';
+                                cui.settingsContainerBase.style.left = '-72px';
+                                cui.windowBase.style.minWidth = 'calc(100vw - 72px)';
+                            }
                         }
                         if (cui.isHSLLoaded) {
                             cui.windowBase.style.removeProperty('top');
@@ -1263,6 +1370,11 @@ module.exports = (() => {
                             cui.channelList.style.display = 'none';
                         } else {
                             cui.channelList.style.width = collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.display = 'none';
+                                if (cui.spotifyContainer)
+                                    cui.spotifyContainer.style.display = 'none';
+                            }
                         }
                         BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'false');
                         this.classList.remove(cui.classSelected);
@@ -1271,6 +1383,11 @@ module.exports = (() => {
                             cui.channelList.style.display = 'initial';
                         } else {
                             cui.channelList.style.removeProperty('width');
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.removeProperty('display');
+                                if (cui.spotifyContainer)
+                                    cui.spotifyContainer.style.removeProperty('display');
+                            }
                         }
                         BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
                         this.classList.add(cui.classSelected);
@@ -1325,6 +1442,8 @@ module.exports = (() => {
                             cui.windowBar.style.display = 'none';
                         } else {
                             cui.windowBar.style.height = '0px';
+                            if (cui.isDarkMatterLoaded)
+                                cui.windowBar.style.opacity = '0';
                             cui.windowBar.style.padding = '0px';
                             cui.windowBar.style.margin = '0px';
                             cui.wordMark.style.display = 'none';
@@ -1335,7 +1454,11 @@ module.exports = (() => {
                         if (disableTransitions) {
                             cui.windowBar.style.display = 'flex';
                         } else {
-                            cui.windowBar.style.height = windowBarHeight + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.windowBar.style.height = '26px';
+                                cui.windowBar.style.removeProperty('opacity');
+                            } else
+                                cui.windowBar.style.height = windowBarHeight + 'px';
                             cui.windowBar.style.removeProperty('padding');
                             cui.windowBar.style.removeProperty('margin');
                             cui.wordMark.style.removeProperty('display');
@@ -1486,6 +1609,7 @@ module.exports = (() => {
             if (this.windowBar) {
                 this.wordMark.style.removeProperty('display');
                 this.windowBar.style.removeProperty('height');
+                this.windowBar.style.removeProperty('opacity');
                 this.windowBar.style.removeProperty('padding');
                 this.windowBar.style.removeProperty('margin');
                 this.windowBar.style.removeProperty('overflow');
@@ -1511,6 +1635,10 @@ module.exports = (() => {
                     this.settingsContainer.children[i].style.removeProperty('overflow');
                     this.settingsContainer.children[i].style.removeProperty('display');
                 }
+                this.settingsContainer.style.removeProperty('display');
+            }
+            if (this.spotifyContainer) {
+                this.spotifyContainer.style.removeProperty('display');
             }
             if (this.userArea) {
                 this.userArea.style.removeProperty('max-height');
@@ -1526,12 +1654,18 @@ module.exports = (() => {
             }
             if (this.windowBase) {
                 this.windowBase.style.removeProperty('top');
+                this.windowBase.style.removeProperty('min-width');
                 this.windowBase.style.removeProperty('transition');
             }
             if (this.toolBar) {
                 this.toolBar.style.removeProperty('max-width');
                 this.toolBar.style.removeProperty('transition');
             }
+            
+            if (this.settingsContainerBase)
+                this.settingsContainerBase.style.removeProperty('left');
+                this.settingsContainerBase.style.removeProperty('width');
+                this.settingsContainerBase.style.removeProperty('transition');
 
             // Restore default ZeresPluginLibrary logger functionality
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;

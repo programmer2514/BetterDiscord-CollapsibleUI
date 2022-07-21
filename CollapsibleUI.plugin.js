@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.4.0
+ * @version 5.4.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,26 +19,27 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.4.0',
+            version: '5.4.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.4.0',
+            title: '5.4.1',
             items: [
-                'Added out-of-the-box compatibility and overrides for Dark Matter theme',
-                'Implemented compatibility fix between Dark Matter and Horizontal Server List'
+                'Fixed minor syntax errors'
             ]
         }, {
-            title: '5.2.6 - 5.3.0',
+            title: '5.2.6 - 5.4.0',
             items: [
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
                 'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
                 'Fixed plugin failing to load if a collapsed element does not exist',
                 'Fixed plugin breaking on GNU/Linux',
-                'Added additional checks for collapsible objects'
+                'Added additional checks for collapsible objects',
+                'Added out-of-the-box compatibility and overrides for Dark Matter theme',
+                'Implemented compatibility fix between Dark Matter and Horizontal Server List'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -241,7 +242,7 @@ module.exports = (() => {
             this.membersList = document.querySelector('.membersWrap-3NUR2t');
             this.serverList = document.querySelector('.wrapper-1_HaEi');
             this.channelList = document.querySelector('.sidebar-1tnWFu');
-            this.settingsContainerBase = document.querySelector('.container-YkUktl')
+            this.settingsContainerBase = document.querySelector('.container-YkUktl');
             this.settingsContainer = this.settingsContainerBase.querySelector('.flex-2S1XBF');
             this.spotifyContainer = document.querySelector('.container-6sXIoE');
 
@@ -1662,10 +1663,11 @@ module.exports = (() => {
                 this.toolBar.style.removeProperty('transition');
             }
             
-            if (this.settingsContainerBase)
+            if (this.settingsContainerBase) {
                 this.settingsContainerBase.style.removeProperty('left');
                 this.settingsContainerBase.style.removeProperty('width');
                 this.settingsContainerBase.style.removeProperty('transition');
+            }
 
             // Restore default ZeresPluginLibrary logger functionality
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.4.1
+ * @version 5.4.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.4.1',
+            version: '5.4.2',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.4.1',
+            title: '5.4.2',
             items: [
-                'Fixed minor syntax errors'
+                'Fixed visual window bar glitch'
             ]
         }, {
-            title: '5.2.6 - 5.4.0',
+            title: '5.2.6 - 5.4.1',
             items: [
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
@@ -39,7 +39,8 @@ module.exports = (() => {
                 'Fixed plugin breaking on GNU/Linux',
                 'Added additional checks for collapsible objects',
                 'Added out-of-the-box compatibility and overrides for Dark Matter theme',
-                'Implemented compatibility fix between Dark Matter and Horizontal Server List'
+                'Implemented compatibility fix between Dark Matter and Horizontal Server List',
+                'Fixed minor syntax errors'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -702,7 +703,6 @@ module.exports = (() => {
                 this.toolBar.style.transition = 'max-width ' + transitionSpeed + 'ms';
 
                 if (this.windowBar) {
-                    this.windowBar.style.overflow = 'hidden';
                     if (this.isDarkMatterLoaded)
                         this.windowBar.style.height = '26px';
                     else
@@ -803,6 +803,7 @@ module.exports = (() => {
                             cui.windowBar.style.opacity = '0';
                         this.windowBar.style.padding = '0px';
                         this.windowBar.style.margin = '0px';
+                        this.windowBar.style.overflow = 'hidden';
                         this.wordMark.style.display = 'none';
                     }
                 } else if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'true') {
@@ -1067,6 +1068,7 @@ module.exports = (() => {
                             cui.windowBar.style.removeProperty('padding');
                             cui.windowBar.style.removeProperty('margin');
                             cui.wordMark.style.removeProperty('display');
+                            cui.windowBar.style.removeProperty('overflow');
                             cui.isCollapsed[3] = false;
                         } else if (!dynamicUncollapseEnabled[3] || (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             cui.windowBar.style.height = '0px';
@@ -1074,6 +1076,7 @@ module.exports = (() => {
                                 cui.windowBar.style.opacity = '0';
                             cui.windowBar.style.padding = '0px';
                             cui.windowBar.style.margin = '0px';
+                            cui.windowBar.style.overflow = 'hidden';
                             cui.wordMark.style.display = 'none';
                             cui.isCollapsed[3] = true;
                         }
@@ -1157,6 +1160,7 @@ module.exports = (() => {
                             cui.windowBar.style.opacity = '0';
                         cui.windowBar.style.padding = '0px';
                         cui.windowBar.style.margin = '0px';
+                        cui.windowBar.style.overflow = 'hidden';
                         cui.wordMark.style.display = 'none';
                         cui.isCollapsed[3] = true;
                     }
@@ -1447,6 +1451,7 @@ module.exports = (() => {
                                 cui.windowBar.style.opacity = '0';
                             cui.windowBar.style.padding = '0px';
                             cui.windowBar.style.margin = '0px';
+                            cui.windowBar.style.overflow = 'hidden';
                             cui.wordMark.style.display = 'none';
                         }
                         BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'false');
@@ -1462,6 +1467,7 @@ module.exports = (() => {
                                 cui.windowBar.style.height = windowBarHeight + 'px';
                             cui.windowBar.style.removeProperty('padding');
                             cui.windowBar.style.removeProperty('margin');
+                            cui.windowBar.style.removeProperty('overflow');
                             cui.wordMark.style.removeProperty('display');
                         }
                         BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.4.2
+ * @version 5.4.3
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.4.2',
+            version: '5.4.3',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.4.2',
+            title: '5.4.3',
             items: [
-                'Fixed visual window bar glitch'
+                'Fixed settings bar alignment glitch'
             ]
         }, {
-            title: '5.2.6 - 5.4.1',
+            title: '5.2.6 - 5.4.2',
             items: [
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
@@ -40,7 +40,8 @@ module.exports = (() => {
                 'Added additional checks for collapsible objects',
                 'Added out-of-the-box compatibility and overrides for Dark Matter theme',
                 'Implemented compatibility fix between Dark Matter and Horizontal Server List',
-                'Fixed minor syntax errors'
+                'Fixed minor syntax errors',
+                'Fixed visual window bar glitch'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -246,6 +247,7 @@ module.exports = (() => {
             this.settingsContainerBase = document.querySelector('.container-YkUktl');
             this.settingsContainer = this.settingsContainerBase.querySelector('.flex-2S1XBF');
             this.spotifyContainer = document.querySelector('.container-6sXIoE');
+            this.avatarWrapper = document.querySelector('.avatarWrapper-1B9FTW');
 
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
 
@@ -713,17 +715,17 @@ module.exports = (() => {
                     this.membersList.style.maxWidth = membersListMaxWidth + 'px';
                     this.membersList.style.minHeight = '100%';
                 }
-
                 if (this.msgBar) {
                     this.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                 }
-
                 if (this.callContainerExists) {
                     document.querySelector('.' + this.classCallContainer).style.minHeight = '0px';
                 }
-
                 if (document.querySelector('.' + this.classDMElement)) {
                     document.querySelectorAll('.' + this.classDMElement).forEach(e => e.style.maxWidth = '200000px');
+                }
+                if (this.avatarWrapper) {
+                    this.avatarWrapper.style.minWidth = '0';
                 }
             }
 
@@ -1673,6 +1675,9 @@ module.exports = (() => {
                 this.settingsContainerBase.style.removeProperty('left');
                 this.settingsContainerBase.style.removeProperty('width');
                 this.settingsContainerBase.style.removeProperty('transition');
+            }
+            if (this.avatarWrapper) {
+                this.avatarWrapper.style.removeProperty('min-width');
             }
 
             // Restore default ZeresPluginLibrary logger functionality

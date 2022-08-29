@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.4.3
+ * @version 5.4.4
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,19 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.4.3',
+            version: '5.4.4',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.4.3',
+            title: '5.4.4',
             items: [
-                'Fixed settings bar alignment glitch'
+                'Fixed user area misalignment with transitions disabled',
+                'Added ChannelDMs compatibility'
             ]
         }, {
-            title: '5.2.6 - 5.4.2',
+            title: '5.2.6 - 5.4.3',
             items: [
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
@@ -41,7 +42,8 @@ module.exports = (() => {
                 'Added out-of-the-box compatibility and overrides for Dark Matter theme',
                 'Implemented compatibility fix between Dark Matter and Horizontal Server List',
                 'Fixed minor syntax errors',
-                'Fixed visual window bar glitch'
+                'Fixed visual window bar glitch',
+                'Fixed settings bar alignment glitch'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -241,7 +243,10 @@ module.exports = (() => {
             this.wordMark = document.querySelector('.wordmark-2u86JB');
             this.msgBar = document.querySelector('.form-3gdLxP');
             this.userArea = document.querySelector('.panels-3wFtMD');
-            this.membersList = document.querySelector('.membersWrap-3NUR2t');
+            if (BdApi.Plugins.isEnabled('ChannelDms') && document.querySelector('.ChannelDms-channelmembers-wrap'))
+                this.membersList = document.querySelector('.ChannelDms-channelmembers-wrap');
+            else
+                this.membersList = document.querySelector('.membersWrap-3NUR2t');
             this.serverList = document.querySelector('.wrapper-1_HaEi');
             this.channelList = document.querySelector('.sidebar-1tnWFu');
             this.settingsContainerBase = document.querySelector('.container-YkUktl');
@@ -1343,7 +1348,7 @@ module.exports = (() => {
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            cui.serverList.style.display = 'initial';
+                            cui.serverList.style.removeProperty('display');
                         } else {
                             cui.serverList.style.removeProperty('width');
                             if ((!cui.isHSLLoaded) && cui.isDarkMatterLoaded) {
@@ -1387,7 +1392,7 @@ module.exports = (() => {
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            cui.channelList.style.display = 'initial';
+                            cui.channelList.style.removeProperty('display');
                         } else {
                             cui.channelList.style.removeProperty('width');
                             if (cui.isDarkMatterLoaded) {
@@ -1423,7 +1428,7 @@ module.exports = (() => {
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            cui.msgBar.style.display = 'initial';
+                            cui.msgBar.style.removeProperty('display');
                         } else {
                             cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
                         }
@@ -1460,7 +1465,7 @@ module.exports = (() => {
                         this.classList.remove(cui.classSelected);
                     } else {
                         if (disableTransitions) {
-                            cui.windowBar.style.display = 'flex';
+                            cui.windowBar.style.removeProperty('display');
                         } else {
                             if (cui.isDarkMatterLoaded) {
                                 cui.windowBar.style.height = '26px';

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.5.0
+ * @version 5.5.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,20 +19,19 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.5.0',
+            version: '5.5.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.5.0',
+            title: '5.5.1',
             items: [
-                'Fixed toolbar not initializing while in call',
-                'Added minimal uncollapse delay, which should improve usability',
-                'Tweaked settings and fixed corruption issue (resets all settings to default)'
+                'Tweaked more settings to improve reactability (resets uncollapse distance and delay)',
+                'Clarified and moved a settings option to make it more usable'
             ]
         }, {
-            title: '5.2.6 - 5.4.4',
+            title: '5.2.6 - 5.5.0',
             items: [
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
@@ -46,7 +45,10 @@ module.exports = (() => {
                 'Fixed visual window bar glitch',
                 'Fixed settings bar alignment glitch',
                 'Fixed user area misalignment with transitions disabled',
-                'Added ChannelDMs compatibility'
+                'Added ChannelDMs compatibility',
+                'Fixed toolbar not initializing while in call',
+                'Added minimal uncollapse delay, which should improve usability',
+                'Tweaked settings and fixed corruption issue (resets all settings to default)'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -194,8 +196,8 @@ module.exports = (() => {
             let enableFullToolbarCollapse = false;
 
             let dynamicUncollapse = true;
-            let dynamicUncollapseDistance = 45;
-            let dynamicUncollapseDelay = 25;
+            let dynamicUncollapseDistance = 30;
+            let dynamicUncollapseDelay = 15;
 
             let resizableChannelList = true;
             let channelListWidth = 0;
@@ -369,9 +371,14 @@ module.exports = (() => {
                 // Clean up (v5)
                 BdApi.deleteData('CollapsibleUI', 'transitionSpeed');
                 BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDistance');
+            }
+            if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 6) {
+                // Clean up (v6)
+                BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDistance');
+                BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDelay');
 
                 // Set new settings version
-                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '5');
+                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '6');
             }
 
             // disableTransitions [Default: false]
@@ -426,14 +433,14 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
             }
 
-            // dynamicUncollapseDistance [Default: 45]
+            // dynamicUncollapseDistance [Default: 30]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')) === 'string') {
                 dynamicUncollapseDistance = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'));
             } else {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', dynamicUncollapseDistance.toString());
             }
 
-            // dynamicUncollapseDelay [Default: 25]
+            // dynamicUncollapseDelay [Default: 15]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay')) === 'string') {
                 dynamicUncollapseDelay = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay'));
             } else {
@@ -1893,6 +1900,11 @@ module.exports = (() => {
                                                          BdApi.getData('CollapsibleUI', 'transitionSpeed'),
                                                          null,
                                                          {placeholder: 'Default: 250'});
+            var settingCollapsedDistance = new zps.Textbox('Collapsed Element Distance',
+                                                         'Sets the size (px) of UI elements when they are collapsed',
+                                                         BdApi.getData('CollapsibleUI', 'collapsedDistance'),
+                                                         null,
+                                                         {placeholder: 'Default: 0'});
             var settingDisableToolbarCollapse = new zps.Switch('Disable Toolbar Auto-collapse',
                                                                'Disables the automatic collapsing of CollapsibleUI\'s toolbar icons',
                                                                BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'true');
@@ -1909,12 +1921,12 @@ module.exports = (() => {
                                                                    'Sets the distance that the mouse must be from a UI element in order for it to expand',
                                                                    BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'),
                                                                    null,
-                                                                   {placeholder: 'Default: 45'});
+                                                                   {placeholder: 'Default: 30'});
             var settingDynamicUncollapseDelay = new zps.Textbox('Dynamic Uncollapse Delay (ms)',
                                                          'Sets the delay before a UI element uncollapses on hover',
                                                          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay'),
                                                          null,
-                                                         {placeholder: 'Default: 25'});
+                                                         {placeholder: 'Default: 15'});
             var settingResizableChannelList = new zps.Switch('Resizable Channel List',
                                                              'Allows the channel list to be resized horizontally by clicking-and-dragging on its bottom-right corner',
                                                              BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
@@ -1922,6 +1934,7 @@ module.exports = (() => {
             // Append main settings to Main subgroup
             groupMain.append(settingDisableTransitions);
             groupMain.append(settingTransitionSpeed);
+            groupMain.append(settingCollapsedDistance);
             groupMain.append(settingDisableToolbarCollapse);
             groupMain.append(settingDisableSettingsCollapse);
             groupMain.append(settingEnableFullToolbarCollapse);
@@ -2067,11 +2080,6 @@ module.exports = (() => {
                                                          BdApi.getData('CollapsibleUI', 'windowBarHeight'),
                                                          null,
                                                          {placeholder: 'Default: 18'});
-            var settingCollapsedDistance = new zps.Textbox('Collapsed Element Distance',
-                                                         null,
-                                                         BdApi.getData('CollapsibleUI', 'collapsedDistance'),
-                                                         null,
-                                                         {placeholder: 'Default: 0'});
 
             // Append advanced settings to Advanced subgroup
             groupAdvanced.append(settingSettingsButtonsMaxWidth);
@@ -2081,7 +2089,6 @@ module.exports = (() => {
             groupAdvanced.append(settingUserAreaMaxHeight);
             groupAdvanced.append(settingMsgBarMaxHeight);
             groupAdvanced.append(settingWindowBarHeight);
-            groupAdvanced.append(settingCollapsedDistance);
 
             // Append subgroups to root node
             settingsRoot.append(groupMain);

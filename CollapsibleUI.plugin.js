@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.5.1
+ * @version 5.6.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,19 +19,21 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.5.1',
+            version: '5.6.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.5.1',
+            title: '5.6.0',
             items: [
-                'Tweaked more settings to improve reactability (resets uncollapse distance and delay)',
-                'Clarified and moved a settings option to make it more usable'
+                'Fixed settings button alignment glitch',
+                'Fixed incorrect handling of disabled toolbar buttons',
+                'Fixed channel list being able to resize beyone window limits'
+                
             ]
         }, {
-            title: '5.2.6 - 5.5.0',
+            title: '5.2.6 - 5.5.1',
             items: [
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
@@ -48,7 +50,9 @@ module.exports = (() => {
                 'Added ChannelDMs compatibility',
                 'Fixed toolbar not initializing while in call',
                 'Added minimal uncollapse delay, which should improve usability',
-                'Tweaked settings and fixed corruption issue (resets all settings to default)'
+                'Tweaked settings and fixed corruption issue (resets all settings to default)',
+                'Tweaked more settings to improve reactability (resets uncollapse distance and delay)',
+                'Clarified and moved a settings option to make it more usable'
             ]
         }, {
             title: '5.0.0 - 5.1.6',
@@ -566,6 +570,10 @@ module.exports = (() => {
                     this.searchBar.previousElementSibling.style.display = 'none';
                 }
             }
+            
+            // Fix settings button alignment
+            if (this.settingsContainerBase)
+                this.settingsContainerBase.style.justifyContent = "space-between";
 
             // Define & add toolbar container
             var toolbarContainer = document.createElement('div');
@@ -771,7 +779,7 @@ module.exports = (() => {
             }
 
             // Read stored user data to decide active state of Server List button
-            if (this.serverList) {
+            if (this.serverList && buttonsActive[0]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') {
                     if (this.serverListButton) this.serverListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
@@ -793,10 +801,10 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
                     if (this.serverListButton) this.serverListButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
 
             // Read stored user data to decide active state of Channel List button
-            if (this.channelList) {
+            if (this.channelList && buttonsActive[1]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') {
                     if (this.channelListButton) this.channelListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
@@ -815,10 +823,10 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
                     if (this.channelListButton) this.channelListButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
 
             // Read stored user data to decide active state of Message Bar button
-            if (this.msgBar) {
+            if (this.msgBar && buttonsActive[2]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') {
                     if (this.msgBarButton) this.msgBarButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
@@ -832,10 +840,10 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
                     if (this.msgBarButton) this.msgBarButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
 
             // Read stored user data to decide active state of Window Bar button
-            if (this.windowBar) {
+            if (this.windowBar && buttonsActive[3]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') {
                     if (this.windowBarButton) this.windowBarButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
@@ -855,10 +863,10 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
                     if (this.windowBarButton) this.windowBarButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
 
             // Read stored user data to decide active state of Members List button
-            if (this.membersList) {
+            if (this.membersList && buttonsActive[4]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') {
                     if (this.membersListButton) this.membersListButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
@@ -873,10 +881,10 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
                     if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
 
             // Read stored user data to decide active state of User Area button
-            if (this.userArea) {
+            if (this.userArea && buttonsActive[5]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') {
                     if (this.userAreaButton) this.userAreaButton.classList.remove(this.classSelected);
                     if (disableTransitions) {
@@ -890,10 +898,10 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
                     if (this.userAreaButton) this.userAreaButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
 
             // Read stored user data to decide active state of Call Container button
-            if (document.querySelector('.' + this.classCallContainer)) {
+            if (document.querySelector('.' + this.classCallContainer) && buttonsActive[6]) {
                 if (BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') {
                     if (this.callContainerButton) this.callContainerButton.classList.remove(this.classSelected);
                     if (document.querySelector('.' + this.classCallContainer)) {
@@ -911,7 +919,7 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
                     if (this.callContainerButton) this.callContainerButton.classList.add(this.classSelected);
                 }
-            }
+            } else BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
 
             // Apply transitions to UI elements
             if (!disableTransitions) {
@@ -919,12 +927,18 @@ module.exports = (() => {
                 // Handle resizing channel list
                 if (resizableChannelList) {
                     this.channelList.style.resize = 'horizontal';
+                    
                     document.body.addEventListener('mousedown', function (){
                         cui.channelList.style.transition = 'none';
                     }, {signal: cui.eventListenerSignal});
                     document.body.addEventListener('mouseup', function (){
                         cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
+                    document.body.addEventListener('mousemove', function (){
+                        if (cui.channelList.getBoundingClientRect().width >= (window.innerWidth * 0.8))
+                            cui.channelList.style.width = (window.innerWidth * 0.8) + 'px';
+                    }, {signal: cui.eventListenerSignal});
+                    
                     this.channelList.addEventListener('contextmenu', function (event){
                         if(event.target !== event.currentTarget) return;
                         clearInterval(cui.channelListWidthChecker);
@@ -949,6 +963,7 @@ module.exports = (() => {
                         }, 100);
                         event.preventDefault();
                     }, {signal: cui.eventListenerSignal});
+                    
                     this.channelListWidthChecker = setInterval(function(){
                         if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
                             let oldChannelListWidth = channelListWidth;

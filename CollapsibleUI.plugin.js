@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.6.0
+ * @version 5.6.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,17 +19,23 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.6.0',
+            version: '5.6.1',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '5.6.1',
+            items: [
+                'Improved channel list fix (it actually works now)'
+                
+            ]
+        }, {
             title: '5.6.0',
             items: [
                 'Fixed settings button alignment glitch',
                 'Fixed incorrect handling of disabled toolbar buttons',
-                'Fixed channel list being able to resize beyone window limits'
+                'Fixed channel list being able to resize beyond window limits'
                 
             ]
         }, {
@@ -927,16 +933,13 @@ module.exports = (() => {
                 // Handle resizing channel list
                 if (resizableChannelList) {
                     this.channelList.style.resize = 'horizontal';
+                    this.channelList.style.maxWidth = '80vw';
                     
                     document.body.addEventListener('mousedown', function (){
                         cui.channelList.style.transition = 'none';
                     }, {signal: cui.eventListenerSignal});
                     document.body.addEventListener('mouseup', function (){
                         cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
-                    }, {signal: cui.eventListenerSignal});
-                    document.body.addEventListener('mousemove', function (){
-                        if (cui.channelList.getBoundingClientRect().width >= (window.innerWidth * 0.8))
-                            cui.channelList.style.width = (window.innerWidth * 0.8) + 'px';
                     }, {signal: cui.eventListenerSignal});
                     
                     this.channelList.addEventListener('contextmenu', function (event){
@@ -1770,6 +1773,7 @@ module.exports = (() => {
                 this.channelList.style.removeProperty('width');
                 this.channelList.style.removeProperty('transition');
                 this.channelList.style.removeProperty('resize');
+                this.channelList.style.removeProperty('max-width');
                 this.channelList.style.removeProperty('display');
             }
             if (this.serverList) {

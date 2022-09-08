@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.6.1
+ * @version 5.6.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,24 +19,25 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.6.1',
+            version: '5.6.2',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.6.1',
+            title: '5.6.2',
             items: [
-                'Improved channel list fix (it actually works now)'
-                
+                'Fixed plugin not loading during video call/screenshare when chat is hidden'
+
             ]
         }, {
-            title: '5.6.0',
+            title: '5.6.0 - 5.6.1',
             items: [
                 'Fixed settings button alignment glitch',
                 'Fixed incorrect handling of disabled toolbar buttons',
-                'Fixed channel list being able to resize beyond window limits'
-                
+                'Fixed channel list being able to resize beyond window limits',
+                'Improved channel list fix (it actually works now)'
+
             ]
         }, {
             title: '5.2.6 - 5.5.1',
@@ -260,10 +261,12 @@ module.exports = (() => {
             this.wordMark = document.querySelector('.wordmark-2u86JB');
             this.msgBar = document.querySelector('.form-3gdLxP');
             this.userArea = document.querySelector('.panels-3wFtMD');
+
             if (BdApi.Plugins.isEnabled('ChannelDms') && document.querySelector('.ChannelDms-channelmembers-wrap'))
                 this.membersList = document.querySelector('.ChannelDms-channelmembers-wrap');
             else
                 this.membersList = document.querySelector('.membersWrap-3NUR2t');
+
             this.serverList = document.querySelector('.wrapper-1_HaEi');
             this.channelList = document.querySelector('.sidebar-1tnWFu');
             this.settingsContainerBase = document.querySelector('.container-YkUktl');
@@ -273,6 +276,11 @@ module.exports = (() => {
 
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
 
+            if (this.callContainerExists)
+                this.callContainerExpanded = document.querySelector('.' + this.classCallContainer).style.maxHeight;
+            else
+                this.callContainerExpanded = 'N/A';
+
             this.localeLabels = {
                                 serverList: 'Server List',
                                 channelList: 'Channel List',
@@ -281,7 +289,7 @@ module.exports = (() => {
                                 membersList: 'Members List',
                                 userArea: 'User Area',
                                 callContainer: 'Call Container'};
-            
+
             // Initialize delay handlers
             this.serverDUDelay = false;
             this.channelDUDelay = false;
@@ -302,6 +310,10 @@ module.exports = (() => {
             // Store eventListeners in an array
             this.eventListenerController = new AbortController();
             this.eventListenerSignal = this.eventListenerController.signal;
+
+            // Initialize delayed checkers
+            this.channelListWidthChecker = false;
+            this.callContainerChecker = false;
 
             // Initialize Horizontal Server List integration
             this.isHSLLoaded = false;
@@ -324,7 +336,7 @@ module.exports = (() => {
                     } catch {}
                 }
             } catch {}
-            
+
             // Fix incompatibility between HSL and Dark Matter
             if (this.isHSLLoaded && this.isDarkMatterLoaded) {
                 this.settingsContainerBase.style.width = '100%';
@@ -549,8 +561,6 @@ module.exports = (() => {
                 BdApi.setData('CollapsibleUI', 'collapsedDistance', collapsedDistance.toString());
             }
 
-
-
             // Purge CollapsibleUI toolbar icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
 
@@ -563,7 +573,7 @@ module.exports = (() => {
             };
 
             // Hide default Members List button
-            if (this.membersList) {
+            if (this.membersList && this.searchBar) {
                 try {
                     if ((!BdApi.Plugins.isEnabled('KeywordTracker')) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
                         this.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
@@ -576,7 +586,7 @@ module.exports = (() => {
                     this.searchBar.previousElementSibling.style.display = 'none';
                 }
             }
-            
+
             // Fix settings button alignment
             if (this.settingsContainerBase)
                 this.settingsContainerBase.style.justifyContent = "space-between";
@@ -934,14 +944,14 @@ module.exports = (() => {
                 if (resizableChannelList) {
                     this.channelList.style.resize = 'horizontal';
                     this.channelList.style.maxWidth = '80vw';
-                    
+
                     document.body.addEventListener('mousedown', function (){
                         cui.channelList.style.transition = 'none';
                     }, {signal: cui.eventListenerSignal});
                     document.body.addEventListener('mouseup', function (){
                         cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
-                    
+
                     this.channelList.addEventListener('contextmenu', function (event){
                         if(event.target !== event.currentTarget) return;
                         clearInterval(cui.channelListWidthChecker);
@@ -966,7 +976,7 @@ module.exports = (() => {
                         }, 100);
                         event.preventDefault();
                     }, {signal: cui.eventListenerSignal});
-                    
+
                     this.channelListWidthChecker = setInterval(function(){
                         if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
                             let oldChannelListWidth = channelListWidth;
@@ -1023,13 +1033,17 @@ module.exports = (() => {
             this.callContainerChecker = setInterval(function() {
                 if ((cui.callContainerExists && !(document.querySelector('.' + cui.classCallContainer))) || (document.querySelector('.' + cui.classCallContainer) && !(cui.callContainerExists)))
                     cui.initialize();
+                if (cui.callContainerExpanded != 'N/A') {
+                    if (cui.callContainerExpanded != document.querySelector('.' + cui.classCallContainer).style.maxHeight)
+                        cui.initialize();
+                }
             }, 100);
 
             // Implement dynamic uncollapse feature
             if (dynamicUncollapse && !disableTransitions) {
                 // Add event listener to document body to track cursor location & check if it is near collapsed elements
                 document.body.addEventListener('mousemove', function(event){
-                    
+
                     cui.mouseX = event.pageX;
                     cui.mouseY = event.pageY;
 
@@ -1054,7 +1068,7 @@ module.exports = (() => {
                             } catch {}
                         }
                     } catch {}
-                    
+
                     // Reiterate incompatibility fix between HSL and Dark Matter
                     if (this.isHSLLoaded && this.isDarkMatterLoaded) {
                         this.settingsContainerBase.style.width = '100%';
@@ -1836,7 +1850,7 @@ module.exports = (() => {
                 this.toolBar.style.removeProperty('max-width');
                 this.toolBar.style.removeProperty('transition');
             }
-            
+
             if (this.settingsContainerBase) {
                 this.settingsContainerBase.style.removeProperty('left');
                 this.settingsContainerBase.style.removeProperty('width');

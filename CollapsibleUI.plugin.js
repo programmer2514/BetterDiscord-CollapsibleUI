@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.7.1
+ * @version 5.7.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,19 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.7.1',
+            version: '5.7.2',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.7.1',
+            title: '5.7.2',
             items: [
-                'Decreased initial plugin loading time',
-                'Fixed incorrect logic causing elements to not remain collapsed'
+                'Fixed HSL integration'
             ]
         }, {
-            title: '5.6.0 - 5.7.0',
+            title: '5.6.0 - 5.7.1',
             items: [
                 'Fixed settings button alignment glitch',
                 'Fixed incorrect handling of disabled toolbar buttons',
@@ -39,7 +38,9 @@ module.exports = (() => {
                 'Improved channel list fix (it actually works now)',
                 'Fixed plugin not loading during video call/screenshare when chat is hidden',
                 'Added settings option to change behavior of collapsed elements when their corresponding button is disabled',
-                'Greatly improved plugin loading times and stability'
+                'Greatly improved plugin loading times and stability',
+                'Decreased initial plugin loading time',
+                'Fixed incorrect logic causing elements to not remain collapsed'
 
             ]
         }, {
@@ -325,7 +326,7 @@ module.exports = (() => {
             try {
                 for (let i = 0; i < document.styleSheets.length; i++) {
                     try {
-                        if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
+                        if (document.styleSheets[i].ownerNode.getAttribute('id') == 'HorizontalServerList-theme-container')
                             this.isHSLLoaded = true;
                     } catch {}
                 }
@@ -1092,7 +1093,7 @@ module.exports = (() => {
                     try {
                         for (let i = 0; i < document.styleSheets.length; i++) {
                             try {
-                                if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Horizontal-Server-List')
+                                if (document.styleSheets[i].ownerNode.getAttribute('id') == 'HorizontalServerList-theme-container')
                                     cui.isHSLLoaded = true;
                             } catch {}
                         }

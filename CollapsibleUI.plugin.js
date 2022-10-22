@@ -2,8 +2,8 @@
  * @name CollapsibleUI
  * @author TenorTheHusky
  * @authorId 563652755814875146
- * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 6.0.0
+ * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
+ * @version 6.0.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,12 +19,17 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.0.0',
-            description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
+            version: '6.0.1',
+            description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
+            title: '6.0.1',
+            items: [
+                'Minor tweaks to code and plugin description'
+            ]
+        }, {
             title: '6.0.0',
             items: [
                 'Added customizable keybinds to all actions',
@@ -361,6 +366,14 @@ module.exports = (() => {
                 this.windowBase.style.minWidth = '100vw';
             }
 
+            // Surpress obnoxious ZeresPluginLibrary spam
+            this.zeresWarnOld = BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn;
+            BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = function (module, ...message) {
+                if (module !== 'DOMTools' && !message.includes('These custom functions on HTMLElement will be removed.')) {
+                    this.zeresWarnOld(module, message);
+                }
+            };
+
             // Make sure settings version is set
             if (!BdApi.getData('CollapsibleUI', 'cuiSettingsVersion'))
                 BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '0');
@@ -638,32 +651,24 @@ module.exports = (() => {
             // Purge CollapsibleUI toolbar icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
 
-            // Surpress obnoxious ZeresPluginLibrary spam
-            this.zeresWarnOld = BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn;
-            BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = function (module, ...message) {
-                if (module !== 'DOMTools' && !message.includes('These custom functions on HTMLElement will be removed.')) {
-                    this.zeresWarnOld(module, message);
-                }
-            };
-
             // Hide default Members List button
-            if (this.membersList && this.searchBar) {
+            if (cui.membersList && cui.searchBar) {
                 try {
-                    if ((!BdApi.Plugins.isEnabled('KeywordTracker')) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
-                        this.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
-                    } else if (BdApi.Plugins.isEnabled('KeywordTracker') && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
-                        this.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.style.display = 'none';
+                    if ((!BdApi.Plugins.isEnabled('KeywordTracker')) && (cui.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (cui.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
+                        cui.searchBar.previousElementSibling.previousElementSibling.style.display = 'none';
+                    } else if (BdApi.Plugins.isEnabled('KeywordTracker') && (cui.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling) && (cui.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.previousElementSibling.classList.contains('icon-1ELUnB'))) {
+                        cui.searchBar.previousElementSibling.previousElementSibling.previousElementSibling.style.display = 'none';
                     } else {
-                        this.searchBar.previousElementSibling.style.display = 'none';
+                        cui.searchBar.previousElementSibling.style.display = 'none';
                     }
                 } catch {
-                    this.searchBar.previousElementSibling.style.display = 'none';
+                    cui.searchBar.previousElementSibling.style.display = 'none';
                 }
             }
 
             // Fix settings button alignment
-            if (this.settingsContainerBase)
-                this.settingsContainerBase.style.justifyContent = "space-between";
+            if (cui.settingsContainerBase)
+                cui.settingsContainerBase.style.justifyContent = "space-between";
 
             // Define & add toolbar container
             var toolbarContainer = document.createElement('div');
@@ -677,12 +682,12 @@ module.exports = (() => {
                 toolbarContainer.innerHTML = '<div id="cui-icon-insert-point" style="display: none;"></div>';
 
             // Insert icons in the correct spot
-            if (this.inviteToolbar || this.searchBar)
-                this.toolBar.insertBefore(toolbarContainer, (this.inviteToolbar) ? this.inviteToolbar.nextElementSibling : this.searchBar);
-            else this.toolBar.appendChild(toolbarContainer);
+            if (cui.inviteToolbar || cui.searchBar)
+                cui.toolBar.insertBefore(toolbarContainer, (cui.inviteToolbar) ? cui.inviteToolbar.nextElementSibling : cui.searchBar);
+            else cui.toolBar.appendChild(toolbarContainer);
 
             // Update locale strings
-            this.getLabels();
+            cui.getLabels();
 
             // Define & add new toolbar icons
             // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
@@ -690,57 +695,57 @@ module.exports = (() => {
             for (let i = 1; i <= cui.buttonsOrder.length; i++) { // lgtm[js/unused-index-variable]
                 if (i == cui.buttonsOrder[0]) {
                     if (cui.buttonsOrder[0]) {
-                        this.serverListButton = this.addToolbarIcon(this.localeLabels.serverList, '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
+                        cui.serverListButton = cui.addToolbarIcon(cui.localeLabels.serverList, '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
                     } else {
-                        this.serverListButton = false;
+                        cui.serverListButton = false;
                         buttonsActive[0] = 0;
                     }
                 }
                 if (i == cui.buttonsOrder[1]) {
                     if (cui.buttonsOrder[1]) {
-                        this.channelListButton = this.addToolbarIcon(this.localeLabels.channelList, '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
+                        cui.channelListButton = cui.addToolbarIcon(cui.localeLabels.channelList, '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
                     } else {
-                        this.channelListButton = false;
+                        cui.channelListButton = false;
                         buttonsActive[1] = 0;
                     }
                 }
                 if (i == cui.buttonsOrder[2]) {
-                    if (cui.buttonsOrder[2] && this.msgBar) {
-                        this.msgBarButton = this.addToolbarIcon(this.localeLabels.msgBar, '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
+                    if (cui.buttonsOrder[2] && cui.msgBar) {
+                        cui.msgBarButton = cui.addToolbarIcon(cui.localeLabels.msgBar, '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
                     } else {
-                        this.msgBarButton = false;
+                        cui.msgBarButton = false;
                         buttonsActive[2] = 0;
                     }
                 }
                 if (i == cui.buttonsOrder[3]) {
-                    if (cui.buttonsOrder[3] && this.windowBar && !(BdApi.Plugins.isEnabled('OldTitleBar'))) {
-                        this.windowBarButton = this.addToolbarIcon(this.localeLabels.windowBar, '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
+                    if (cui.buttonsOrder[3] && cui.windowBar && !(BdApi.Plugins.isEnabled('OldTitleBar'))) {
+                        cui.windowBarButton = cui.addToolbarIcon(cui.localeLabels.windowBar, '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
                     } else {
-                        this.windowBarButton = false;
+                        cui.windowBarButton = false;
                         buttonsActive[3] = 0;
                     }
                 }
                 if (i == cui.buttonsOrder[4]) {
-                    if (cui.buttonsOrder[4] && this.membersList) {
-                        this.membersListButton = this.addToolbarIcon(this.localeLabels.membersList, '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
+                    if (cui.buttonsOrder[4] && cui.membersList) {
+                        cui.membersListButton = cui.addToolbarIcon(cui.localeLabels.membersList, '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
                     } else {
-                        this.membersListButton = false;
+                        cui.membersListButton = false;
                         buttonsActive[4] = 0;
                     }
                 }
                 if (i == cui.buttonsOrder[5]) {
-                    if (cui.buttonsOrder[5] && this.userArea) {
-                        this.userAreaButton = this.addToolbarIcon(this.localeLabels.userArea, '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
+                    if (cui.buttonsOrder[5] && cui.userArea) {
+                        cui.userAreaButton = cui.addToolbarIcon(cui.localeLabels.userArea, '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
                     } else {
-                        this.userAreaButton = false;
+                        cui.userAreaButton = false;
                         buttonsActive[5] = 0;
                     }
                 }
                 if (i == cui.buttonsOrder[6]) {
                     if (cui.buttonsOrder[6] && document.querySelector('.' + cui.classConnectionArea)) {
-                        this.callContainerButton = this.addToolbarIcon(this.localeLabels.callContainer, '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.189-0.149c-0.028,0.021-0.055,0.045-0.079,0.07L0.006,0.875C-0.597,1.48-0.82,2.336-0.556,3.087c1.095,3.11,2.875,5.933,5.21,8.259c2.328,2.336,5.15,4.116,8.26,5.21c0.752,0.264,1.606,0.042,2.212-0.562l1.292-1.294c0.332-0.329,0.332-0.866,0.002-1.196c-0.024-0.026-0.052-0.049-0.08-0.07l-2.884-2.244c-0.205-0.158-0.474-0.215-0.725-0.151l-2.737,0.684c-0.744,0.186-1.53-0.032-2.071-0.573l-3.07-3.072C4.311,7.536,4.092,6.75,4.278,6.007l0.685-2.738C5.026,3.017,4.97,2.75,4.81,2.543L2.567-0.34z M0.354-1.361c0.852-0.852,2.234-0.852,3.085,0C3.504-1.297,3.564-1.229,3.62-1.158l2.242,2.883c0.412,0.529,0.557,1.218,0.394,1.868L5.573,6.33C5.501,6.618,5.585,6.923,5.795,7.134l3.071,3.071c0.21,0.21,0.516,0.295,0.806,0.222l2.734-0.684c0.651-0.161,1.34-0.017,1.868,0.395l2.883,2.242c1.035,0.806,1.131,2.338,0.204,3.264l-1.293,1.292c-0.925,0.925-2.307,1.332-3.596,0.879c-3.299-1.162-6.293-3.05-8.763-5.525C1.234,9.82-0.654,6.826-1.815,3.527C-2.267,2.24-1.861,0.856-0.936-0.069l1.292-1.292H0.354z"/>', '-4 -4 24 24');
+                        cui.callContainerButton = cui.addToolbarIcon(cui.localeLabels.callContainer, '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.189-0.149c-0.028,0.021-0.055,0.045-0.079,0.07L0.006,0.875C-0.597,1.48-0.82,2.336-0.556,3.087c1.095,3.11,2.875,5.933,5.21,8.259c2.328,2.336,5.15,4.116,8.26,5.21c0.752,0.264,1.606,0.042,2.212-0.562l1.292-1.294c0.332-0.329,0.332-0.866,0.002-1.196c-0.024-0.026-0.052-0.049-0.08-0.07l-2.884-2.244c-0.205-0.158-0.474-0.215-0.725-0.151l-2.737,0.684c-0.744,0.186-1.53-0.032-2.071-0.573l-3.07-3.072C4.311,7.536,4.092,6.75,4.278,6.007l0.685-2.738C5.026,3.017,4.97,2.75,4.81,2.543L2.567-0.34z M0.354-1.361c0.852-0.852,2.234-0.852,3.085,0C3.504-1.297,3.564-1.229,3.62-1.158l2.242,2.883c0.412,0.529,0.557,1.218,0.394,1.868L5.573,6.33C5.501,6.618,5.585,6.923,5.795,7.134l3.071,3.071c0.21,0.21,0.516,0.295,0.806,0.222l2.734-0.684c0.651-0.161,1.34-0.017,1.868,0.395l2.883,2.242c1.035,0.806,1.131,2.338,0.204,3.264l-1.293,1.292c-0.925,0.925-2.307,1.332-3.596,0.879c-3.299-1.162-6.293-3.05-8.763-5.525C1.234,9.82-0.654,6.826-1.815,3.527C-2.267,2.24-1.861,0.856-0.936-0.069l1.292-1.292H0.354z"/>', '-4 -4 24 24');
                     } else {
-                        this.callContainerButton = false;
+                        cui.callContainerButton = false;
                         buttonsActive[6] = 0;
                     }
                 }
@@ -748,76 +753,76 @@ module.exports = (() => {
 
             // Collapse toolbar
             if (cui.enableFullToolbarCollapse) {
-                var singleButtonWidth = this.serverListButton.getBoundingClientRect().width + parseInt(window.getComputedStyle(this.serverListButton).marginRight) + 'px';
-                this.toolBar.style.maxWidth = singleButtonWidth;
+                var singleButtonWidth = cui.serverListButton.getBoundingClientRect().width + parseInt(window.getComputedStyle(cui.serverListButton).marginRight) + 'px';
+                cui.toolBar.style.maxWidth = singleButtonWidth;
             }
 
             // Collapse toolbar buttons
             if (!cui.disableToolbarCollapse) {
-                if (this.serverListButton) {
-                    this.serverListButton.style.maxWidth = '0px';
-                    this.serverListButton.style.margin = '0px';
-                    this.serverListButton.style.padding = '0px';
+                if (cui.serverListButton) {
+                    cui.serverListButton.style.maxWidth = '0px';
+                    cui.serverListButton.style.margin = '0px';
+                    cui.serverListButton.style.padding = '0px';
                 }
-                if (this.channelListButton) {
-                    this.channelListButton.style.maxWidth = '0px';
-                    this.channelListButton.style.margin = '0px';
-                    this.channelListButton.style.padding = '0px';
+                if (cui.channelListButton) {
+                    cui.channelListButton.style.maxWidth = '0px';
+                    cui.channelListButton.style.margin = '0px';
+                    cui.channelListButton.style.padding = '0px';
                 }
-                if (this.msgBarButton) {
-                    this.msgBarButton.style.maxWidth = '0px';
-                    this.msgBarButton.style.margin = '0px';
-                    this.msgBarButton.style.padding = '0px';
+                if (cui.msgBarButton) {
+                    cui.msgBarButton.style.maxWidth = '0px';
+                    cui.msgBarButton.style.margin = '0px';
+                    cui.msgBarButton.style.padding = '0px';
                 }
-                if (this.windowBarButton) {
-                    this.windowBarButton.style.maxWidth = '0px';
-                    this.windowBarButton.style.margin = '0px';
-                    this.windowBarButton.style.padding = '0px';
+                if (cui.windowBarButton) {
+                    cui.windowBarButton.style.maxWidth = '0px';
+                    cui.windowBarButton.style.margin = '0px';
+                    cui.windowBarButton.style.padding = '0px';
                 }
-                if (this.membersListButton) {
-                    this.membersListButton.style.maxWidth = '0px';
-                    this.membersListButton.style.margin = '0px';
-                    this.membersListButton.style.padding = '0px';
+                if (cui.membersListButton) {
+                    cui.membersListButton.style.maxWidth = '0px';
+                    cui.membersListButton.style.margin = '0px';
+                    cui.membersListButton.style.padding = '0px';
                 }
-                if (this.userAreaButton) {
-                    this.userAreaButton.style.maxWidth = '0px';
-                    this.userAreaButton.style.margin = '0px';
-                    this.userAreaButton.style.padding = '0px';
+                if (cui.userAreaButton) {
+                    cui.userAreaButton.style.maxWidth = '0px';
+                    cui.userAreaButton.style.margin = '0px';
+                    cui.userAreaButton.style.padding = '0px';
                 }
-                if (this.callContainerButton) {
-                    this.callContainerButton.style.maxWidth = '0px';
-                    this.callContainerButton.style.margin = '0px';
-                    this.callContainerButton.style.padding = '0px';
+                if (cui.callContainerButton) {
+                    cui.callContainerButton.style.maxWidth = '0px';
+                    cui.callContainerButton.style.margin = '0px';
+                    cui.callContainerButton.style.padding = '0px';
                 }
 
-                if (this.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
-                    this.membersListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.membersListButton.style.removeProperty('margin');
-                    this.membersListButton.style.removeProperty('padding');
-                } else if (this.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
-                    this.windowBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.windowBarButton.style.removeProperty('margin');
-                    this.windowBarButton.style.removeProperty('padding');
-                } else if (this.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
-                    this.msgBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.msgBarButton.style.removeProperty('margin');
-                    this.msgBarButton.style.removeProperty('padding');
-                } else if (this.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
-                    this.channelListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.channelListButton.style.removeProperty('margin');
-                    this.channelListButton.style.removeProperty('padding');
-                } else if (this.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
-                    this.serverListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.serverListButton.style.removeProperty('margin');
-                    this.serverListButton.style.removeProperty('padding');
-                } else if (this.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
-                    this.userAreaButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.userAreaButton.style.removeProperty('margin');
-                    this.userAreaButton.style.removeProperty('padding');
-                } else if (this.callContainerButton && (buttonsActive[6] == Math.max.apply(Math, buttonsActive))) {
-                    this.callContainerButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
-                    this.callContainerButton.style.removeProperty('margin');
-                    this.callContainerButton.style.removeProperty('padding');
+                if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
+                    cui.membersListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.membersListButton.style.removeProperty('margin');
+                    cui.membersListButton.style.removeProperty('padding');
+                } else if (cui.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
+                    cui.windowBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.windowBarButton.style.removeProperty('margin');
+                    cui.windowBarButton.style.removeProperty('padding');
+                } else if (cui.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
+                    cui.msgBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.msgBarButton.style.removeProperty('margin');
+                    cui.msgBarButton.style.removeProperty('padding');
+                } else if (cui.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
+                    cui.channelListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.channelListButton.style.removeProperty('margin');
+                    cui.channelListButton.style.removeProperty('padding');
+                } else if (cui.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
+                    cui.serverListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.serverListButton.style.removeProperty('margin');
+                    cui.serverListButton.style.removeProperty('padding');
+                } else if (cui.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
+                    cui.userAreaButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.userAreaButton.style.removeProperty('margin');
+                    cui.userAreaButton.style.removeProperty('padding');
+                } else if (cui.callContainerButton && (buttonsActive[6] == Math.max.apply(Math, buttonsActive))) {
+                    cui.callContainerButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
+                    cui.callContainerButton.style.removeProperty('margin');
+                    cui.callContainerButton.style.removeProperty('padding');
                 } else {
                     document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.display = 'none');
                 }
@@ -826,7 +831,7 @@ module.exports = (() => {
             // Collapse settings buttons
             if (!cui.disableSettingsCollapse) {
                 // Define settings buttons array
-                var settingsButtons = this.settingsContainer.children;
+                var settingsButtons = cui.settingsContainer.children;
 
                 // Collapse settings buttons
                 for (let i = 0; i < (settingsButtons.length - 1); i++) {
@@ -840,186 +845,186 @@ module.exports = (() => {
             // Adjust UI element styling in preparation for transitions
             if (!cui.disableTransitions) {
                 document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + cui.transitionSpeed + 'ms, margin ' + cui.transitionSpeed + 'ms, padding ' + cui.transitionSpeed + 'ms');
-                this.toolBar.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
+                cui.toolBar.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
 
-                if (this.windowBar) {
-                    if (this.isDarkMatterLoaded)
-                        this.windowBar.style.height = '26px';
+                if (cui.windowBar) {
+                    if (cui.isDarkMatterLoaded)
+                        cui.windowBar.style.height = '26px';
                     else
-                        this.windowBar.style.height = cui.windowBarHeight + 'px';
+                        cui.windowBar.style.height = cui.windowBarHeight + 'px';
                 }
-                if (this.membersList) {
-                    this.membersList.style.overflow = 'hidden';
-                    this.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
-                    this.membersList.style.minHeight = '100%';
+                if (cui.membersList) {
+                    cui.membersList.style.overflow = 'hidden';
+                    cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
+                    cui.membersList.style.minHeight = '100%';
                 }
-                if (this.msgBar) {
-                    this.msgBar.style.maxHeight = cui.msgBarMaxHeight + 'px';
+                if (cui.msgBar) {
+                    cui.msgBar.style.maxHeight = cui.msgBarMaxHeight + 'px';
                 }
-                if (this.callContainerExists) {
-                    document.querySelector('.' + this.classCallContainer).style.minHeight = '0px';
+                if (cui.callContainerExists) {
+                    document.querySelector('.' + cui.classCallContainer).style.minHeight = '0px';
                 }
-                if (document.querySelector('.' + this.classDMElement)) {
-                    document.querySelectorAll('.' + this.classDMElement).forEach(e => e.style.maxWidth = '200000px');
+                if (document.querySelector('.' + cui.classDMElement)) {
+                    document.querySelectorAll('.' + cui.classDMElement).forEach(e => e.style.maxWidth = '200000px');
                 }
-                if (this.avatarWrapper) {
-                    this.avatarWrapper.style.minWidth = '0';
+                if (cui.avatarWrapper) {
+                    cui.avatarWrapper.style.minWidth = '0';
                 }
             }
 
             // Read stored user data to decide active state of Server List button
-            if (this.serverList) {
+            if (cui.serverList) {
                 if (cui.buttonsOrder[0] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
-                        if (this.serverListButton) this.serverListButton.classList.remove(this.classSelected);
+                        if (cui.serverListButton) cui.serverListButton.classList.remove(cui.classSelected);
                         if (cui.disableTransitions) {
-                            this.serverList.style.display = 'none';
+                            cui.serverList.style.display = 'none';
                         } else {
-                            this.serverList.style.width = cui.collapsedDistance + 'px';
+                            cui.serverList.style.width = cui.collapsedDistance + 'px';
                             if (cui.isDarkMatterLoaded) {
                                 cui.settingsContainerBase.style.width = '100%';
                                 cui.settingsContainerBase.style.left = '0px';
                                 cui.windowBase.style.minWidth = '100vw';
                             }
                         }
-                        if (this.isHSLLoaded) {
-                            this.windowBase.style.setProperty('top', '0px', 'important');
+                        if (cui.isHSLLoaded) {
+                            cui.windowBase.style.setProperty('top', '0px', 'important');
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
-                        if (this.serverListButton) this.serverListButton.classList.add(this.classSelected);
+                        if (cui.serverListButton) cui.serverListButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
-                        if (this.serverListButton) this.serverListButton.classList.add(this.classSelected);
+                        if (cui.serverListButton) cui.serverListButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Channel List button
-            if (this.channelList) {
+            if (cui.channelList) {
                 if (cui.buttonsOrder[1] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
-                        if (this.channelListButton) this.channelListButton.classList.remove(this.classSelected);
+                        if (cui.channelListButton) cui.channelListButton.classList.remove(cui.classSelected);
                         if (cui.disableTransitions) {
-                            this.channelList.style.display = 'none';
+                            cui.channelList.style.display = 'none';
                         } else {
-                            this.channelList.style.width = cui.collapsedDistance + 'px';
-                            if (this.isDarkMatterLoaded) {
-                                this.settingsContainer.style.display = 'none';
+                            cui.channelList.style.width = cui.collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.display = 'none';
                                 if (cui.spotifyContainer)
                                     cui.spotifyContainer.style.display = 'none';
                             }
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
-                        if (this.channelListButton) this.channelListButton.classList.add(this.classSelected);
+                        if (cui.channelListButton) cui.channelListButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
-                        if (this.channelListButton) this.channelListButton.classList.add(this.classSelected);
+                        if (cui.channelListButton) cui.channelListButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Message Bar button
-            if (this.msgBar) {
+            if (cui.msgBar) {
                 if (cui.buttonsOrder[2] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
-                        if (this.msgBarButton) this.msgBarButton.classList.remove(this.classSelected);
+                        if (cui.msgBarButton) cui.msgBarButton.classList.remove(cui.classSelected);
                         if (cui.disableTransitions) {
-                            this.msgBar.style.display = 'none';
+                            cui.msgBar.style.display = 'none';
                         } else {
-                            this.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
+                            cui.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
-                        if (this.msgBarButton) this.msgBarButton.classList.add(this.classSelected);
+                        if (cui.msgBarButton) cui.msgBarButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
-                        if (this.msgBarButton) this.msgBarButton.classList.add(this.classSelected);
+                        if (cui.msgBarButton) cui.msgBarButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Window Bar button
-            if (this.windowBar) {
+            if (cui.windowBar) {
                 if (cui.buttonsOrder[3] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
-                        if (this.windowBarButton) this.windowBarButton.classList.remove(this.classSelected);
+                        if (cui.windowBarButton) cui.windowBarButton.classList.remove(cui.classSelected);
                         if (cui.disableTransitions) {
-                            this.windowBar.style.display = 'none';
+                            cui.windowBar.style.display = 'none';
                         } else {
-                            this.windowBar.style.height = '0px';
+                            cui.windowBar.style.height = '0px';
                             if (cui.isDarkMatterLoaded)
                                 cui.windowBar.style.opacity = '0';
-                            this.windowBar.style.padding = '0px';
-                            this.windowBar.style.margin = '0px';
-                            this.windowBar.style.overflow = 'hidden';
-                            this.wordMark.style.display = 'none';
+                            cui.windowBar.style.padding = '0px';
+                            cui.windowBar.style.margin = '0px';
+                            cui.windowBar.style.overflow = 'hidden';
+                            cui.wordMark.style.display = 'none';
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
-                        if (this.windowBarButton) this.windowBarButton.classList.add(this.classSelected);
+                        if (cui.windowBarButton) cui.windowBarButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
-                        if (this.windowBarButton) this.windowBarButton.classList.add(this.classSelected);
+                        if (cui.windowBarButton) cui.windowBarButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Members List button
-            if (this.membersList) {
+            if (cui.membersList) {
                 if (cui.buttonsOrder[4] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
-                        if (this.membersListButton) this.membersListButton.classList.remove(this.classSelected);
+                        if (cui.membersListButton) cui.membersListButton.classList.remove(cui.classSelected);
                         if (cui.disableTransitions) {
-                            this.membersList.style.display = 'none';
+                            cui.membersList.style.display = 'none';
                         } else {
-                            this.membersList.style.maxWidth = cui.collapsedDistance + 'px';
-                            this.membersList.style.minWidth = '0px';
+                            cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
+                            cui.membersList.style.minWidth = '0px';
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
-                        if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
+                        if (cui.membersListButton) cui.membersListButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
-                        if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
+                        if (cui.membersListButton) cui.membersListButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of User Area button
-            if (this.userArea) {
+            if (cui.userArea) {
                 if (cui.buttonsOrder[5] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') {
-                        if (this.userAreaButton) this.userAreaButton.classList.remove(this.classSelected);
+                        if (cui.userAreaButton) cui.userAreaButton.classList.remove(cui.classSelected);
                         if (cui.disableTransitions) {
-                            this.userArea.style.display = 'none';
+                            cui.userArea.style.display = 'none';
                         } else {
-                            this.userArea.style.maxHeight = cui.collapsedDistance + 'px';
+                            cui.userArea.style.maxHeight = cui.collapsedDistance + 'px';
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
-                        if (this.userAreaButton) this.userAreaButton.classList.add(this.classSelected);
+                        if (cui.userAreaButton) cui.userAreaButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
-                        if (this.userAreaButton) this.userAreaButton.classList.add(this.classSelected);
+                        if (cui.userAreaButton) cui.userAreaButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Call Container button
-            if (document.querySelector('.' + this.classCallContainer)) {
+            if (document.querySelector('.' + cui.classCallContainer)) {
                 if (cui.buttonsOrder[6] || cui.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'false') {
-                        if (this.callContainerButton) this.callContainerButton.classList.remove(this.classSelected);
-                        if (document.querySelector('.' + this.classCallContainer)) {
+                        if (cui.callContainerButton) cui.callContainerButton.classList.remove(cui.classSelected);
+                        if (document.querySelector('.' + cui.classCallContainer)) {
                             if (cui.disableTransitions) {
-                                document.querySelector('.' + this.classCallContainer).style.display = 'none';
+                                document.querySelector('.' + cui.classCallContainer).style.display = 'none';
                             } else {
-                                document.querySelector('.' + this.classCallContainer).style.height = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
-                                if (document.querySelector('.' + this.classCallUserWrapper))
-                                    document.querySelector('.' + this.classCallUserWrapper).style.display = 'none';
+                                document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                                if (document.querySelector('.' + cui.classCallUserWrapper))
+                                    document.querySelector('.' + cui.classCallUserWrapper).style.display = 'none';
                             }
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'true') {
-                        if (this.callContainerButton) this.callContainerButton.classList.add(this.classSelected);
+                        if (cui.callContainerButton) cui.callContainerButton.classList.add(cui.classSelected);
                     } else {
                         BdApi.setData('CollapsibleUI', 'callContainerButtonActive', 'true');
-                        if (this.callContainerButton) this.callContainerButton.classList.add(this.classSelected);
+                        if (cui.callContainerButton) cui.callContainerButton.classList.add(cui.classSelected);
                     }
                 } else BdApi.setData('CollapsibleUI', 'callContainerButtonActive', 'true');
             }
@@ -1029,8 +1034,8 @@ module.exports = (() => {
 
                 // Handle resizing channel list
                 if (cui.resizableChannelList) {
-                    this.channelList.style.resize = 'horizontal';
-                    this.channelList.style.maxWidth = '80vw';
+                    cui.channelList.style.resize = 'horizontal';
+                    cui.channelList.style.maxWidth = '80vw';
 
                     document.body.addEventListener('mousedown', function (){
                         cui.channelList.style.transition = 'none';
@@ -1039,8 +1044,8 @@ module.exports = (() => {
                         cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
 
-                    this.channelList.addEventListener('contextmenu', function (event){
-                        if(event.target !== event.currentTarget) return;
+                    cui.channelList.addEventListener('contextmenu', function (event){
+                        if (event.target !== event.currentTarget) return;
                         clearInterval(cui.channelListWidthChecker);
                         cui.channelListWidth = 0;
                         BdApi.setData('CollapsibleUI', 'channelListWidth', cui.channelListWidth.toString());
@@ -1064,7 +1069,7 @@ module.exports = (() => {
                         event.preventDefault();
                     }, {signal: cui.eventListenerSignal});
 
-                    this.channelListWidthChecker = setInterval(function(){
+                    cui.channelListWidthChecker = setInterval(function(){
                         if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true')) {
                             let oldChannelListWidth = cui.channelListWidth;
                             if (parseInt(cui.channelList.style.width)) {
@@ -1082,42 +1087,42 @@ module.exports = (() => {
                     }, 100);
                 }
                 if (cui.channelListWidth != 0) {
-                    this.channelList.style.transition = 'none';
-                    this.channelList.style.width = cui.channelListWidth + 'px';
+                    cui.channelList.style.transition = 'none';
+                    cui.channelList.style.width = cui.channelListWidth + 'px';
                 }
-                this.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
+                cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
 
-                this.serverList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
-                if (this.windowBar) {
-                    this.windowBar.style.transition = 'height ' + cui.transitionSpeed + 'ms';
+                cui.serverList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
+                if (cui.windowBar) {
+                    cui.windowBar.style.transition = 'height ' + cui.transitionSpeed + 'ms';
                 }
-                if (this.membersList) {
-                    this.membersList.style.transition = 'max-width ' + cui.transitionSpeed + 'ms, min-width ' + cui.transitionSpeed + 'ms';
-                }
-
-                if (this.msgBar) {
-                    this.msgBar.style.transition = 'max-height ' + cui.transitionSpeed + 'ms';
+                if (cui.membersList) {
+                    cui.membersList.style.transition = 'max-width ' + cui.transitionSpeed + 'ms, min-width ' + cui.transitionSpeed + 'ms';
                 }
 
-                if (this.userArea) {
-                    this.userArea.style.transition = 'max-height ' + cui.transitionSpeed + 'ms';
+                if (cui.msgBar) {
+                    cui.msgBar.style.transition = 'max-height ' + cui.transitionSpeed + 'ms';
                 }
-                if (document.querySelector('.' + this.classCallContainer)) {
-                    document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + cui.transitionSpeed + 'ms';
+
+                if (cui.userArea) {
+                    cui.userArea.style.transition = 'max-height ' + cui.transitionSpeed + 'ms';
                 }
-                if (this.windowBase) {
-                    if (this.isDarkMatterLoaded)
-                        this.windowBase.style.transition = 'top ' + cui.transitionSpeed + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+                if (document.querySelector('.' + cui.classCallContainer)) {
+                    document.querySelector('.' + cui.classCallContainer).style.transition = 'height ' + cui.transitionSpeed + 'ms';
+                }
+                if (cui.windowBase) {
+                    if (cui.isDarkMatterLoaded)
+                        cui.windowBase.style.transition = 'top ' + cui.transitionSpeed + 'ms, min-width ' + cui.transitionSpeed + 'ms';
                     else
-                        this.windowBase.style.transition = 'top ' + cui.transitionSpeed + 'ms';
+                        cui.windowBase.style.transition = 'top ' + cui.transitionSpeed + 'ms';
                 }
-                if (this.isDarkMatterLoaded) {
-                    this.settingsContainerBase.style.transition = 'width ' + cui.transitionSpeed + 'ms, left ' + cui.transitionSpeed + 'ms';
+                if (cui.isDarkMatterLoaded) {
+                    cui.settingsContainerBase.style.transition = 'width ' + cui.transitionSpeed + 'ms, left ' + cui.transitionSpeed + 'ms';
                 }
             }
 
             // Add call checking event
-            this.callContainerChecker = setInterval(function() {
+            cui.callContainerChecker = setInterval(function() {
                 if ((cui.callContainerExists && !(document.querySelector('.' + cui.classCallContainer))) || (document.querySelector('.' + cui.classCallContainer) && !(cui.callContainerExists)))
                     cui.initialize();
                 if (cui.callContainerExpanded != 'N/A') {
@@ -1207,10 +1212,10 @@ module.exports = (() => {
                     } catch {}
 
                     // Reiterate incompatibility fix between HSL and Dark Matter
-                    if (this.isHSLLoaded && this.isDarkMatterLoaded) {
-                        this.settingsContainerBase.style.width = '100%';
-                        this.settingsContainerBase.style.left = '0px';
-                        this.windowBase.style.minWidth = '100vw';
+                    if (cui.isHSLLoaded && cui.isDarkMatterLoaded) {
+                        cui.settingsContainerBase.style.width = '100%';
+                        cui.settingsContainerBase.style.left = '0px';
+                        cui.windowBase.style.minWidth = '100vw';
                     }
 
                     // Server List
@@ -1506,11 +1511,11 @@ module.exports = (() => {
 
             // Add event listeners to the Toolbar to update on hover
             if (cui.enableFullToolbarCollapse) {
-                this.toolBar.addEventListener('mouseenter', function(){
-                    this.style.maxWidth = cui.toolbarMaxWidth + 'px';
+                cui.toolBar.addEventListener('mouseenter', function(){
+                    cui.style.maxWidth = cui.toolbarMaxWidth + 'px';
                 }, {signal: cui.eventListenerSignal});
-                this.toolBar.addEventListener('mouseleave', function(){
-                    this.style.maxWidth = singleButtonWidth;
+                cui.toolBar.addEventListener('mouseleave', function(){
+                    cui.style.maxWidth = singleButtonWidth;
                 }, {signal: cui.eventListenerSignal});
             }
 
@@ -1626,12 +1631,12 @@ module.exports = (() => {
 
             // Add event listeners to the Settings Container to update on hover
             if (!cui.disableSettingsCollapse) {
-                this.settingsContainer.addEventListener('mouseenter', function(){
+                cui.settingsContainer.addEventListener('mouseenter', function(){
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = cui.settingsButtonsMaxWidth + 'px';
                     }
                 }, {signal: cui.eventListenerSignal});
-                this.settingsContainer.addEventListener('mouseleave', function(){
+                cui.settingsContainer.addEventListener('mouseleave', function(){
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = '0px';
                     }
@@ -1853,7 +1858,7 @@ module.exports = (() => {
             }
 
             // Restore default ZeresPluginLibrary logger functionality
-            BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
+            BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = cui.zeresWarnOld;
 
             // Abort event listeners
             if (cui.eventListenerController)

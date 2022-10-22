@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A simple plugin that allows collapsing various sections of the Discord UI.
- * @version 5.7.2
+ * @version 6.0.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,33 +19,38 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '5.7.2',
+            version: '6.0.0',
             description: 'A simple plugin that allows collapsing various sections of the Discord UI.',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '5.7.2',
+            title: '6.0.0',
             items: [
-                'Fixed HSL integration'
+                'Added customizable keybinds to all actions',
+                'Added ability to auto-collapse elements based on size of Discord window',
+                'Added better compatibility with DevilBro\'s plugins',
+                'Greatly increased plugin persistence',
+                'Fixed plugin not starting after another plugin is updated',
+                'Significantly refactored code for better modularity',
+                'Removed unnecessary plugin reloading when changing settings',
+                'Removed unnecessary console clutter'
             ]
         }, {
-            title: '5.6.0 - 5.7.1',
+            title: '5.0.0 - 5.7.2',
             items: [
-                'Fixed settings button alignment glitch',
-                'Fixed incorrect handling of disabled toolbar buttons',
-                'Fixed channel list being able to resize beyond window limits',
-                'Improved channel list fix (it actually works now)',
-                'Fixed plugin not loading during video call/screenshare when chat is hidden',
-                'Added settings option to change behavior of collapsed elements when their corresponding button is disabled',
-                'Greatly improved plugin loading times and stability',
-                'Decreased initial plugin loading time',
-                'Fixed incorrect logic causing elements to not remain collapsed'
-
-            ]
-        }, {
-            title: '5.2.6 - 5.5.1',
-            items: [
+                'Cleaned up code',
+                'Stopped relying on aria labels for tooltips',
+                'Fixed minor security vulnerability with tooltips',
+                'Added KeywordTracker compatibility',
+                'Added OldTitleBar compatibility',
+                'Fixed elements not collapsing when their respective button is hidden',
+                'Fixed call container issues',
+                'Decreased number of writes to the config file',
+                'Fixed plugin animations and events while on a call',
+                'Added ability to reset channel list size to default',
+                'Added ability to selectively enable Dynamic Uncollapse',
+                'Added option to make vanilla Discord toolbar collapsible as well as CollapsibleUI\'s',
                 'Suppressed false code security errors',
                 'Fixed unintentional console spam',
                 'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
@@ -63,23 +68,17 @@ module.exports = (() => {
                 'Added minimal uncollapse delay, which should improve usability',
                 'Tweaked settings and fixed corruption issue (resets all settings to default)',
                 'Tweaked more settings to improve reactability (resets uncollapse distance and delay)',
-                'Clarified and moved a settings option to make it more usable'
-            ]
-        }, {
-            title: '5.0.0 - 5.1.6',
-            items: [
-                'Cleaned up code',
-                'Stopped relying on aria labels for tooltips',
-                'Fixed minor security vulnerability with tooltips',
-                'Added KeywordTracker compatibility',
-                'Added OldTitleBar compatibility',
-                'Fixed elements not collapsing when their respective button is hidden',
-                'Fixed call container issues',
-                'Decreased number of writes to the config file',
-                'Fixed plugin animations and events while on a call',
-                'Added ability to reset channel list size to default',
-                'Added ability to selectively enable Dynamic Uncollapse',
-                'Added option to make vanilla Discord toolbar collapsible as well as CollapsibleUI\'s'
+                'Clarified and moved a settings option to make it more usable',
+                'Fixed settings button alignment glitch',
+                'Fixed incorrect handling of disabled toolbar buttons',
+                'Fixed channel list being able to resize beyond window limits',
+                'Improved channel list fix (it actually works now)',
+                'Fixed plugin not loading during video call/screenshare when chat is hidden',
+                'Added settings option to change behavior of collapsed elements when their corresponding button is disabled',
+                'Greatly improved plugin loading times and stability',
+                'Decreased initial plugin loading time',
+                'Fixed incorrect logic causing elements to not remain collapsed',
+                'Fixed HSL integration'
             ]
         }, {
             title: '4.0.0 - 4.4.2',
@@ -192,43 +191,38 @@ module.exports = (() => {
 
             // Initialize settings variables
 
-            /* BUTTON INDEX:               *
-             *-----------------------------*
-             * 0 - cui.serverListButton    *
-             * 1 - cui.channelListButton   *
-             * 2 - cui.msgBarButton        *
-             * 3 - cui.windowBarButton     *
-             * 4 - cui.membersListButton   *
-             * 5 - cui.userAreaButton      *
-             * 6 - cui.callContainerButton *
-             *-----------------------------*/
-
-            let disableTransitions = false;
-            let transitionSpeed = 250;
-
-            let disableToolbarCollapse = false;
-            let disableSettingsCollapse = false;
-            let enableFullToolbarCollapse = false;
-
-            let dynamicUncollapse = true;
-            let dynamicUncollapseDistance = 30;
-            let dynamicUncollapseDelay = 15;
-
-            let resizableChannelList = true;
-            let channelListWidth = 0;
-
-            let buttonsOrder = [1,2,4,6,7,3,5];
-            let dynamicUncollapseEnabled = [true,true,true,true,true,true,true];
-            let disabledButtonsStayCollapsed = false;
-
-            let settingsButtonsMaxWidth = 100;
-            let toolbarIconMaxWidth = 300;
-            let membersListMaxWidth = 240;
-            let toolbarMaxWidth = 800;
-            let userAreaMaxHeight = 300;
-            let msgBarMaxHeight = 400;
-            let windowBarHeight = 18;
-            let collapsedDistance = 0;
+            this.disableTransitions = false;
+            this.transitionSpeed = 250;
+            
+            this.disableToolbarCollapse = false;
+            this.disableSettingsCollapse = false;
+            this.enableFullToolbarCollapse = false;
+            
+            this.dynamicUncollapse = true;
+            this.dynamicUncollapseDistance = 30;
+            this.dynamicUncollapseDelay = 15;
+            
+            this.autoCollapse = false;
+            this.autoCollapseThreshold = [500, 600, 400, 200, 950, 400, 550];
+            
+            this.resizableChannelList = true;
+            this.channelListWidth = 0;
+            
+            this.buttonsOrder = [1, 2, 4, 6, 7, 3, 5];
+            this.dynamicUncollapseEnabled = [true, true, true, true, true, true, true];
+            this.disabledButtonsStayCollapsed = false;
+            
+            this.keyBindsEnabled = true;
+            this.keyStringList = ["Alt+S", "Alt+C", "Alt+T", "Alt+W", "Alt+M", "Alt+U", "Alt+P"];
+           
+            this.settingsButtonsMaxWidth = 100;
+            this.toolbarIconMaxWidth = 300;
+            this.membersListMaxWidth = 240;
+            this.toolbarMaxWidth = 800;
+            this.userAreaMaxHeight = 300;
+            this.msgBarMaxHeight = 400;
+            this.windowBarHeight = 18;
+            this.collapsedDistance = 0;
 
             // Define mouse tracking variables
             this.mouseX = 0;
@@ -262,7 +256,6 @@ module.exports = (() => {
             this.toolBar = document.querySelector('.toolbar-3_r2xA');
             this.searchBar = document.querySelector('.search-39IXmY');
             this.inviteToolbar = document.querySelector('.inviteToolbar-2k2nqz');
-            this.toolbarDivider = this.toolBar.querySelector('.divider-q3P9HC');
             this.windowBar = document.querySelector('.typeWindows-2-g3UY');
             this.wordMark = document.querySelector('.wordmark-2u86JB');
             this.msgBar = document.querySelector('.form-3gdLxP');
@@ -343,8 +336,8 @@ module.exports = (() => {
                 }
             } catch {}
 
-            // Add a mutation observer to improve plugin stability
-            this.mutationReloader = new MutationObserver((mutationList) => {
+            // Add mutation observer to improve plugin stability
+            this.settingsReloader = new MutationObserver((mutationList) => {
                 try {
                     if (mutationList[0].target.ariaHidden == 'false')
                         cui.initialize();
@@ -353,7 +346,13 @@ module.exports = (() => {
                     console.warn(e);
                 }
             });
-            this.mutationReloader.observe(this.baseLayer, {attributeFilter:['aria-hidden']});
+            this.settingsReloader.observe(this.baseLayer, {attributeFilter:['aria-hidden']});
+            
+            // Add interval to make sure toolbar container always exists
+            this.checkerInterval = setInterval(() => {
+                if (!document.getElementById('cui-toolbar-container'))
+                    cui.initialize()
+            }, 250)
 
             // Fix incompatibility between HSL and Dark Matter
             if (this.isHSLLoaded && this.isDarkMatterLoaded) {
@@ -391,13 +390,13 @@ module.exports = (() => {
                 BdApi.deleteData('CollapsibleUI', 'userAreaMaxHeight');
                 BdApi.deleteData('CollapsibleUI', 'msgBarMaxHeight');
                 BdApi.deleteData('CollapsibleUI', 'windowBarHeight');
-                BdApi.deleteData('CollapsibleUI', 'cui.serverListButtonActive');
-                BdApi.deleteData('CollapsibleUI', 'cui.channelListButtonActive');
-                BdApi.deleteData('CollapsibleUI', 'cui.msgBarButtonActive');
-                BdApi.deleteData('CollapsibleUI', 'cui.windowBarButtonActive');
-                BdApi.deleteData('CollapsibleUI', 'cui.membersListButtonActive');
-                BdApi.deleteData('CollapsibleUI', 'cui.userAreaButtonActive');
-                BdApi.deleteData('CollapsibleUI', 'cui.callContainerButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'serverListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'channelListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'msgBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'windowBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'membersListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'userAreaButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'callContainerButtonActive');
             }
             if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 3) {
                 // Clean up (v3)
@@ -416,176 +415,224 @@ module.exports = (() => {
                 // Clean up (v6)
                 BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDistance');
                 BdApi.deleteData('CollapsibleUI', 'dynamicUncollapseDelay');
+            }
+            if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 7) {
+                // Clean up (v7)
+                BdApi.deleteData('CollapsibleUI', 'cui.serverListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.channelListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.msgBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.windowBarButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.membersListButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.userAreaButtonActive');
+                BdApi.deleteData('CollapsibleUI', 'cui.callContainerButtonActive');
 
                 // Set new settings version
-                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '6');
+                BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '7');
             }
 
             // disableTransitions [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'false') {
-                disableTransitions = false;
+                cui.disableTransitions = false;
             } else if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'true') {
-                disableTransitions = true;
+                cui.disableTransitions = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'disableTransitions', 'false');
             }
 
             // transitionSpeed [Default: 250]
             if (typeof(BdApi.getData('CollapsibleUI', 'transitionSpeed')) === 'string') {
-                transitionSpeed = parseInt(BdApi.getData('CollapsibleUI', 'transitionSpeed'));
+                cui.transitionSpeed = parseInt(BdApi.getData('CollapsibleUI', 'transitionSpeed'));
             } else {
-                BdApi.setData('CollapsibleUI', 'transitionSpeed', transitionSpeed.toString());
+                BdApi.setData('CollapsibleUI', 'transitionSpeed', cui.transitionSpeed.toString());
             }
 
             // disableToolbarCollapse [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'false') {
-                disableToolbarCollapse = false;
+                cui.disableToolbarCollapse = false;
             } else if (BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'true') {
-                disableToolbarCollapse = true;
+                cui.disableToolbarCollapse = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'false');
             }
 
             // disableSettingsCollapse [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'false') {
-                disableSettingsCollapse = false;
+                cui.disableSettingsCollapse = false;
             } else if (BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'true') {
-                disableSettingsCollapse = true;
+                cui.disableSettingsCollapse = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
             }
 
             // enableFullToolbarCollapse [Default: false]
             if (BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'false') {
-                enableFullToolbarCollapse = false;
+                cui.enableFullToolbarCollapse = false;
             } else if (BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'true') {
-                enableFullToolbarCollapse = true;
+                cui.enableFullToolbarCollapse = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'false');
             }
 
             // dynamicUncollapse [Default: true]
             if (BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'false') {
-                dynamicUncollapse = false;
+                cui.dynamicUncollapse = false;
             } else if (BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true') {
-                dynamicUncollapse = true;
+                cui.dynamicUncollapse = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
             }
 
             // dynamicUncollapseDistance [Default: 30]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')) === 'string') {
-                dynamicUncollapseDistance = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'));
+                cui.dynamicUncollapseDistance = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance'));
             } else {
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', dynamicUncollapseDistance.toString());
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', cui.dynamicUncollapseDistance.toString());
             }
 
             // dynamicUncollapseDelay [Default: 15]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay')) === 'string') {
-                dynamicUncollapseDelay = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay'));
+                cui.dynamicUncollapseDelay = parseInt(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay'));
             } else {
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseDelay', dynamicUncollapseDelay.toString());
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseDelay', cui.dynamicUncollapseDelay.toString());
+            }
+
+            // autoCollapse [Default: false]
+            if (BdApi.getData('CollapsibleUI', 'autoCollapse') === 'false') {
+                cui.autoCollapse = false;
+            } else if (BdApi.getData('CollapsibleUI', 'autoCollapse') === 'true') {
+                cui.autoCollapse = true;
+            } else {
+                BdApi.setData('CollapsibleUI', 'autoCollapse', 'false');
+            }
+
+            // autoCollapseThreshold [Default: [500, 600, 400, 200, 950, 400, 550]]
+            if (typeof(BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')) === 'string') {
+                if (BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',').map(Number).length = cui.autoCollapseThreshold.length)
+                    cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',').map(Number);
+                else
+                    BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            } else {
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
             }
 
             // resizableChannelList [Default: true]
             if (BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'false') {
-                resizableChannelList = false;
+                cui.resizableChannelList = false;
             } else if (BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true') {
-                resizableChannelList = true;
+                cui.resizableChannelList = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
             }
 
             // channelListWidth [Default: 0]
             if (typeof(BdApi.getData('CollapsibleUI', 'channelListWidth')) === 'string') {
-                channelListWidth = parseInt(BdApi.getData('CollapsibleUI', 'channelListWidth'));
+                cui.channelListWidth = parseInt(BdApi.getData('CollapsibleUI', 'channelListWidth'));
             } else {
-                BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                BdApi.setData('CollapsibleUI', 'channelListWidth', cui.channelListWidth.toString());
             }
 
-            // buttonsOrder [Default: [1,2,4,6,7,3,5]]
+            // buttonsOrder [Default: [1, 2, 4, 6, 7, 3, 5]]
             if (typeof(BdApi.getData('CollapsibleUI', 'buttonsOrder')) === 'string') {
-                if (BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number).length = buttonsOrder.length)
-                    buttonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
+                if (BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number).length = cui.buttonsOrder.length)
+                    cui.buttonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 else
-                    BdApi.setData('CollapsibleUI', 'buttonsOrder', buttonsOrder.toString());
+                    BdApi.setData('CollapsibleUI', 'buttonsOrder', cui.buttonsOrder.toString());
             } else {
-                BdApi.setData('CollapsibleUI', 'buttonsOrder', buttonsOrder.toString());
+                BdApi.setData('CollapsibleUI', 'buttonsOrder', cui.buttonsOrder.toString());
             }
 
-            // dynamicUncollapseEnabled [Default: [true,true,true,true,true,true,true]]
+            // dynamicUncollapseEnabled [Default: [true, true, true, true, true, true, true]]
             if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')) === 'string') {
-                if (BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false).length = dynamicUncollapseEnabled.length)
-                    dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                if (BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false).length = cui.dynamicUncollapseEnabled.length)
+                    cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
                 else
-                    BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                    BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             } else {
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             }
 
             // disabledButtonsStayCollapsed [Default: false]
             if (BdApi.getData('CollapsibleUI', 'disabledButtonsStayCollapsed') === 'false') {
-                disabledButtonsStayCollapsed = false;
+                cui.disabledButtonsStayCollapsed = false;
             } else if (BdApi.getData('CollapsibleUI', 'disabledButtonsStayCollapsed') === 'true') {
-                disabledButtonsStayCollapsed = true;
+                cui.disabledButtonsStayCollapsed = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'false');
             }
 
+            // keyBindsEnabled [Default: true]
+            if (BdApi.getData('CollapsibleUI', 'keyBindsEnabled') === 'false') {
+                cui.keyBindsEnabled = false;
+            } else if (BdApi.getData('CollapsibleUI', 'keyBindsEnabled') === 'true') {
+                cui.keyBindsEnabled = true;
+            } else {
+                BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'true');
+            }
+
+            // keyStringList [Default: ["Alt+S", "Alt+C", "Alt+T", "Alt+W", "Alt+M", "Alt+U", "Alt+P"]]
+            if (typeof(BdApi.getData('CollapsibleUI', 'keyStringList')) === 'string') {
+                if (BdApi.getData('CollapsibleUI', 'keyStringList').split(',').length = cui.keyStringList.length)
+                    cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                else
+                    BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            } else {
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            }
+
             // settingsButtonsMaxWidth [Default: 100]
             if (typeof(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth')) === 'string') {
-                settingsButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'));
+                cui.settingsButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'));
             } else {
-                BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', settingsButtonsMaxWidth.toString());
+                BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', cui.settingsButtonsMaxWidth.toString());
             }
 
             // toolbarIconMaxWidth [Default: 300]
             if (typeof(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth')) === 'string') {
-                toolbarIconMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'));
+                cui.toolbarIconMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'));
             } else {
-                BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', toolbarIconMaxWidth.toString());
+                BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', cui.toolbarIconMaxWidth.toString());
             }
 
             // membersListMaxWidth [Default: 240]
             if (typeof(BdApi.getData('CollapsibleUI', 'membersListMaxWidth')) === 'string') {
-                membersListMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'membersListMaxWidth'));
+                cui.membersListMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'membersListMaxWidth'));
             } else {
-                BdApi.setData('CollapsibleUI', 'membersListMaxWidth', membersListMaxWidth.toString());
+                BdApi.setData('CollapsibleUI', 'membersListMaxWidth', cui.membersListMaxWidth.toString());
             }
 
             // toolbarMaxWidth [Default: 800]
             if (typeof(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth')) === 'string') {
-                toolbarMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'));
+                cui.toolbarMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'));
             } else {
-                BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', toolbarMaxWidth.toString());
+                BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', cui.toolbarMaxWidth.toString());
             }
 
             // userAreaMaxHeight [Default: 300]
             if (typeof(BdApi.getData('CollapsibleUI', 'userAreaMaxHeight')) === 'string') {
-                userAreaMaxHeight = parseInt(BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'));
+                cui.userAreaMaxHeight = parseInt(BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'));
             } else {
-                BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', userAreaMaxHeight.toString());
+                BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', cui.userAreaMaxHeight.toString());
             }
 
             // msgBarMaxHeight [Default: 400]
             if (typeof(BdApi.getData('CollapsibleUI', 'msgBarMaxHeight')) === 'string') {
-                msgBarMaxHeight = parseInt(BdApi.getData('CollapsibleUI', 'msgBarMaxHeight'));
+                cui.msgBarMaxHeight = parseInt(BdApi.getData('CollapsibleUI', 'msgBarMaxHeight'));
             } else {
-                BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', msgBarMaxHeight.toString());
+                BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', cui.msgBarMaxHeight.toString());
             }
 
             // windowBarHeight [Default: 18]
             if (typeof(BdApi.getData('CollapsibleUI', 'windowBarHeight')) === 'string') {
-                windowBarHeight = parseInt(BdApi.getData('CollapsibleUI', 'windowBarHeight'));
+                cui.windowBarHeight = parseInt(BdApi.getData('CollapsibleUI', 'windowBarHeight'));
             } else {
-                BdApi.setData('CollapsibleUI', 'windowBarHeight', windowBarHeight.toString());
+                BdApi.setData('CollapsibleUI', 'windowBarHeight', cui.windowBarHeight.toString());
             }
 
             // collapsedDistance [Default: 0]
             if (typeof(BdApi.getData('CollapsibleUI', 'collapsedDistance')) === 'string') {
-                collapsedDistance = parseInt(BdApi.getData('CollapsibleUI', 'collapsedDistance'));
+                cui.collapsedDistance = parseInt(BdApi.getData('CollapsibleUI', 'collapsedDistance'));
             } else {
-                BdApi.setData('CollapsibleUI', 'collapsedDistance', collapsedDistance.toString());
+                BdApi.setData('CollapsibleUI', 'collapsedDistance', cui.collapsedDistance.toString());
             }
 
             // Purge CollapsibleUI toolbar icons
@@ -632,66 +679,65 @@ module.exports = (() => {
             // Insert icons in the correct spot
             if (this.inviteToolbar || this.searchBar)
                 this.toolBar.insertBefore(toolbarContainer, (this.inviteToolbar) ? this.inviteToolbar.nextElementSibling : this.searchBar);
-            else if (this.toolbarDivider)
-                this.toolBar.insertBefore(toolbarContainer, this.toolbarDivider);
+            else this.toolBar.appendChild(toolbarContainer);
 
             // Update locale strings
             this.getLabels();
 
             // Define & add new toolbar icons
             // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
-            var buttonsActive = buttonsOrder;
-            for (let i = 1; i <= buttonsOrder.length; i++) { // lgtm[js/unused-index-variable]
-                if (i == buttonsOrder[0]) {
-                    if (buttonsOrder[0]) {
+            var buttonsActive = cui.buttonsOrder;
+            for (let i = 1; i <= cui.buttonsOrder.length; i++) { // lgtm[js/unused-index-variable]
+                if (i == cui.buttonsOrder[0]) {
+                    if (cui.buttonsOrder[0]) {
                         this.serverListButton = this.addToolbarIcon(this.localeLabels.serverList, '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.857V-0.571z"/>', '-4 -4 24 24');
                     } else {
                         this.serverListButton = false;
                         buttonsActive[0] = 0;
                     }
                 }
-                if (i == buttonsOrder[1]) {
-                    if (buttonsOrder[1]) {
+                if (i == cui.buttonsOrder[1]) {
+                    if (cui.buttonsOrder[1]) {
                         this.channelListButton = this.addToolbarIcon(this.localeLabels.channelList, '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
                     } else {
                         this.channelListButton = false;
                         buttonsActive[1] = 0;
                     }
                 }
-                if (i == buttonsOrder[2]) {
-                    if (buttonsOrder[2] && this.msgBar) {
+                if (i == cui.buttonsOrder[2]) {
+                    if (cui.buttonsOrder[2] && this.msgBar) {
                         this.msgBarButton = this.addToolbarIcon(this.localeLabels.msgBar, '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
                     } else {
                         this.msgBarButton = false;
                         buttonsActive[2] = 0;
                     }
                 }
-                if (i == buttonsOrder[3]) {
-                    if (buttonsOrder[3] && this.windowBar && !(BdApi.Plugins.isEnabled('OldTitleBar'))) {
+                if (i == cui.buttonsOrder[3]) {
+                    if (cui.buttonsOrder[3] && this.windowBar && !(BdApi.Plugins.isEnabled('OldTitleBar'))) {
                         this.windowBarButton = this.addToolbarIcon(this.localeLabels.windowBar, '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
                     } else {
                         this.windowBarButton = false;
                         buttonsActive[3] = 0;
                     }
                 }
-                if (i == buttonsOrder[4]) {
-                    if (buttonsOrder[4] && this.membersList) {
+                if (i == cui.buttonsOrder[4]) {
+                    if (cui.buttonsOrder[4] && this.membersList) {
                         this.membersListButton = this.addToolbarIcon(this.localeLabels.membersList, '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
                     } else {
                         this.membersListButton = false;
                         buttonsActive[4] = 0;
                     }
                 }
-                if (i == buttonsOrder[5]) {
-                    if (buttonsOrder[5] && this.userArea) {
+                if (i == cui.buttonsOrder[5]) {
+                    if (cui.buttonsOrder[5] && this.userArea) {
                         this.userAreaButton = this.addToolbarIcon(this.localeLabels.userArea, '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.125,8.75z"/>', '-4 -4 24 24');
                     } else {
                         this.userAreaButton = false;
                         buttonsActive[5] = 0;
                     }
                 }
-                if (i == buttonsOrder[6]) {
-                    if (buttonsOrder[6] && document.querySelector('.' + cui.classConnectionArea)) {
+                if (i == cui.buttonsOrder[6]) {
+                    if (cui.buttonsOrder[6] && document.querySelector('.' + cui.classConnectionArea)) {
                         this.callContainerButton = this.addToolbarIcon(this.localeLabels.callContainer, '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.189-0.149c-0.028,0.021-0.055,0.045-0.079,0.07L0.006,0.875C-0.597,1.48-0.82,2.336-0.556,3.087c1.095,3.11,2.875,5.933,5.21,8.259c2.328,2.336,5.15,4.116,8.26,5.21c0.752,0.264,1.606,0.042,2.212-0.562l1.292-1.294c0.332-0.329,0.332-0.866,0.002-1.196c-0.024-0.026-0.052-0.049-0.08-0.07l-2.884-2.244c-0.205-0.158-0.474-0.215-0.725-0.151l-2.737,0.684c-0.744,0.186-1.53-0.032-2.071-0.573l-3.07-3.072C4.311,7.536,4.092,6.75,4.278,6.007l0.685-2.738C5.026,3.017,4.97,2.75,4.81,2.543L2.567-0.34z M0.354-1.361c0.852-0.852,2.234-0.852,3.085,0C3.504-1.297,3.564-1.229,3.62-1.158l2.242,2.883c0.412,0.529,0.557,1.218,0.394,1.868L5.573,6.33C5.501,6.618,5.585,6.923,5.795,7.134l3.071,3.071c0.21,0.21,0.516,0.295,0.806,0.222l2.734-0.684c0.651-0.161,1.34-0.017,1.868,0.395l2.883,2.242c1.035,0.806,1.131,2.338,0.204,3.264l-1.293,1.292c-0.925,0.925-2.307,1.332-3.596,0.879c-3.299-1.162-6.293-3.05-8.763-5.525C1.234,9.82-0.654,6.826-1.815,3.527C-2.267,2.24-1.861,0.856-0.936-0.069l1.292-1.292H0.354z"/>', '-4 -4 24 24');
                     } else {
                         this.callContainerButton = false;
@@ -701,13 +747,13 @@ module.exports = (() => {
             }
 
             // Collapse toolbar
-            if (enableFullToolbarCollapse) {
+            if (cui.enableFullToolbarCollapse) {
                 var singleButtonWidth = this.serverListButton.getBoundingClientRect().width + parseInt(window.getComputedStyle(this.serverListButton).marginRight) + 'px';
                 this.toolBar.style.maxWidth = singleButtonWidth;
             }
 
             // Collapse toolbar buttons
-            if (!disableToolbarCollapse) {
+            if (!cui.disableToolbarCollapse) {
                 if (this.serverListButton) {
                     this.serverListButton.style.maxWidth = '0px';
                     this.serverListButton.style.margin = '0px';
@@ -745,31 +791,31 @@ module.exports = (() => {
                 }
 
                 if (this.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
-                    this.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.membersListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.membersListButton.style.removeProperty('margin');
                     this.membersListButton.style.removeProperty('padding');
                 } else if (this.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
-                    this.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.windowBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.windowBarButton.style.removeProperty('margin');
                     this.windowBarButton.style.removeProperty('padding');
                 } else if (this.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
-                    this.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.msgBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.msgBarButton.style.removeProperty('margin');
                     this.msgBarButton.style.removeProperty('padding');
                 } else if (this.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
-                    this.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.channelListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.channelListButton.style.removeProperty('margin');
                     this.channelListButton.style.removeProperty('padding');
                 } else if (this.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
-                    this.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.serverListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.serverListButton.style.removeProperty('margin');
                     this.serverListButton.style.removeProperty('padding');
                 } else if (this.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
-                    this.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.userAreaButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.userAreaButton.style.removeProperty('margin');
                     this.userAreaButton.style.removeProperty('padding');
                 } else if (this.callContainerButton && (buttonsActive[6] == Math.max.apply(Math, buttonsActive))) {
-                    this.callContainerButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                    this.callContainerButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                     this.callContainerButton.style.removeProperty('margin');
                     this.callContainerButton.style.removeProperty('padding');
                 } else {
@@ -778,37 +824,37 @@ module.exports = (() => {
             }
 
             // Collapse settings buttons
-            if (!disableSettingsCollapse) {
+            if (!cui.disableSettingsCollapse) {
                 // Define settings buttons array
                 var settingsButtons = this.settingsContainer.children;
 
                 // Collapse settings buttons
                 for (let i = 0; i < (settingsButtons.length - 1); i++) {
                     settingsButtons[i].style.maxWidth = '0px';
-                    if (!disableTransitions)
-                        settingsButtons[i].style.transition = 'max-width ' + transitionSpeed + 'ms';
+                    if (!cui.disableTransitions)
+                        settingsButtons[i].style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
                     settingsButtons[i].style.overflow = 'hidden';
                 }
             }
 
             // Adjust UI element styling in preparation for transitions
-            if (!disableTransitions) {
-                document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + transitionSpeed + 'ms, margin ' + transitionSpeed + 'ms, padding ' + transitionSpeed + 'ms');
-                this.toolBar.style.transition = 'max-width ' + transitionSpeed + 'ms';
+            if (!cui.disableTransitions) {
+                document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + cui.transitionSpeed + 'ms, margin ' + cui.transitionSpeed + 'ms, padding ' + cui.transitionSpeed + 'ms');
+                this.toolBar.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
 
                 if (this.windowBar) {
                     if (this.isDarkMatterLoaded)
                         this.windowBar.style.height = '26px';
                     else
-                        this.windowBar.style.height = windowBarHeight + 'px';
+                        this.windowBar.style.height = cui.windowBarHeight + 'px';
                 }
                 if (this.membersList) {
                     this.membersList.style.overflow = 'hidden';
-                    this.membersList.style.maxWidth = membersListMaxWidth + 'px';
+                    this.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
                     this.membersList.style.minHeight = '100%';
                 }
                 if (this.msgBar) {
-                    this.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
+                    this.msgBar.style.maxHeight = cui.msgBarMaxHeight + 'px';
                 }
                 if (this.callContainerExists) {
                     document.querySelector('.' + this.classCallContainer).style.minHeight = '0px';
@@ -823,13 +869,13 @@ module.exports = (() => {
 
             // Read stored user data to decide active state of Server List button
             if (this.serverList) {
-                if (buttonsOrder[0] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') {
+                if (cui.buttonsOrder[0] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
                         if (this.serverListButton) this.serverListButton.classList.remove(this.classSelected);
-                        if (disableTransitions) {
+                        if (cui.disableTransitions) {
                             this.serverList.style.display = 'none';
                         } else {
-                            this.serverList.style.width = collapsedDistance + 'px';
+                            this.serverList.style.width = cui.collapsedDistance + 'px';
                             if (cui.isDarkMatterLoaded) {
                                 cui.settingsContainerBase.style.width = '100%';
                                 cui.settingsContainerBase.style.left = '0px';
@@ -839,64 +885,64 @@ module.exports = (() => {
                         if (this.isHSLLoaded) {
                             this.windowBase.style.setProperty('top', '0px', 'important');
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
                         if (this.serverListButton) this.serverListButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
                         if (this.serverListButton) this.serverListButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Channel List button
             if (this.channelList) {
-                if (buttonsOrder[1] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') {
+                if (cui.buttonsOrder[1] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
                         if (this.channelListButton) this.channelListButton.classList.remove(this.classSelected);
-                        if (disableTransitions) {
+                        if (cui.disableTransitions) {
                             this.channelList.style.display = 'none';
                         } else {
-                            this.channelList.style.width = collapsedDistance + 'px';
+                            this.channelList.style.width = cui.collapsedDistance + 'px';
                             if (this.isDarkMatterLoaded) {
                                 this.settingsContainer.style.display = 'none';
                                 if (cui.spotifyContainer)
                                     cui.spotifyContainer.style.display = 'none';
                             }
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
                         if (this.channelListButton) this.channelListButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
                         if (this.channelListButton) this.channelListButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Message Bar button
             if (this.msgBar) {
-                if (buttonsOrder[2] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') {
+                if (cui.buttonsOrder[2] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
                         if (this.msgBarButton) this.msgBarButton.classList.remove(this.classSelected);
-                        if (disableTransitions) {
+                        if (cui.disableTransitions) {
                             this.msgBar.style.display = 'none';
                         } else {
-                            this.msgBar.style.maxHeight = collapsedDistance + 'px';
+                            this.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
                         if (this.msgBarButton) this.msgBarButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
                         if (this.msgBarButton) this.msgBarButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Window Bar button
             if (this.windowBar) {
-                if (buttonsOrder[3] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') {
+                if (cui.buttonsOrder[3] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') {
                         if (this.windowBarButton) this.windowBarButton.classList.remove(this.classSelected);
-                        if (disableTransitions) {
+                        if (cui.disableTransitions) {
                             this.windowBar.style.display = 'none';
                         } else {
                             this.windowBar.style.height = '0px';
@@ -907,61 +953,61 @@ module.exports = (() => {
                             this.windowBar.style.overflow = 'hidden';
                             this.wordMark.style.display = 'none';
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
                         if (this.windowBarButton) this.windowBarButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
                         if (this.windowBarButton) this.windowBarButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Members List button
             if (this.membersList) {
-                if (buttonsOrder[4] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') {
+                if (cui.buttonsOrder[4] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
                         if (this.membersListButton) this.membersListButton.classList.remove(this.classSelected);
-                        if (disableTransitions) {
+                        if (cui.disableTransitions) {
                             this.membersList.style.display = 'none';
                         } else {
-                            this.membersList.style.maxWidth = collapsedDistance + 'px';
+                            this.membersList.style.maxWidth = cui.collapsedDistance + 'px';
                             this.membersList.style.minWidth = '0px';
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
                         if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
                         if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of User Area button
             if (this.userArea) {
-                if (buttonsOrder[5] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') {
+                if (cui.buttonsOrder[5] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') {
                         if (this.userAreaButton) this.userAreaButton.classList.remove(this.classSelected);
-                        if (disableTransitions) {
+                        if (cui.disableTransitions) {
                             this.userArea.style.display = 'none';
                         } else {
-                            this.userArea.style.maxHeight = collapsedDistance + 'px';
+                            this.userArea.style.maxHeight = cui.collapsedDistance + 'px';
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
                         if (this.userAreaButton) this.userAreaButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
                         if (this.userAreaButton) this.userAreaButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
             }
 
             // Read stored user data to decide active state of Call Container button
             if (document.querySelector('.' + this.classCallContainer)) {
-                if (buttonsOrder[6] || disabledButtonsStayCollapsed) {
-                    if (BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') {
+                if (cui.buttonsOrder[6] || cui.disabledButtonsStayCollapsed) {
+                    if (BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'false') {
                         if (this.callContainerButton) this.callContainerButton.classList.remove(this.classSelected);
                         if (document.querySelector('.' + this.classCallContainer)) {
-                            if (disableTransitions) {
+                            if (cui.disableTransitions) {
                                 document.querySelector('.' + this.classCallContainer).style.display = 'none';
                             } else {
                                 document.querySelector('.' + this.classCallContainer).style.height = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
@@ -969,20 +1015,20 @@ module.exports = (() => {
                                     document.querySelector('.' + this.classCallUserWrapper).style.display = 'none';
                             }
                         }
-                    } else if (BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'true') {
+                    } else if (BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'true') {
                         if (this.callContainerButton) this.callContainerButton.classList.add(this.classSelected);
                     } else {
-                        BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
+                        BdApi.setData('CollapsibleUI', 'callContainerButtonActive', 'true');
                         if (this.callContainerButton) this.callContainerButton.classList.add(this.classSelected);
                     }
-                } else BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
+                } else BdApi.setData('CollapsibleUI', 'callContainerButtonActive', 'true');
             }
 
             // Apply transitions to UI elements
-            if (!disableTransitions) {
+            if (!cui.disableTransitions) {
 
                 // Handle resizing channel list
-                if (resizableChannelList) {
+                if (cui.resizableChannelList) {
                     this.channelList.style.resize = 'horizontal';
                     this.channelList.style.maxWidth = '80vw';
 
@@ -990,83 +1036,83 @@ module.exports = (() => {
                         cui.channelList.style.transition = 'none';
                     }, {signal: cui.eventListenerSignal});
                     document.body.addEventListener('mouseup', function (){
-                        cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                        cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                     }, {signal: cui.eventListenerSignal});
 
                     this.channelList.addEventListener('contextmenu', function (event){
                         if(event.target !== event.currentTarget) return;
                         clearInterval(cui.channelListWidthChecker);
-                        channelListWidth = 0;
-                        BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                        cui.channelListWidth = 0;
+                        BdApi.setData('CollapsibleUI', 'channelListWidth', cui.channelListWidth.toString());
                         cui.channelList.style.removeProperty('width');
                         cui.channelListWidthChecker = setInterval(function(){
-                            if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
-                                let oldChannelListWidth = channelListWidth;
+                            if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true')) {
+                                let oldChannelListWidth = cui.channelListWidth;
                                 if (parseInt(cui.channelList.style.width)) {
-                                    channelListWidth = parseInt(cui.channelList.style.width);
-                                } else if (channelListWidth != 0) {
+                                    cui.channelListWidth = parseInt(cui.channelList.style.width);
+                                } else if (cui.channelListWidth != 0) {
                                     cui.channelList.style.transition = 'none';
-                                    cui.channelList.style.width = channelListWidth + 'px';
-                                    cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                                    cui.channelList.style.width = cui.channelListWidth + 'px';
+                                    cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                                 } else {
                                     cui.channelList.style.removeProperty('width');
                                 }
-                                if (oldChannelListWidth != channelListWidth)
-                                    BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                                if (oldChannelListWidth != cui.channelListWidth)
+                                    BdApi.setData('CollapsibleUI', 'channelListWidth', cui.channelListWidth.toString());
                             }
                         }, 100);
                         event.preventDefault();
                     }, {signal: cui.eventListenerSignal});
 
                     this.channelListWidthChecker = setInterval(function(){
-                        if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true')) {
-                            let oldChannelListWidth = channelListWidth;
+                        if ((!cui.isCollapsed[1]) || (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true')) {
+                            let oldChannelListWidth = cui.channelListWidth;
                             if (parseInt(cui.channelList.style.width)) {
-                                channelListWidth = parseInt(cui.channelList.style.width);
-                            } else if (channelListWidth != 0) {
+                                cui.channelListWidth = parseInt(cui.channelList.style.width);
+                            } else if (cui.channelListWidth != 0) {
                                 cui.channelList.style.transition = 'none';
-                                cui.channelList.style.width = channelListWidth + 'px';
-                                cui.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                                cui.channelList.style.width = cui.channelListWidth + 'px';
+                                cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                             } else {
                                 cui.channelList.style.removeProperty('width');
                             }
-                            if (oldChannelListWidth != channelListWidth)
-                                BdApi.setData('CollapsibleUI', 'channelListWidth', channelListWidth.toString());
+                            if (oldChannelListWidth != cui.channelListWidth)
+                                BdApi.setData('CollapsibleUI', 'channelListWidth', cui.channelListWidth.toString());
                         }
                     }, 100);
                 }
-                if (channelListWidth != 0) {
+                if (cui.channelListWidth != 0) {
                     this.channelList.style.transition = 'none';
-                    this.channelList.style.width = channelListWidth + 'px';
+                    this.channelList.style.width = cui.channelListWidth + 'px';
                 }
-                this.channelList.style.transition = 'width ' + transitionSpeed + 'ms';
+                this.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
 
-                this.serverList.style.transition = 'width ' + transitionSpeed + 'ms';
+                this.serverList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                 if (this.windowBar) {
-                    this.windowBar.style.transition = 'height ' + transitionSpeed + 'ms';
+                    this.windowBar.style.transition = 'height ' + cui.transitionSpeed + 'ms';
                 }
                 if (this.membersList) {
-                    this.membersList.style.transition = 'max-width ' + transitionSpeed + 'ms, min-width ' + transitionSpeed + 'ms';
+                    this.membersList.style.transition = 'max-width ' + cui.transitionSpeed + 'ms, min-width ' + cui.transitionSpeed + 'ms';
                 }
 
                 if (this.msgBar) {
-                    this.msgBar.style.transition = 'max-height ' + transitionSpeed + 'ms';
+                    this.msgBar.style.transition = 'max-height ' + cui.transitionSpeed + 'ms';
                 }
 
                 if (this.userArea) {
-                    this.userArea.style.transition = 'max-height ' + transitionSpeed + 'ms';
+                    this.userArea.style.transition = 'max-height ' + cui.transitionSpeed + 'ms';
                 }
                 if (document.querySelector('.' + this.classCallContainer)) {
-                    document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + transitionSpeed + 'ms';
+                    document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + cui.transitionSpeed + 'ms';
                 }
                 if (this.windowBase) {
                     if (this.isDarkMatterLoaded)
-                        this.windowBase.style.transition = 'top ' + transitionSpeed + 'ms, min-width ' + transitionSpeed + 'ms';
+                        this.windowBase.style.transition = 'top ' + cui.transitionSpeed + 'ms, min-width ' + cui.transitionSpeed + 'ms';
                     else
-                        this.windowBase.style.transition = 'top ' + transitionSpeed + 'ms';
+                        this.windowBase.style.transition = 'top ' + cui.transitionSpeed + 'ms';
                 }
                 if (this.isDarkMatterLoaded) {
-                    this.settingsContainerBase.style.transition = 'width ' + transitionSpeed + 'ms, left ' + transitionSpeed + 'ms';
+                    this.settingsContainerBase.style.transition = 'width ' + cui.transitionSpeed + 'ms, left ' + cui.transitionSpeed + 'ms';
                 }
             }
 
@@ -1080,8 +1126,58 @@ module.exports = (() => {
                 }
             }, 100);
 
-            // Implement dynamic uncollapse feature
-            if (dynamicUncollapse && !disableTransitions) {
+            // Implement dynamic uncollapse features
+            if (cui.dynamicUncollapse && !cui.disableTransitions) {
+                
+                // Add event listener to window to autocollapse elements if window becomes too small
+                if (cui.autoCollapse) {
+                    window.addEventListener('resize', function(event){
+                        if (cui.isHSLLoaded) {
+                            if (cui.serverListButton &&
+                               ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[0] && BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') ||
+                                (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[0] && BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false'))) {
+                                cui.toggleButton(0);
+                            }
+                        } else {
+                            if (cui.serverListButton &&
+                               ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[0] && BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') ||
+                                (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[0] && BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false'))) {
+                                cui.toggleButton(0);
+                            }
+                        }
+                        if (cui.channelListButton &&
+                           ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[1] && BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') ||
+                            (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[1] && BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false'))) {
+                            cui.toggleButton(1);
+                        }
+                        if (cui.msgBarButton &&
+                           ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[2] && BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') ||
+                            (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[2] && BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false'))) {
+                            cui.toggleButton(2);
+                        }
+                        if (cui.windowBarButton &&
+                           ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[3] && BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') ||
+                            (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[3] && BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false'))) {
+                            cui.toggleButton(3);
+                        }
+                        if (cui.membersListButton &&
+                           ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[4] && BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') ||
+                            (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[4] && BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false'))) {
+                            cui.toggleButton(4);
+                        }
+                        if (cui.userAreaButton &&
+                           ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[5] && BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') ||
+                            (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[5] && BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false'))) {
+                            cui.toggleButton(5);
+                        }
+                        if (cui.callContainerButton &&
+                           ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[6] && BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'true') ||
+                            (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[6] && BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'false'))) {
+                            cui.toggleButton(6);
+                        }
+                    }, {signal: cui.eventListenerSignal});
+                }
+                
                 // Add event listener to document body to track cursor location & check if it is near collapsed elements
                 document.body.addEventListener('mousemove', function(event){
 
@@ -1118,8 +1214,8 @@ module.exports = (() => {
                     }
 
                     // Server List
-                    if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverList) {
-                        if (dynamicUncollapseEnabled[0] && cui.isCollapsed[0] && cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                    if ((BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') && cui.serverList) {
+                        if (cui.dynamicUncollapseEnabled[0] && cui.isCollapsed[0] && cui.isNear(cui.serverList, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             if (cui.serverDUDelay) {
                                 clearTimeout(cui.serverDUDelay);
                                 cui.serverDUDelay = false;
@@ -1135,13 +1231,13 @@ module.exports = (() => {
                                 }
                                 cui.isCollapsed[0] = false;
                                 cui.serverDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[0] || ((!(cui.isCollapsed[0]) || cui.serverDUDelay) && !(cui.isNear(cui.serverList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[0] || ((!(cui.isCollapsed[0]) || cui.serverDUDelay) && !(cui.isNear(cui.serverList, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.serverDUDelay) {
                                 clearTimeout(cui.serverDUDelay);
                                 cui.serverDUDelay = false;
                             }
-                            cui.serverList.style.width = collapsedDistance + 'px';
+                            cui.serverList.style.width = cui.collapsedDistance + 'px';
                             if (cui.isHSLLoaded)
                                 cui.windowBase.style.setProperty('top', '0px', 'important');
                             if (cui.isDarkMatterLoaded) {
@@ -1154,8 +1250,8 @@ module.exports = (() => {
                     }
 
                     // Channel List
-                    if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelList) {
-                        if (dynamicUncollapseEnabled[1] && cui.isCollapsed[1] && cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                    if ((BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') && cui.channelList) {
+                        if (cui.dynamicUncollapseEnabled[1] && cui.isCollapsed[1] && cui.isNear(cui.channelList, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             if (cui.channelDUDelay) {
                                 clearTimeout(cui.channelDUDelay);
                                 cui.channelDUDelay = false;
@@ -1169,13 +1265,13 @@ module.exports = (() => {
                                 }
                                 cui.isCollapsed[1] = false;
                                 cui.channelDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[1] || (!(cui.isCollapsed[1]) && !(cui.isNear(cui.channelList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[1] || (!(cui.isCollapsed[1]) && !(cui.isNear(cui.channelList, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.channelDUDelay) {
                                 clearTimeout(cui.channelDUDelay);
                                 cui.channelDUDelay = false;
                             }
-                            cui.channelList.style.width = collapsedDistance + 'px';
+                            cui.channelList.style.width = cui.collapsedDistance + 'px';
                             if (cui.isDarkMatterLoaded) {
                                 cui.settingsContainer.style.display = 'none';
                                 if (cui.spotifyContainer)
@@ -1186,30 +1282,30 @@ module.exports = (() => {
                     }
 
                     // Message Bar
-                    if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBar) {
-                        if (dynamicUncollapseEnabled[2] && cui.isCollapsed[2] && cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                    if ((BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') && cui.msgBar) {
+                        if (cui.dynamicUncollapseEnabled[2] && cui.isCollapsed[2] && cui.isNear(cui.msgBar, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             if (cui.messageDUDelay) {
                                 clearTimeout(cui.messageDUDelay);
                                 cui.messageDUDelay = false;
                             }
                             cui.messageDUDelay = setTimeout(() => {
-                                cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
+                                cui.msgBar.style.maxHeight = cui.msgBarMaxHeight + 'px';
                                 cui.isCollapsed[2] = false;
                                 cui.messageDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[2] || (!(cui.isCollapsed[2]) && !(cui.isNear(cui.msgBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[2] || (!(cui.isCollapsed[2]) && !(cui.isNear(cui.msgBar, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.messageDUDelay) {
                                 clearTimeout(cui.messageDUDelay);
                                 cui.messageDUDelay = false;
                             }
-                            cui.msgBar.style.maxHeight = collapsedDistance + 'px';
+                            cui.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
                             cui.isCollapsed[2] = true;
                         }
                     }
 
                     // Window Bar
-                    if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBar) {
-                        if (dynamicUncollapseEnabled[3] && cui.isCollapsed[3] && cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                    if ((BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') && cui.windowBar) {
+                        if (cui.dynamicUncollapseEnabled[3] && cui.isCollapsed[3] && cui.isNear(cui.windowBar, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             if (cui.windowDUDelay) {
                                 clearTimeout(cui.windowDUDelay);
                                 cui.windowDUDelay = false;
@@ -1219,15 +1315,15 @@ module.exports = (() => {
                                     cui.windowBar.style.height = '26px';
                                     cui.windowBar.style.removeProperty('opacity');
                                 } else
-                                    cui.windowBar.style.height = windowBarHeight + 'px';
+                                    cui.windowBar.style.height = cui.windowBarHeight + 'px';
                                 cui.windowBar.style.removeProperty('padding');
                                 cui.windowBar.style.removeProperty('margin');
                                 cui.wordMark.style.removeProperty('display');
                                 cui.windowBar.style.removeProperty('overflow');
                                 cui.isCollapsed[3] = false;
                                 cui.windowDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[3] || (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[3] || (!(cui.isCollapsed[3]) && !(cui.isNear(cui.windowBar, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.windowDUDelay) {
                                 clearTimeout(cui.windowDUDelay);
                                 cui.windowDUDelay = false;
@@ -1244,54 +1340,54 @@ module.exports = (() => {
                     }
 
                     // Members List
-                    if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersList) {
-                        if (dynamicUncollapseEnabled[4] && cui.isCollapsed[4] && cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                    if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && cui.membersList) {
+                        if (cui.dynamicUncollapseEnabled[4] && cui.isCollapsed[4] && cui.isNear(cui.membersList, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                             if (cui.membersDUDelay) {
                                 clearTimeout(cui.membersDUDelay);
                                 cui.membersDUDelay = false;
                             }
                             cui.membersDUDelay = setTimeout(() => {
-                                cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
+                                cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
                                 cui.membersList.style.removeProperty('min-width');
                                 cui.isCollapsed[4] = false;
                                 cui.membersDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[4] || (!(cui.isCollapsed[4]) && !(cui.isNear(cui.membersList, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[4] || (!(cui.isCollapsed[4]) && !(cui.isNear(cui.membersList, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.membersDUDelay) {
                                 clearTimeout(cui.membersDUDelay);
                                 cui.membersDUDelay = false;
                             }
-                            cui.membersList.style.maxWidth = collapsedDistance + 'px';
+                            cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
                             cui.membersList.style.minWidth = '0px';
                             cui.isCollapsed[4] = true;
                         }
                     }
 
                     // User Area
-                    if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userArea) {
-                        if (dynamicUncollapseEnabled[5] && cui.isCollapsed[5] && cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                    if ((BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') && cui.userArea) {
+                        if (cui.dynamicUncollapseEnabled[5] && cui.isCollapsed[5] && cui.isNear(cui.userArea, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             if (cui.userDUDelay) {
                                 clearTimeout(cui.userDUDelay);
                                 cui.userDUDelay = false;
                             }
                             cui.userDUDelay = setTimeout(() => {
-                                cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
+                                cui.userArea.style.maxHeight = cui.userAreaMaxHeight + 'px';
                                 cui.isCollapsed[5] = false;
                                 cui.userDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[5] || (!(cui.isCollapsed[5]) && !(cui.isNear(cui.userArea, dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[5] || (!(cui.isCollapsed[5]) && !(cui.isNear(cui.userArea, cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.userDUDelay) {
                                 clearTimeout(cui.userDUDelay);
                                 cui.userDUDelay = false;
                             }
-                            cui.userArea.style.maxHeight = collapsedDistance + 'px';
+                            cui.userArea.style.maxHeight = cui.collapsedDistance + 'px';
                             cui.isCollapsed[5] = true;
                         }
                     }
 
                     // Call Container
-                    if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
-                        if (dynamicUncollapseEnabled[6] && cui.isCollapsed[6] && cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
+                    if ((BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
+                        if (cui.dynamicUncollapseEnabled[6] && cui.isCollapsed[6] && cui.isNear(document.querySelector('.' + cui.classCallContainer), cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)) {
                             if (cui.callDUDelay) {
                                 clearTimeout(cui.callDUDelay);
                                 cui.callDUDelay = false;
@@ -1302,8 +1398,8 @@ module.exports = (() => {
                                     document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
                                 cui.isCollapsed[6] = false;
                                 cui.callDUDelay = false;
-                            }, dynamicUncollapseDelay);
-                        } else if (!dynamicUncollapseEnabled[6] || (!(cui.isCollapsed[6]) && !(cui.isNear(document.querySelector('.' + cui.classCallContainer), dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
+                            }, cui.dynamicUncollapseDelay);
+                        } else if (!cui.dynamicUncollapseEnabled[6] || (!(cui.isCollapsed[6]) && !(cui.isNear(document.querySelector('.' + cui.classCallContainer), cui.dynamicUncollapseDistance, cui.mouseX, cui.mouseY)))) {
                             if (cui.callDUDelay) {
                                 clearTimeout(cui.callDUDelay);
                                 cui.callDUDelay = false;
@@ -1318,13 +1414,13 @@ module.exports = (() => {
                 }, {signal: cui.eventListenerSignal});
                 document.body.addEventListener('mouseleave', function(){
                     // Server List
-                    if ((BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'false') && cui.serverList) {
+                    if ((BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') && cui.serverList) {
                         if (cui.serverDUDelay) {
                             clearTimeout(cui.serverDUDelay);
                             cui.serverDUDelay = false;
                         }
                         if (!cui.isHSLLoaded) {
-                            cui.serverList.style.width = collapsedDistance + 'px';
+                            cui.serverList.style.width = cui.collapsedDistance + 'px';
                             if (cui.isDarkMatterLoaded) {
                                 cui.settingsContainerBase.style.width = '100%';
                                 cui.settingsContainerBase.style.left = '0px';
@@ -1335,12 +1431,12 @@ module.exports = (() => {
                     }
 
                     // Channel List
-                    if ((BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'false') && cui.channelList) {
+                    if ((BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') && cui.channelList) {
                         if (cui.channelDUDelay) {
                             clearTimeout(cui.channelDUDelay);
                             cui.channelDUDelay = false;
                         }
-                        cui.channelList.style.width = collapsedDistance + 'px';
+                        cui.channelList.style.width = cui.collapsedDistance + 'px';
                         if (cui.isDarkMatterLoaded) {
                             cui.settingsContainer.style.display = 'none';
                             if (cui.spotifyContainer)
@@ -1350,17 +1446,17 @@ module.exports = (() => {
                     }
 
                     // Message Bar
-                    if ((BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'false') && cui.msgBar) {
+                    if ((BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') && cui.msgBar) {
                         if (cui.messageDUDelay) {
                             clearTimeout(cui.messageDUDelay);
                             cui.messageDUDelay = false;
                         }
-                        cui.msgBar.style.maxHeight = collapsedDistance + 'px';
+                        cui.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
                         cui.isCollapsed[2] = true;
                     }
 
                     // Window Bar
-                    if ((BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'false') && cui.windowBar && (cui.mouseY > windowBarHeight + dynamicUncollapseDistance)) {
+                    if ((BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false') && cui.windowBar && (cui.mouseY > cui.windowBarHeight + cui.dynamicUncollapseDistance)) {
                         if (cui.windowDUDelay) {
                             clearTimeout(cui.windowDUDelay);
                             cui.windowDUDelay = false;
@@ -1376,28 +1472,28 @@ module.exports = (() => {
                     }
 
                     // Members List
-                    if ((BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'false') && cui.membersList) {
+                    if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && cui.membersList) {
                         if (cui.membersDUDelay) {
                             clearTimeout(cui.membersDUDelay);
                             cui.membersDUDelay = false;
                         }
-                        cui.membersList.style.maxWidth = collapsedDistance + 'px';
+                        cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
                         cui.membersList.style.minWidth = '0px';
                         cui.isCollapsed[4] = true;
                     }
 
                     // User Area
-                    if ((BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'false') && cui.userArea) {
+                    if ((BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false') && cui.userArea) {
                         if (cui.userDUDelay) {
                             clearTimeout(cui.userDUDelay);
                             cui.userDUDelay = false;
                         }
-                        cui.userArea.style.maxHeight = collapsedDistance + 'px';
+                        cui.userArea.style.maxHeight = cui.collapsedDistance + 'px';
                         cui.isCollapsed[5] = true;
                     }
 
                     // Call Container
-                    if ((BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
+                    if ((BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'false') && document.querySelector('.' + cui.classCallContainer)) {
                         if (cui.callDUDelay) {
                             clearTimeout(cui.callDUDelay);
                             cui.callDUDelay = false;
@@ -1409,9 +1505,9 @@ module.exports = (() => {
             }
 
             // Add event listeners to the Toolbar to update on hover
-            if (enableFullToolbarCollapse) {
+            if (cui.enableFullToolbarCollapse) {
                 this.toolBar.addEventListener('mouseenter', function(){
-                    this.style.maxWidth = toolbarMaxWidth + 'px';
+                    this.style.maxWidth = cui.toolbarMaxWidth + 'px';
                 }, {signal: cui.eventListenerSignal});
                 this.toolBar.addEventListener('mouseleave', function(){
                     this.style.maxWidth = singleButtonWidth;
@@ -1419,40 +1515,40 @@ module.exports = (() => {
             }
 
             // Add event listeners to the Toolbar Container to update on hover
-            if (!disableToolbarCollapse) {
+            if (!cui.disableToolbarCollapse) {
                 toolbarContainer.addEventListener('mouseenter', function(){
                     if (cui.serverListButton) {
-                        cui.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.serverListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.serverListButton.style.removeProperty('margin');
                         cui.serverListButton.style.removeProperty('padding');
                     }
                     if (cui.channelListButton) {
-                        cui.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.channelListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.channelListButton.style.removeProperty('margin');
                         cui.channelListButton.style.removeProperty('padding');
                     }
                     if (cui.msgBarButton) {
-                        cui.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.msgBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.msgBarButton.style.removeProperty('margin');
                         cui.msgBarButton.style.removeProperty('padding');
                     }
                     if (cui.windowBarButton) {
-                        cui.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.windowBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.windowBarButton.style.removeProperty('margin');
                         cui.windowBarButton.style.removeProperty('padding');
                     }
                     if (cui.membersListButton) {
-                        cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.membersListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.membersListButton.style.removeProperty('margin');
                         cui.membersListButton.style.removeProperty('padding');
                     }
                     if (cui.userAreaButton) {
-                        cui.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.userAreaButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.userAreaButton.style.removeProperty('margin');
                         cui.userAreaButton.style.removeProperty('padding');
                     }
                     if (cui.callContainerButton) {
-                        cui.callContainerButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.callContainerButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.callContainerButton.style.removeProperty('margin');
                         cui.callContainerButton.style.removeProperty('padding');
                     }
@@ -1495,31 +1591,31 @@ module.exports = (() => {
                     }
 
                     if (cui.membersListButton && (buttonsActive[4] == Math.max.apply(Math, buttonsActive))) {
-                        cui.membersListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.membersListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.membersListButton.style.removeProperty('margin');
                         cui.membersListButton.style.removeProperty('padding');
                     } else if (cui.windowBarButton && (buttonsActive[3] == Math.max.apply(Math, buttonsActive))) {
-                        cui.windowBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.windowBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.windowBarButton.style.removeProperty('margin');
                         cui.windowBarButton.style.removeProperty('padding');
                     } else if (cui.msgBarButton && (buttonsActive[2] == Math.max.apply(Math, buttonsActive))) {
-                        cui.msgBarButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.msgBarButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.msgBarButton.style.removeProperty('margin');
                         cui.msgBarButton.style.removeProperty('padding');
                     } else if (cui.channelListButton && (buttonsActive[1] == Math.max.apply(Math, buttonsActive))) {
-                        cui.channelListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.channelListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.channelListButton.style.removeProperty('margin');
                         cui.channelListButton.style.removeProperty('padding');
                     } else if (cui.serverListButton && (buttonsActive[0] == Math.max.apply(Math, buttonsActive))) {
-                        cui.serverListButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.serverListButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.serverListButton.style.removeProperty('margin');
                         cui.serverListButton.style.removeProperty('padding');
                     } else if (cui.userAreaButton && (buttonsActive[5] == Math.max.apply(Math, buttonsActive))) {
-                        cui.userAreaButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.userAreaButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.userAreaButton.style.removeProperty('margin');
                         cui.userAreaButton.style.removeProperty('padding');
                     } else if (cui.callContainerButton && (buttonsActive[6] == Math.max.apply(Math, buttonsActive))) {
-                        cui.callContainerButton.style.maxWidth = toolbarIconMaxWidth + 'px';
+                        cui.callContainerButton.style.maxWidth = cui.toolbarIconMaxWidth + 'px';
                         cui.callContainerButton.style.removeProperty('margin');
                         cui.callContainerButton.style.removeProperty('padding');
                     } else {
@@ -1529,10 +1625,10 @@ module.exports = (() => {
             }
 
             // Add event listeners to the Settings Container to update on hover
-            if (!disableSettingsCollapse) {
+            if (!cui.disableSettingsCollapse) {
                 this.settingsContainer.addEventListener('mouseenter', function(){
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
-                        settingsButtons[i].style.maxWidth = settingsButtonsMaxWidth + 'px';
+                        settingsButtons[i].style.maxWidth = cui.settingsButtonsMaxWidth + 'px';
                     }
                 }, {signal: cui.eventListenerSignal});
                 this.settingsContainer.addEventListener('mouseleave', function(){
@@ -1541,47 +1637,33 @@ module.exports = (() => {
                     }
                 }, {signal: cui.eventListenerSignal});
             }
+            
+            // Add event listener to detect keyboard shortcuts
+            if (cui.keyBindsEnabled) {
+                window.addEventListener('keydown', function(e){
+                    if (e.ctrlKey || e.altKey || e.shiftKey) {
+                        navigator.keyboard.getLayoutMap().then((kbMap) => {
+                            for (let i = 0; i < 7; i++) {
+                                let ksParsed = cui.getShortcutFromKeystring(cui.keyStringList[i]);
+                                
+                                if (e.ctrlKey == ksParsed[0] && e.altKey == ksParsed[1] && e.shiftKey == ksParsed[2] && kbMap.get(e.code) == ksParsed[3]) {
+                                    cui.toggleButton(i);
+                                    e.preventDefault();
+                                }
+                            }
+                        });
+                    }
+                }, {signal: cui.eventListenerSignal});
+            }
 
             // Add event listener to the Server List button to update the icon, UI, & settings on click
             if (cui.serverListButton) {
                 cui.serverListButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.serverListButtonActive') === 'true') {
-                        if (disableTransitions) {
-                            cui.serverList.style.display = 'none';
-                        } else {
-                            cui.serverList.style.width = collapsedDistance + 'px';
-                            if (cui.isDarkMatterLoaded) {
-                                cui.settingsContainerBase.style.width = '100%';
-                                cui.settingsContainerBase.style.left = '0px';
-                                cui.windowBase.style.minWidth = '100vw';
-                            }
-                        }
-                        if (cui.isHSLLoaded) {
-                            cui.windowBase.style.setProperty('top', '0px', 'important');
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (disableTransitions) {
-                            cui.serverList.style.removeProperty('display');
-                        } else {
-                            cui.serverList.style.removeProperty('width');
-                            if ((!cui.isHSLLoaded) && cui.isDarkMatterLoaded) {
-                                cui.settingsContainerBase.style.width = 'calc(100% + 72px)';
-                                cui.settingsContainerBase.style.left = '-72px';
-                                cui.windowBase.style.minWidth = 'calc(100vw - 72px)';
-                            }
-                        }
-                        if (cui.isHSLLoaded) {
-                            cui.windowBase.style.removeProperty('top');
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.serverListButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(0);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.serverListButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.serverList, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.serverList + ` (${cui.keyStringList[0]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.serverListButton.addEventListener('mouseleave', function(){
@@ -1592,37 +1674,11 @@ module.exports = (() => {
             // Add event listener to the Channel List button to update the icon, UI, & settings on click
             if (cui.channelListButton) {
                 cui.channelListButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.channelListButtonActive') === 'true') {
-                        if (disableTransitions) {
-                            cui.channelList.style.display = 'none';
-                        } else {
-                            cui.channelList.style.width = collapsedDistance + 'px';
-                            if (cui.isDarkMatterLoaded) {
-                                cui.settingsContainer.style.display = 'none';
-                                if (cui.spotifyContainer)
-                                    cui.spotifyContainer.style.display = 'none';
-                            }
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (disableTransitions) {
-                            cui.channelList.style.removeProperty('display');
-                        } else {
-                            cui.channelList.style.removeProperty('width');
-                            if (cui.isDarkMatterLoaded) {
-                                cui.settingsContainer.style.removeProperty('display');
-                                if (cui.spotifyContainer)
-                                    cui.spotifyContainer.style.removeProperty('display');
-                            }
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.channelListButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(1);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.channelListButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.channelList, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.channelList + ` (${cui.keyStringList[1]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.channelListButton.addEventListener('mouseleave', function(){
@@ -1633,27 +1689,11 @@ module.exports = (() => {
             // Add event listener to the Message Bar button to update the icon, UI, & settings on click
             if (cui.msgBarButton) {
                 cui.msgBarButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.msgBarButtonActive') === 'true') {
-                        if (disableTransitions) {
-                            cui.msgBar.style.display = 'none';
-                        } else {
-                            cui.msgBar.style.maxHeight = collapsedDistance + 'px';
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (disableTransitions) {
-                            cui.msgBar.style.removeProperty('display');
-                        } else {
-                            cui.msgBar.style.maxHeight = msgBarMaxHeight + 'px';
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.msgBarButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(2);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.msgBarButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.msgBar, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.msgBar + ` (${cui.keyStringList[2]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.msgBarButton.addEventListener('mouseleave', function(){
@@ -1664,41 +1704,11 @@ module.exports = (() => {
             // Add event listener to the Window Bar button to update the icon, UI, & settings on click
             if (cui.windowBarButton) {
                 cui.windowBarButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.windowBarButtonActive') === 'true') {
-                        if (disableTransitions) {
-                            cui.windowBar.style.display = 'none';
-                        } else {
-                            cui.windowBar.style.height = '0px';
-                            if (cui.isDarkMatterLoaded)
-                                cui.windowBar.style.opacity = '0';
-                            cui.windowBar.style.padding = '0px';
-                            cui.windowBar.style.margin = '0px';
-                            cui.windowBar.style.overflow = 'hidden';
-                            cui.wordMark.style.display = 'none';
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (disableTransitions) {
-                            cui.windowBar.style.removeProperty('display');
-                        } else {
-                            if (cui.isDarkMatterLoaded) {
-                                cui.windowBar.style.height = '26px';
-                                cui.windowBar.style.removeProperty('opacity');
-                            } else
-                                cui.windowBar.style.height = windowBarHeight + 'px';
-                            cui.windowBar.style.removeProperty('padding');
-                            cui.windowBar.style.removeProperty('margin');
-                            cui.windowBar.style.removeProperty('overflow');
-                            cui.wordMark.style.removeProperty('display');
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.windowBarButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(3);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.windowBarButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.windowBar, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.windowBar + ` (${cui.keyStringList[3]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.windowBarButton.addEventListener('mouseleave', function(){
@@ -1709,29 +1719,11 @@ module.exports = (() => {
             // Add event listener to the Members List button to update the icon, UI, & settings on click
             if (cui.membersListButton) {
                 cui.membersListButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.membersListButtonActive') === 'true') {
-                        if (disableTransitions) {
-                            cui.membersList.style.display = 'none';
-                        } else {
-                            cui.membersList.style.maxWidth = collapsedDistance + 'px';
-                            cui.membersList.style.minWidth = '0px';
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (disableTransitions) {
-                            cui.membersList.style.removeProperty('display');
-                        } else {
-                            cui.membersList.style.maxWidth = membersListMaxWidth + 'px';
-                            cui.membersList.style.removeProperty('min-width');
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.membersListButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(4);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.membersListButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.membersList, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.membersList + ` (${cui.keyStringList[4]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.membersListButton.addEventListener('mouseleave', function(){
@@ -1742,27 +1734,11 @@ module.exports = (() => {
             // Add event listener to the User Area button to update the icon, UI, & settings on click
             if (cui.userAreaButton) {
                 cui.userAreaButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.userAreaButtonActive') === 'true') {
-                        if (disableTransitions) {
-                            cui.userArea.style.display = 'none';
-                        } else {
-                            cui.userArea.style.maxHeight = collapsedDistance + 'px';
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (disableTransitions) {
-                            cui.userArea.style.removeProperty('display');
-                        } else {
-                            cui.userArea.style.maxHeight = userAreaMaxHeight + 'px';
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.userAreaButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(5);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.userAreaButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.userArea, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.userArea + ` (${cui.keyStringList[5]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.userAreaButton.addEventListener('mouseleave', function(){
@@ -1773,35 +1749,11 @@ module.exports = (() => {
             // Add event listener to the Call Container button to update the icon, UI, & settings on click
             if (cui.callContainerButton) {
                 cui.callContainerButton.addEventListener('click', function(){
-                    if (BdApi.getData('CollapsibleUI', 'cui.callContainerButtonActive') === 'true') {
-                        if (document.querySelector('.' + cui.classCallContainer)) {
-                            if (disableTransitions) {
-                                document.querySelector('.' + cui.classCallContainer).style.display = 'none';
-                            } else {
-                                document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
-                                if (document.querySelector('.' + cui.classCallUserWrapper))
-                                    document.querySelector('.' + cui.classCallUserWrapper).style.display = 'none';
-                            }
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'false');
-                        this.classList.remove(cui.classSelected);
-                    } else {
-                        if (document.querySelector('.' + cui.classCallContainer)) {
-                            if (disableTransitions) {
-                                document.querySelector('.' + cui.classCallContainer).style.removeProperty('display');
-                            } else {
-                                document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
-                                if (document.querySelector('.' + cui.classCallUserWrapper))
-                                    document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
-                            }
-                        }
-                        BdApi.setData('CollapsibleUI', 'cui.callContainerButtonActive', 'true');
-                        this.classList.add(cui.classSelected);
-                    }
+                    cui.toggleButton(6);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.callContainerButton.addEventListener('mouseenter', function(){
-                    this.tooltip = cui.createTooltip(cui.localeLabels.callContainer, this);
+                    this.tooltip = cui.createTooltip(cui.localeLabels.callContainer + ` (${cui.keyStringList[6]})`, this);
                 }, {signal: cui.eventListenerSignal});
 
                 cui.callContainerButton.addEventListener('mouseleave', function(){
@@ -1812,107 +1764,108 @@ module.exports = (() => {
 
         // Terminate the plugin and undo its effects
         terminate() {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
 
             // Remove CollapsibleUI icons
             document.querySelectorAll('.collapsible-ui-element').forEach(e => e.remove());
 
             // Re-enable the original Members List icon
             try {
-                this.searchBar.previousElementSibling.style.removeProperty('display');
-            } catch {
-                console.warn('%c[CollapsibleUI] ' + '%cFailed to restore Members List button. Are you sure it exists?', 'color: #3a71c1; font-weight: 700;', '');
-            }
+                cui.searchBar.previousElementSibling.style.removeProperty('display');
+            } catch {}
 
             // Expand any collapsed elements & remove transitions
-            if (this.channelList) {
-                this.channelList.style.removeProperty('width');
-                this.channelList.style.removeProperty('transition');
-                this.channelList.style.removeProperty('resize');
-                this.channelList.style.removeProperty('max-width');
-                this.channelList.style.removeProperty('display');
+            if (cui.channelList) {
+                cui.channelList.style.removeProperty('width');
+                cui.channelList.style.removeProperty('transition');
+                cui.channelList.style.removeProperty('resize');
+                cui.channelList.style.removeProperty('max-width');
+                cui.channelList.style.removeProperty('display');
             }
-            if (this.serverList) {
-                this.serverList.style.removeProperty('width');
-                this.serverList.style.removeProperty('transition');
-                this.serverList.style.removeProperty('display');
+            if (cui.serverList) {
+                cui.serverList.style.removeProperty('width');
+                cui.serverList.style.removeProperty('transition');
+                cui.serverList.style.removeProperty('display');
             }
-            if (this.windowBar) {
-                this.wordMark.style.removeProperty('display');
-                this.windowBar.style.removeProperty('height');
-                this.windowBar.style.removeProperty('opacity');
-                this.windowBar.style.removeProperty('padding');
-                this.windowBar.style.removeProperty('margin');
-                this.windowBar.style.removeProperty('overflow');
-                this.windowBar.style.removeProperty('transition');
-                this.windowBar.style.removeProperty('display');
+            if (cui.windowBar) {
+                cui.wordMark.style.removeProperty('display');
+                cui.windowBar.style.removeProperty('height');
+                cui.windowBar.style.removeProperty('opacity');
+                cui.windowBar.style.removeProperty('padding');
+                cui.windowBar.style.removeProperty('margin');
+                cui.windowBar.style.removeProperty('overflow');
+                cui.windowBar.style.removeProperty('transition');
+                cui.windowBar.style.removeProperty('display');
             }
-            if (this.membersList) {
-                this.membersList.style.removeProperty('max-width');
-                this.membersList.style.removeProperty('min-width');
-                this.membersList.style.removeProperty('overflow');
-                this.membersList.style.removeProperty('transition');
-                this.membersList.style.removeProperty('display');
+            if (cui.membersList) {
+                cui.membersList.style.removeProperty('max-width');
+                cui.membersList.style.removeProperty('min-width');
+                cui.membersList.style.removeProperty('overflow');
+                cui.membersList.style.removeProperty('transition');
+                cui.membersList.style.removeProperty('display');
             }
-            if (this.msgBar) {
-                this.msgBar.style.removeProperty('max-height');
-                this.msgBar.style.removeProperty('transition');
-                this.msgBar.style.removeProperty('display');
+            if (cui.msgBar) {
+                cui.msgBar.style.removeProperty('max-height');
+                cui.msgBar.style.removeProperty('transition');
+                cui.msgBar.style.removeProperty('display');
             }
-            if (this.settingsContainer) {
-                for (let i = 0; i < (this.settingsContainer.children.length - 1); i++) {
-                    this.settingsContainer.children[i].style.removeProperty('max-width');
-                    this.settingsContainer.children[i].style.removeProperty('transition');
-                    this.settingsContainer.children[i].style.removeProperty('overflow');
-                    this.settingsContainer.children[i].style.removeProperty('display');
+            if (cui.settingsContainer) {
+                for (let i = 0; i < (cui.settingsContainer.children.length - 1); i++) {
+                    cui.settingsContainer.children[i].style.removeProperty('max-width');
+                    cui.settingsContainer.children[i].style.removeProperty('transition');
+                    cui.settingsContainer.children[i].style.removeProperty('overflow');
+                    cui.settingsContainer.children[i].style.removeProperty('display');
                 }
-                this.settingsContainer.style.removeProperty('display');
+                cui.settingsContainer.style.removeProperty('display');
             }
-            if (this.spotifyContainer) {
-                this.spotifyContainer.style.removeProperty('display');
+            if (cui.spotifyContainer) {
+                cui.spotifyContainer.style.removeProperty('display');
             }
-            if (this.userArea) {
-                this.userArea.style.removeProperty('max-height');
-                this.userArea.style.removeProperty('transition');
-                this.userArea.style.removeProperty('display');
+            if (cui.userArea) {
+                cui.userArea.style.removeProperty('max-height');
+                cui.userArea.style.removeProperty('transition');
+                cui.userArea.style.removeProperty('display');
             }
-            if (document.querySelector('.' + this.classCallContainer)) {
-                document.querySelector('.' + this.classCallContainer).style.removeProperty('height');
-                document.querySelector('.' + this.classCallContainer).style.removeProperty('transition');
-                document.querySelector('.' + this.classCallContainer).style.removeProperty('display');
-                if (document.querySelector('.' + this.classCallUserWrapper))
-                    document.querySelector('.' + this.classCallUserWrapper).style.removeProperty('display');
+            if (document.querySelector('.' + cui.classCallContainer)) {
+                document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
+                document.querySelector('.' + cui.classCallContainer).style.removeProperty('transition');
+                document.querySelector('.' + cui.classCallContainer).style.removeProperty('display');
+                if (document.querySelector('.' + cui.classCallUserWrapper))
+                    document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
             }
-            if (this.windowBase) {
-                this.windowBase.style.removeProperty('top');
-                this.windowBase.style.removeProperty('min-width');
-                this.windowBase.style.removeProperty('transition');
+            if (cui.windowBase) {
+                cui.windowBase.style.removeProperty('top');
+                cui.windowBase.style.removeProperty('min-width');
+                cui.windowBase.style.removeProperty('transition');
             }
-            if (this.toolBar) {
-                this.toolBar.style.removeProperty('max-width');
-                this.toolBar.style.removeProperty('transition');
+            if (cui.toolBar) {
+                cui.toolBar.style.removeProperty('max-width');
+                cui.toolBar.style.removeProperty('transition');
             }
 
-            if (this.settingsContainerBase) {
-                this.settingsContainerBase.style.removeProperty('left');
-                this.settingsContainerBase.style.removeProperty('width');
-                this.settingsContainerBase.style.removeProperty('transition');
+            if (cui.settingsContainerBase) {
+                cui.settingsContainerBase.style.removeProperty('left');
+                cui.settingsContainerBase.style.removeProperty('width');
+                cui.settingsContainerBase.style.removeProperty('transition');
             }
-            if (this.avatarWrapper) {
-                this.avatarWrapper.style.removeProperty('min-width');
+            if (cui.avatarWrapper) {
+                cui.avatarWrapper.style.removeProperty('min-width');
             }
 
             // Restore default ZeresPluginLibrary logger functionality
             BdApi.Plugins.get('ZeresPluginLibrary').exports.Logger.warn = this.zeresWarnOld;
 
             // Abort event listeners
-            if (this.eventListenerController)
-                this.eventListenerController.abort();
-            if (this.channelListWidthChecker)
-                clearInterval(this.channelListWidthChecker);
-            if (this.callContainerChecker)
-                clearInterval(this.callContainerChecker);
-            if (this.mutationReloader)
-                this.mutationReloader.disconnect();
+            if (cui.eventListenerController)
+                cui.eventListenerController.abort();
+            if (cui.channelListWidthChecker)
+                clearInterval(cui.channelListWidthChecker);
+            if (cui.callContainerChecker)
+                clearInterval(cui.callContainerChecker);
+            if (cui.settingsReloader)
+                cui.settingsReloader.disconnect();
+            if (cui.checkerInterval)
+                clearInterval(cui.checkerInterval)
         }
 
         // Initialize the plugin when it is enabled
@@ -1955,6 +1908,7 @@ module.exports = (() => {
 
         // Add settings panel
         getSettingsPanel() {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
             let zps = Api.Settings;
 
             // Create root settings node
@@ -2016,31 +1970,84 @@ module.exports = (() => {
             groupMain.append(settingDynamicUncollapseDelay);
             groupMain.append(settingResizableChannelList);
 
+            // Create Keyboard Shortcuts subgroup
+            var groupKB = new zps.SettingGroup('Keyboard Shortcuts');
+
+            // Create keyboard shortcut settings
+            var settingKBEnabled = new zps.Switch('Keyboard Shortcuts Enabled',
+                                                  'Enables shortcuts to collapse UI elements',
+                                                  BdApi.getData('CollapsibleUI', 'keyBindsEnabled') === 'true');
+            var settingKBServerList = new zps.Textbox('Toggle Server List - Shortcut',
+                                                      'Case-insensitive. Do not use spaces. Valid modifiers are Ctrl, Alt, and Shift. Ctrl+Alt cannot be combined in any order due to a JavaScript limitation',
+                                                      BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[0],
+                                                      null,
+                                                      {placeholder: 'Default: Alt+S'});
+            var settingKBChannelList = new zps.Textbox('Toggle Channel List - Shortcut',
+                                                       null,
+                                                       BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[1],
+                                                       null,
+                                                       {placeholder: 'Default: Alt+C'});
+            var settingKBUserArea = new zps.Textbox('Toggle User Area - Shortcut',
+                                                    null,
+                                                    BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[5],
+                                                    null,
+                                                    {placeholder: 'Default: Alt+U'});
+            var settingKBMsgBar = new zps.Textbox('Toggle Message Bar - Shortcut',
+                                                  null,
+                                                  BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[2],
+                                                  null,
+                                                  {placeholder: 'Default: Alt+T'});
+            var settingKBCallContainer = new zps.Textbox('Toggle Call Container - Shortcut',
+                                                         null,
+                                                         BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[6],
+                                                         null,
+                                                         {placeholder: 'Default: Alt+P'});
+            var settingKBWindowBar = new zps.Textbox('Toggle Window Bar - Shortcut',
+                                                     null,
+                                                     BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[3],
+                                                     null,
+                                                     {placeholder: 'Default: Alt+W'});
+            var settingKBMembersList = new zps.Textbox('Toggle Members List - Shortcut',
+                                                       null,
+                                                       BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[4],
+                                                       null,
+                                                       {placeholder: 'Default: Alt+M'});
+
+            // Append keyboard shortcut settings to Keyboard Shortcuts subgroup
+            groupKB.append(settingKBEnabled);
+            groupKB.append(settingKBServerList);
+            groupKB.append(settingKBChannelList);
+            groupKB.append(settingKBUserArea);
+            groupKB.append(settingKBMsgBar);
+            groupKB.append(settingKBCallContainer);
+            groupKB.append(settingKBWindowBar);
+            groupKB.append(settingKBMembersList);
+
             // Create Selective Dynamic Uncollapse subgroup
             var groupSDU = new zps.SettingGroup('Selective Dynamic Uncollapse');
 
             // Create selective dynamic uncollapse settings
             var settingDUServerList = new zps.Switch('Server List',
-                                                           'Toggles Dynamic Uncollapse for the server list',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[0] === 'true');
+                                                     'Toggles Dynamic Uncollapse for the server list',
+                                                     BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[0] === 'true');
             var settingDUChannelList = new zps.Switch('Channel List',
-                                                           'Toggles Dynamic Uncollapse for the channel list',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[1] === 'true');
+                                                      'Toggles Dynamic Uncollapse for the channel list',
+                                                      BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[1] === 'true');
             var settingDUUserArea = new zps.Switch('User Area',
-                                                           'Toggles Dynamic Uncollapse for the user area',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[5] === 'true');
+                                                   'Toggles Dynamic Uncollapse for the user area',
+                                                   BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[5] === 'true');
             var settingDUMsgBar = new zps.Switch('Message Bar',
-                                                           'Toggles Dynamic Uncollapse for the message bar',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[2] === 'true');
+                                                 'Toggles Dynamic Uncollapse for the message bar',
+                                                 BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[2] === 'true');
             var settingDUCallContainer = new zps.Switch('Call Container',
-                                                           'Toggles Dynamic Uncollapse for the call container',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[6] === 'true');
+                                                        'Toggles Dynamic Uncollapse for the call container',
+                                                        BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[6] === 'true');
             var settingDUWindowBar = new zps.Switch('Window Bar',
-                                                           'Toggles Dynamic Uncollapse for the window bar',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[3] === 'true');
+                                                    'Toggles Dynamic Uncollapse for the window bar',
+                                                    BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[3] === 'true');
             var settingDUMembersList = new zps.Switch('Members List',
-                                                           'Toggles Dynamic Uncollapse for the members list',
-                                                           BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[4] === 'true');
+                                                      'Toggles Dynamic Uncollapse for the members list',
+                                                      BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[4] === 'true');
 
             // Append selective dynamic uncollapse settings to Selective Dynamic Uncollapse subgroup
             groupSDU.append(settingDUServerList);
@@ -2050,6 +2057,59 @@ module.exports = (() => {
             groupSDU.append(settingDUCallContainer);
             groupSDU.append(settingDUWindowBar);
             groupSDU.append(settingDUMembersList);
+
+            // Create Autocollapse subgroup
+            var groupAC = new zps.SettingGroup('Autocollapse');
+
+            // Create autocollapse settings
+            var settingACEnabled = new zps.Switch('Autocollapse Enabled',
+                                                  'Enables auto-collapse of UI elements based on window size',
+                                                  BdApi.getData('CollapsibleUI', 'autoCollapse') === 'true');
+            var settingACServerList = new zps.Textbox('Server List - Threshold',
+                                                      'Maximum width for element to remain uncollapsed. Specifies height if Horizontal Server List is enabled',
+                                                      BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[0],
+                                                      null,
+                                                      {placeholder: 'Default: 500'});
+            var settingACChannelList = new zps.Textbox('Channel List - Threshold',
+                                                       'Maximum width for element to remain uncollapsed',
+                                                       BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[1],
+                                                       null,
+                                                       {placeholder: 'Default: 600'});
+            var settingACUserArea = new zps.Textbox('User Area - Threshold',
+                                                    'Maximum height for element to remain uncollapsed',
+                                                    BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[5],
+                                                    null,
+                                                    {placeholder: 'Default: 400'});
+            var settingACMsgBar = new zps.Textbox('Message Bar - Threshold',
+                                                  'Maximum height for element to remain uncollapsed',
+                                                  BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[2],
+                                                  null,
+                                                  {placeholder: 'Default: 400'});
+            var settingACCallContainer = new zps.Textbox('Call Container - Threshold',
+                                                         'Maximum height for element to remain uncollapsed',
+                                                         BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[6],
+                                                         null,
+                                                         {placeholder: 'Default: 550'});
+            var settingACWindowBar = new zps.Textbox('Window Bar - Threshold',
+                                                     'Maximum height for element to remain uncollapsed',
+                                                     BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[3],
+                                                     null,
+                                                     {placeholder: 'Default: 200'});
+            var settingACMembersList = new zps.Textbox('Members List - Threshold',
+                                                       'Maximum width for element to remain uncollapsed',
+                                                       BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[4],
+                                                       null,
+                                                       {placeholder: 'Default: 950'});
+
+            // Append autocollapse settings to Autocollapse subgroup
+            groupAC.append(settingACEnabled);
+            groupAC.append(settingACServerList);
+            groupAC.append(settingACChannelList);
+            groupAC.append(settingACUserArea);
+            groupAC.append(settingACMsgBar);
+            groupAC.append(settingACCallContainer);
+            groupAC.append(settingACWindowBar);
+            groupAC.append(settingACMembersList);
 
             // Create Button Customization subgroup
             var groupButtons = new zps.SettingGroup('Button Customization');
@@ -2169,7 +2229,9 @@ module.exports = (() => {
 
             // Append subgroups to root node
             settingsRoot.append(groupMain);
+            settingsRoot.append(groupKB);
             settingsRoot.append(groupSDU);
+            settingsRoot.append(groupAC);
             settingsRoot.append(groupButtons);
             settingsRoot.append(groupAdvanced);
 
@@ -2179,54 +2241,45 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'disableTransitions', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'disableTransitions', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingTransitionSpeed.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'transitionSpeed', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingDisableToolbarCollapse.onChange = function(result) {
                 if (result)
                     BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingDisableSettingsCollapse.onChange = function(result) {
                 if (result)
                     BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingEnableFullToolbarCollapse.onChange = function(result) {
                 if (result)
                     BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingDynamicUncollapse.onChange = function(result) {
                 if (result)
                     BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingDynamicUncollapseDistance.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingDynamicUncollapseDelay.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'dynamicUncollapseDelay', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingResizableChannelList.onChange = function(result) {
                 if (result)
                     BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'resizableChannelList', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
 
             // Register button settings onChange events
@@ -2235,127 +2288,190 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'false');
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingServerList.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[0] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingChannelList.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[1] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingUserArea.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[5] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingMsgBar.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[2] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingCallContainer.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[6] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingWindowBar.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[3] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingMembersList.onChange = function(result) {
                 var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number);
                 newButtonsOrder[4] = result;
                 BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+            };
+            
+            // Register keyboard shortcut settings onChange events
+            settingKBEnabled.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'false');
+            };
+            settingKBServerList.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[0] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            };
+            settingKBChannelList.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[1] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            };
+            settingKBUserArea.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[5] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            };
+            settingKBMsgBar.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[2] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            };
+            settingKBCallContainer.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[6] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            };
+            settingKBWindowBar.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[3] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
+            };
+            settingKBMembersList.onChange = function(result) {
+                cui.keyStringList = BdApi.getData('CollapsibleUI', 'keyStringList').split(',');
+                cui.keyStringList[4] = result;
+                BdApi.setData('CollapsibleUI', 'keyStringList', cui.keyStringList.toString());
             };
 
             // Register selective dynamic uncollapse settings onChange events
             settingDUServerList.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[0] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[0] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             };
             settingDUChannelList.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[1] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[1] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             };
             settingDUUserArea.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[5] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[5] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             };
             settingDUMsgBar.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[2] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[2] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             };
             settingDUCallContainer.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[6] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[6] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             };
             settingDUWindowBar.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[3] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[3] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
             };
             settingDUMembersList.onChange = function(result) {
-                let dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
-                dynamicUncollapseEnabled[4] = result;
-                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', dynamicUncollapseEnabled.toString());
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
+                cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',').map(x => (x == 'true') ? true : false);
+                cui.dynamicUncollapseEnabled[4] = result;
+                BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled', cui.dynamicUncollapseEnabled.toString());
+            };
+            
+            // Register autocollapse settings onChange events
+            settingACEnabled.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'autoCollapse', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'autoCollapse', 'false');
+            };
+            settingACServerList.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[0] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            };
+            settingACChannelList.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[1] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            };
+            settingACUserArea.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[5] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            };
+            settingACMsgBar.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[2] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            };
+            settingACCallContainer.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[6] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            };
+            settingACWindowBar.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[3] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
+            };
+            settingACMembersList.onChange = function(result) {
+                cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',');
+                cui.autoCollapseThreshold[4] = result;
+                BdApi.setData('CollapsibleUI', 'autoCollapseThreshold', cui.autoCollapseThreshold.toString());
             };
 
             // Register advanced settings onChange events
             settingSettingsButtonsMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingToolbarIconMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingMembersListMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'membersListMaxWidth', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingToolbarMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingUserAreaMaxHeight.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingMsgBarMaxHeight.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingWindowBarHeight.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'windowBarHeight', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
             settingCollapsedDistance.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'collapsedDistance', result);
-                BdApi.Plugins.get('CollapsibleUI').instance.initialize();
             };
 
             // Return final settings page
@@ -2364,11 +2480,12 @@ module.exports = (() => {
 
         // Adds a new SVG icon to the toolbar
         addToolbarIcon(ariaLabel, rawSVGData, viewBox) {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
 
             // Create the icon and define properties
             var newToolbarIcon = document.createElement('div');
-                newToolbarIcon.classList.add(this.classIconWrapper);
-                newToolbarIcon.classList.add(this.classClickable);
+                newToolbarIcon.classList.add(cui.classIconWrapper);
+                newToolbarIcon.classList.add(cui.classClickable);
                 newToolbarIcon.classList.add('collapsible-ui-element');
                 newToolbarIcon.setAttribute('role', 'button');
                 newToolbarIcon.setAttribute('aria-label', ariaLabel);
@@ -2386,6 +2503,8 @@ module.exports = (() => {
         }
 
         createTooltip(msg, elem) {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
+            
             // Get location of selected element
             var left = elem.getBoundingClientRect().left,
                 top = elem.getBoundingClientRect().top,
@@ -2394,11 +2513,11 @@ module.exports = (() => {
 
             // Create tooltip
             var newTooltip = document.createElement('div');
-                newTooltip.classList.add(this.classTooltipWrapper);
-                newTooltip.classList.add(this.classTooltipWrapperDPE);
+                newTooltip.classList.add(cui.classTooltipWrapper);
+                newTooltip.classList.add(cui.classTooltipWrapperDPE);
                 newTooltip.style.position = 'fixed';
                 newTooltip.style.textAlign = 'center';
-                newTooltip.innerHTML = `<div class="${this.classTooltip} ${this.classTooltipBottom} ${this.classTooltipPrimary} ${this.classTooltipDPE}" style="opacity: 1; transform: none;"><div class="${this.classTooltipPointer}"></div><div class="${this.classTooltipContent}">${msg}</div></div>`;
+                newTooltip.innerHTML = `<div class="${cui.classTooltip} ${cui.classTooltipBottom} ${cui.classTooltipPrimary} ${cui.classTooltipDPE}" style="opacity: 1; transform: none;"><div class="${cui.classTooltipPointer}"></div><div class="${cui.classTooltipContent}">${msg}</div></div>`;
 
             // Insert tooltip into tooltip layer
             document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);
@@ -2408,7 +2527,7 @@ module.exports = (() => {
 
             // Extrapolate tooltip location
             var x = left + (width/2) - (ttwidth/2),
-                y = top + height + this.tooltipOffset;
+                y = top + height + cui.tooltipOffset;
 
             // Set tooltip location
             newTooltip.style.left = x + 'px';
@@ -2420,8 +2539,9 @@ module.exports = (() => {
 
         // Checks if cursor is near an element
         isNear(element, distance, x, y) {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
             try {
-                if (this.isHSLLoaded && (element === this.serverList)) {
+                if (cui.isHSLLoaded && (element === cui.serverList)) {
                     var top = 0,
                         left = element.getBoundingClientRect().left - distance,
                         right = left + element.getBoundingClientRect().width + 2*distance,
@@ -2437,12 +2557,255 @@ module.exports = (() => {
             }
             return (x > left && x < right && y > top && y < bottom);
         }
+        
+        // Toggles a button at the specified index
+        
+        /* BUTTON INDEX:           *
+         *-------------------------*
+         * 0 - serverListButton    *
+         * 1 - channelListButton   *
+         * 2 - msgBarButton        *
+         * 3 - windowBarButton     *
+         * 4 - membersListButton   *
+         * 5 - userAreaButton      *
+         * 6 - callContainerButton *
+         *-------------------------*/
+        toggleButton(index) {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
+            switch (index) {
+                case 0:
+                    if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
+                        if (cui.disableTransitions) {
+                            cui.serverList.style.display = 'none';
+                        } else {
+                            cui.serverList.style.width = cui.collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = '100%';
+                                cui.settingsContainerBase.style.left = '0px';
+                                cui.windowBase.style.minWidth = '100vw';
+                            }
+                        }
+                        if (cui.isHSLLoaded) {
+                            cui.windowBase.style.setProperty('top', '0px', 'important');
+                        }
+                        BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'false');
+                        cui.serverListButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (cui.disableTransitions) {
+                            cui.serverList.style.removeProperty('display');
+                        } else {
+                            cui.serverList.style.removeProperty('width');
+                            if ((!cui.isHSLLoaded) && cui.isDarkMatterLoaded) {
+                                cui.settingsContainerBase.style.width = 'calc(100% + 72px)';
+                                cui.settingsContainerBase.style.left = '-72px';
+                                cui.windowBase.style.minWidth = 'calc(100vw - 72px)';
+                            }
+                        }
+                        if (cui.isHSLLoaded) {
+                            cui.windowBase.style.removeProperty('top');
+                        }
+                        BdApi.setData('CollapsibleUI', 'serverListButtonActive', 'true');
+                        cui.serverListButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                case 1:
+                    if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
+                        if (cui.disableTransitions) {
+                            cui.channelList.style.display = 'none';
+                        } else {
+                            cui.channelList.style.width = cui.collapsedDistance + 'px';
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.display = 'none';
+                                if (cui.spotifyContainer)
+                                    cui.spotifyContainer.style.display = 'none';
+                            }
+                        }
+                        BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'false');
+                        cui.channelListButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (cui.disableTransitions) {
+                            cui.channelList.style.removeProperty('display');
+                        } else {
+                            cui.channelList.style.removeProperty('width');
+                            if (cui.isDarkMatterLoaded) {
+                                cui.settingsContainer.style.removeProperty('display');
+                                if (cui.spotifyContainer)
+                                    cui.spotifyContainer.style.removeProperty('display');
+                            }
+                        }
+                        BdApi.setData('CollapsibleUI', 'channelListButtonActive', 'true');
+                        cui.channelListButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                case 2:
+                    if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
+                        if (cui.disableTransitions) {
+                            cui.msgBar.style.display = 'none';
+                        } else {
+                            cui.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
+                        }
+                        BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'false');
+                        cui.msgBarButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (cui.disableTransitions) {
+                            cui.msgBar.style.removeProperty('display');
+                        } else {
+                            cui.msgBar.style.maxHeight = cui.msgBarMaxHeight + 'px';
+                        }
+                        BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'true');
+                        cui.msgBarButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                case 3:
+                    if (BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true') {
+                        if (cui.disableTransitions) {
+                            cui.windowBar.style.display = 'none';
+                        } else {
+                            cui.windowBar.style.height = '0px';
+                            if (cui.isDarkMatterLoaded)
+                                cui.windowBar.style.opacity = '0';
+                            cui.windowBar.style.padding = '0px';
+                            cui.windowBar.style.margin = '0px';
+                            cui.windowBar.style.overflow = 'hidden';
+                            cui.wordMark.style.display = 'none';
+                        }
+                        BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'false');
+                        cui.windowBarButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (cui.disableTransitions) {
+                            cui.windowBar.style.removeProperty('display');
+                        } else {
+                            if (cui.isDarkMatterLoaded) {
+                                cui.windowBar.style.height = '26px';
+                                cui.windowBar.style.removeProperty('opacity');
+                            } else
+                                cui.windowBar.style.height = cui.windowBarHeight + 'px';
+                            cui.windowBar.style.removeProperty('padding');
+                            cui.windowBar.style.removeProperty('margin');
+                            cui.windowBar.style.removeProperty('overflow');
+                            cui.wordMark.style.removeProperty('display');
+                        }
+                        BdApi.setData('CollapsibleUI', 'windowBarButtonActive', 'true');
+                        cui.windowBarButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                case 4:
+                    if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
+                        if (cui.disableTransitions) {
+                            cui.membersList.style.display = 'none';
+                        } else {
+                            cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
+                            cui.membersList.style.minWidth = '0px';
+                        }
+                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
+                        cui.membersListButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (cui.disableTransitions) {
+                            cui.membersList.style.removeProperty('display');
+                        } else {
+                            cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
+                            cui.membersList.style.removeProperty('min-width');
+                        }
+                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
+                        cui.membersListButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                case 5:
+                    if (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') {
+                        if (cui.disableTransitions) {
+                            cui.userArea.style.display = 'none';
+                        } else {
+                            cui.userArea.style.maxHeight = cui.collapsedDistance + 'px';
+                        }
+                        BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'false');
+                        cui.userAreaButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (cui.disableTransitions) {
+                            cui.userArea.style.removeProperty('display');
+                        } else {
+                            cui.userArea.style.maxHeight = cui.userAreaMaxHeight + 'px';
+                        }
+                        BdApi.setData('CollapsibleUI', 'userAreaButtonActive', 'true');
+                        cui.userAreaButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                case 6:
+                    if (BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'true') {
+                        if (document.querySelector('.' + cui.classCallContainer)) {
+                            if (cui.disableTransitions) {
+                                document.querySelector('.' + cui.classCallContainer).style.display = 'none';
+                            } else {
+                                document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                                if (document.querySelector('.' + cui.classCallUserWrapper))
+                                    document.querySelector('.' + cui.classCallUserWrapper).style.display = 'none';
+                            }
+                        }
+                        BdApi.setData('CollapsibleUI', 'callContainerButtonActive', 'false');
+                        cui.callContainerButton.classList.remove(cui.classSelected);
+                    } else {
+                        if (document.querySelector('.' + cui.classCallContainer)) {
+                            if (cui.disableTransitions) {
+                                document.querySelector('.' + cui.classCallContainer).style.removeProperty('display');
+                            } else {
+                                document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
+                                if (document.querySelector('.' + cui.classCallUserWrapper))
+                                    document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
+                            }
+                        }
+                        BdApi.setData('CollapsibleUI', 'callContainerButtonActive', 'true');
+                        cui.callContainerButton.classList.add(cui.classSelected);
+                    }
+                    break;
+                    
+                default:
+                    break;
+            }
+        }
+        
+        // Converts a keystring to a list containing modifier states and the key being pressed
+        getShortcutFromKeystring(string) {
+            let keyStates = [false, false, false, null];
+            let modifierStates = string.match(/^(ctrl\+|alt\+|shift\+)?(ctrl\+|alt\+|shift\+)?(ctrl\+|alt\+|shift\+)?([A-Z])$/i);
+            
+            try {
+                for (let i = 1; i < 4; i++) {
+                    if (modifierStates[i]) {
+                        switch (modifierStates[i].toLowerCase()) {
+                            case "ctrl+":
+                                keyStates[0] = true;
+                                break;
+                                
+                            case "alt+":
+                                keyStates[1] = true;
+                                break;
+                                
+                            case "shift+":
+                                keyStates[2] = true;
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                    }
+                }
+                
+                keyStates[3] = modifierStates[4].toLowerCase();
+            } catch {}
+            return keyStates;
+        }
 
         // Returns the correct language strings for each locale
         getLabels() {
+            let cui = BdApi.Plugins.get('CollapsibleUI').instance;
             switch (document.documentElement.getAttribute("lang")) {
                 case "da":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Serverliste',
                         channelList: 'Kanalliste',
                         msgBar: 'Meddelelsesbjælke',
@@ -2452,7 +2815,7 @@ module.exports = (() => {
                         callContainer: 'Opkaldsbeholder'};
                     break;
                 case "de":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Server-Liste',
                         channelList: 'Kanal-Liste',
                         msgBar: 'Nachrichten-Bar',
@@ -2462,7 +2825,7 @@ module.exports = (() => {
                         callContainer: 'Anruf-Container'};
                     break;
                 case "es-ES":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Lista de Servidores',
                         channelList: 'Lista de Canales',
                         msgBar: 'Barra de Mensajes',
@@ -2472,7 +2835,7 @@ module.exports = (() => {
                         callContainer: 'Contenedor Llamadas'};
                     break;
                 case "fr":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Liste des Serveurs',
                         channelList: 'Liste des Chaînes',
                         msgBar: 'Barre de Messages',
@@ -2482,7 +2845,7 @@ module.exports = (() => {
                         callContainer: 'Conteneur D&apos;appel'};
                     break;
                 case "hr":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Popis Poslužitelja',
                         channelList: 'Popis Kanala',
                         msgBar: 'Traka Poruke',
@@ -2492,7 +2855,7 @@ module.exports = (() => {
                         callContainer: 'Spremnik Poziva'};
                     break;
                 case "it":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Elenco Server',
                         channelList: 'Elenco Canali',
                         msgBar: 'Barra Messaggi',
@@ -2502,7 +2865,7 @@ module.exports = (() => {
                         callContainer: 'Chiama Contenitore'};
                     break;
                 case "lt":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Serverių Sąrašas',
                         channelList: 'Kanalų Sąrašas',
                         msgBar: 'Žinučių Juosta',
@@ -2512,7 +2875,7 @@ module.exports = (() => {
                         callContainer: 'Skambučių Konteineris'};
                     break;
                 case "hu":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Szerver Lista',
                         channelList: 'Csatorna Lista',
                         msgBar: 'Üzenetsáv',
@@ -2522,7 +2885,7 @@ module.exports = (() => {
                         callContainer: 'Hívás Konténer'};
                     break;
                 case "nl":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Serverlijst',
                         channelList: 'Kanaallijst',
                         msgBar: 'Berichtbar',
@@ -2532,7 +2895,7 @@ module.exports = (() => {
                         callContainer: 'Bel Container'};
                     break;
                 case "no":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Liste over Servere',
                         channelList: 'Liste over Kanaler',
                         msgBar: 'Meldingsfelt',
@@ -2542,7 +2905,7 @@ module.exports = (() => {
                         callContainer: 'Kall Beholder'};
                     break;
                 case "pl":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Lista Serwerów',
                         channelList: 'Lista Kanałów',
                         msgBar: 'Pasek Komunikatów',
@@ -2552,7 +2915,7 @@ module.exports = (() => {
                         callContainer: 'Pojemnik na Telefony'};
                     break;
                 case "pt-BR":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Lista de Servidores',
                         channelList: 'Lista de Canais',
                         msgBar: 'Barra de Mensagens',
@@ -2562,7 +2925,7 @@ module.exports = (() => {
                         callContainer: 'Container de Chamadas'};
                     break;
                 case "ro":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Lista de Servere',
                         channelList: 'Lista de Canale',
                         msgBar: 'Bara de Mesaje',
@@ -2572,7 +2935,7 @@ module.exports = (() => {
                         callContainer: 'Apelare Container'};
                     break;
                 case "fi":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Palvelinluettelo',
                         channelList: 'Kanavaluettelo',
                         msgBar: 'Viestipalkki',
@@ -2582,7 +2945,7 @@ module.exports = (() => {
                         callContainer: 'Kutsukontti'};
                     break;
                 case "sv-SE":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Serverlista',
                         channelList: 'Kanallista',
                         msgBar: 'Meddelandefält',
@@ -2592,7 +2955,7 @@ module.exports = (() => {
                         callContainer: 'Samtalsbehållare'};
                     break;
                 case "vi":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Danh sách Máy Chủ',
                         channelList: 'Danh sách Kênh',
                         msgBar: 'Thanh Thông Báo',
@@ -2602,7 +2965,7 @@ module.exports = (() => {
                         callContainer: 'Container Cuộc Gọi'};
                     break;
                 case "tr":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Sunucu Listesi',
                         channelList: 'Kanal Listesi',
                         msgBar: 'İleti Çubuğu',
@@ -2612,7 +2975,7 @@ module.exports = (() => {
                         callContainer: 'Arama Kapsayıcısı'};
                     break;
                 case "cs":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Seznam Serverů',
                         channelList: 'Seznam Kanálů',
                         msgBar: 'Panel Zpráv',
@@ -2622,7 +2985,7 @@ module.exports = (() => {
                         callContainer: 'Kontejner Volání'};
                     break;
                 case "el":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Λίστα Διακομιστών',
                         channelList: 'Λίστα Καναλιών',
                         msgBar: 'Γραμμή Μηνυμάτων',
@@ -2632,7 +2995,7 @@ module.exports = (() => {
                         callContainer: 'Δοχείο Κλήσεων'};
                     break;
                 case "bg":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Списък на Сървърите',
                         channelList: 'Списък на Каналите',
                         msgBar: 'Лента за Съобщения',
@@ -2642,7 +3005,7 @@ module.exports = (() => {
                         callContainer: 'Контейнер за Повиквания'};
                     break;
                 case "ru":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Список Серверов',
                         channelList: 'Список Каналов',
                         msgBar: 'Панель Сообщений',
@@ -2652,7 +3015,7 @@ module.exports = (() => {
                         callContainer: 'Контейнер Вызовов'};
                     break;
                 case "uk":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Список Серверів',
                         channelList: 'Список Каналів',
                         msgBar: 'Рядок Повідомлень',
@@ -2662,7 +3025,7 @@ module.exports = (() => {
                         callContainer: 'Контейнер Викликів'};
                     break;
                 case "hi":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'सर्वर सूची',
                         channelList: 'चैनल सूची',
                         msgBar: 'संदेश पट्टी',
@@ -2672,7 +3035,7 @@ module.exports = (() => {
                         callContainer: 'कॉल कंटेनर'};
                     break;
                 case "th":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'รายการเซิร์ฟเวอร์',
                         channelList: 'รายการแชนเนล',
                         msgBar: 'แถบข้อความ',
@@ -2682,7 +3045,7 @@ module.exports = (() => {
                         callContainer: 'คอนเทนเนอร์การโทร'};
                     break;
                 case "zh-CN":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: '服务器列表',
                         channelList: '频道列表',
                         msgBar: '信息栏',
@@ -2692,7 +3055,7 @@ module.exports = (() => {
                         callContainer: '呼叫容器'};
                     break;
                 case "ja":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'サーバー一覧',
                         channelList: 'チャンネル一覧',
                         msgBar: 'メッセージバー',
@@ -2702,7 +3065,7 @@ module.exports = (() => {
                         callContainer: 'コールコンテナ'};
                     break;
                 case "zh-TW":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: '伺服器清單',
                         channelList: '通道清單',
                         msgBar: '消息列',
@@ -2712,7 +3075,7 @@ module.exports = (() => {
                         callContainer: '呼叫容器'};
                     break;
                 case "ko":
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: '서버 목록',
                         channelList: '채널 목록',
                         msgBar: '메시지 표시줄',
@@ -2722,7 +3085,7 @@ module.exports = (() => {
                         callContainer: '통화 컨테이너'};
                     break;
                 default:
-                    this.localeLabels = {
+                    cui.localeLabels = {
                         serverList: 'Server List',
                         channelList: 'Channel List',
                         msgBar: 'Message Bar',

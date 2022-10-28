@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.1.1
+ * @version 6.1.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,21 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.1.1',
+            version: '6.1.2',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.1.1',
+            title: '6.1.2',
             items: [
-                'Fixed several issues introduced in v6.1.0',
-                'Rewrote toolbar insertion code to play better with other plugins',
-                'Fixed BDFDB updates causing plugin to break',
-                'Added support for new Discord forum layout'
+                'Fixed keyboard shortcuts messing with non-english keyboard layouts'
             ]
         }, {
-            title: '6.0.0 - 6.1.0',
+            title: '6.0.0 - 6.1.1',
             items: [
                 'Added customizable keybinds to all actions',
                 'Added ability to auto-collapse elements based on size of Discord window',
@@ -48,7 +45,11 @@ module.exports = (() => {
                 'Removed reliance on ZeresPluginLibrary logger modification',
                 'Changed inefficient startup behavior',
                 'Fixed crash caused by BDFDB\'s stupidity',
-                'Plugin should now comply with updated code guidelines'
+                'Plugin should now comply with updated code guidelines',
+                'Fixed several issues introduced in v6.1.0',
+                'Rewrote toolbar insertion code to play better with other plugins',
+                'Fixed BDFDB updates causing plugin to break',
+                'Added support for new Discord forum layout'
             ]
         }, {
             title: '5.0.0 - 5.7.2',
@@ -1659,7 +1660,7 @@ module.exports = (() => {
             // Add event listener to detect keyboard shortcuts
             if (cui.keyBindsEnabled) {
                 window.addEventListener('keydown', function(e){
-                    if (e.ctrlKey || e.altKey || e.shiftKey) {
+                    if ((e.ctrlKey || e.altKey || e.shiftKey) && (e.key != 'Dead')) {
                         navigator.keyboard.getLayoutMap().then((kbMap) => {
                             for (let i = 0; i < 7; i++) {
                                 let ksParsed = cui.getShortcutFromKeystring(cui.keyStringList[i]);

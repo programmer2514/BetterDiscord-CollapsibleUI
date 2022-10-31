@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.1.2
+ * @version 6.1.3
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,19 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.1.2',
+            version: '6.1.3',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.1.2',
+            title: '6.1.3',
             items: [
-                'Fixed keyboard shortcuts messing with non-english keyboard layouts'
+                'Fixed settings buttons not collapsing when a non-focused user sends a DM',
+                'Removed some pointless console spam'
             ]
         }, {
-            title: '6.0.0 - 6.1.1',
+            title: '6.0.0 - 6.1.2',
             items: [
                 'Added customizable keybinds to all actions',
                 'Added ability to auto-collapse elements based on size of Discord window',
@@ -49,7 +50,8 @@ module.exports = (() => {
                 'Fixed several issues introduced in v6.1.0',
                 'Rewrote toolbar insertion code to play better with other plugins',
                 'Fixed BDFDB updates causing plugin to break',
-                'Added support for new Discord forum layout'
+                'Added support for new Discord forum layout',
+                'Fixed keyboard shortcuts messing with non-english keyboard layouts'
             ]
         }, {
             title: '5.0.0 - 5.7.2',
@@ -264,6 +266,7 @@ module.exports = (() => {
             this.classTooltipPointer = 'tooltipPointer-3L49xb';
             this.classTooltipContent = 'tooltipContent-Nejnvh';
             this.classAppWrapper = 'layers-OrUESM';
+            this.classChannelList = 'sidebar-1tnWFu';
 
 
             // Abstract modified elements
@@ -283,7 +286,7 @@ module.exports = (() => {
                 this.membersList = document.querySelector('.membersWrap-3NUR2t');
 
             this.serverList = document.querySelector('.wrapper-1_HaEi');
-            this.channelList = document.querySelector('.sidebar-1tnWFu');
+            this.channelList = document.querySelector('.' + this.classChannelList);
             this.settingsContainerBase = document.querySelector('.container-YkUktl');
             this.settingsContainer = this.settingsContainerBase.querySelector('.flex-2S1XBF');
             this.spotifyContainer = document.querySelector('.container-6sXIoE');
@@ -291,6 +294,7 @@ module.exports = (() => {
             this.avatarWrapper = document.querySelector('.avatarWrapper-1B9FTW');
             this.chatWrapper = document.querySelector('.chat-2ZfjoI');
             this.moreButton = this.toolBar.querySelector('[d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z"]');
+            this.contentWrapper = document.querySelector('.content-1SgpWY');
 
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
 
@@ -315,7 +319,8 @@ module.exports = (() => {
             // Abstract CollapsibleUI as a variable
             let cui = this;
 
-            console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
+            // Display reloading message (dev only)
+            // console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
 
             // Clean up UI
             this.terminate();
@@ -416,6 +421,21 @@ module.exports = (() => {
                 }
             });
             this.appObserver.observe(this.appWrapper, {childList: true});
+
+            // Add yet another mutation observer to the dm list
+            this.dmObserver = new MutationObserver((mutationList) => {
+                try {
+                    for (let i = 0; i < mutationList.length; i++) {
+                        if (mutationList[i].addedNodes[0])
+                            if (mutationList[i].addedNodes[0].classList.contains(cui.classChannelList))
+                                cui.initialize();
+                    }
+                } catch(e) {
+                    console.warn('%c[CollapsibleUI] ' + '%cFailed to trigger mutationObserver reload! (see below)', 'color: #3a71c1; font-weight: 700;', '');
+                    console.warn(e);
+                }
+            });
+            this.dmObserver.observe(this.contentWrapper, {childList: true});
 
             // Make sure settings version is set
             if (!BdApi.getData('CollapsibleUI', 'cuiSettingsVersion'))
@@ -1878,6 +1898,8 @@ module.exports = (() => {
                 cui.settingsObserver.disconnect();
             if (cui.appObserver)
                 cui.appObserver.disconnect();
+            if (cui.dmObserver)
+                cui.dmObserver.disconnect();
             if (cui.channelListWidthObserver)
                 cui.channelListWidthObserver.disconnect();
             if (cui.callContainerObserver)

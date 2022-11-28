@@ -1,4 +1,4 @@
-# CollapsibleUI for BetterDiscord [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/programmer2514/BetterDiscord-CollapsibleUI.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/programmer2514/BetterDiscord-CollapsibleUI/context:javascript)
+# CollapsibleUI for BetterDiscord
 A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular.
 
 ![Plugin Preview](https://user-images.githubusercontent.com/43104632/149331593-927b0987-69bc-4254-b709-963c4c38aa60.gif)

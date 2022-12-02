@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.3.0
+ * @version 6.3.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,22 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.3.0',
+            version: '6.3.1',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.3.0',
+            title: '6.3.1',
             items: [
-                'Fixed channel list margin remaining in fullscreen mode',
-                'Fixed Members List button functionality in forum channels',
-                'Fixed rare issue where tooltips would get stuck open',
-                'Increased fidelity of toolbar insertion',
-                'Overhauled dynamic uncollapse settings (reset dynamic uncollapse distance)'
+                'Fixed patch notes'
             ]
         }, {
-            title: '6.0.0 - 6.2.1',
+            title: '6.0.0 - 6.3.0',
             items: [
                 'Added customizable keybinds to all actions',
                 'Added ability to auto-collapse elements based on size of Discord window',
@@ -59,28 +55,34 @@ module.exports = (() => {
                 'Removed some pointless console spam',
                 'Fixed resizable channel list on latest update',
                 'Fixed plugin failing to load on initial app startup',
-                'Prevented members list from auto-collapsing when user popout is open'
+                'Prevented members list from auto-collapsing when user popout is open',
+                'Fixed channel list margin remaining in fullscreen mode',
+                'Fixed Members List button functionality in forum channels',
+                'Fixed rare issue where tooltips would get stuck open',
+                'Increased fidelity of toolbar insertion',
+                'Overhauled dynamic uncollapse settings (reset dynamic uncollapse distance)'
             ]
         }, {
             title: '5.0.0 - 5.7.2',
             items: [
-                'Cleaned up code',
-                'Stopped relying on aria labels for tooltips',
-                'Fixed minor security vulnerability with tooltips',
-                'Added KeywordTracker compatibility',
-                'Added OldTitleBar compatibility',
-                'Fixed elements not collapsing when their respective button is hidden',
-                'Fixed call container issues',
                 'Decreased number of writes to the config file',
                 'Fixed plugin animations and events while on a call',
                 'Added ability to reset channel list size to default',
                 'Added ability to selectively enable Dynamic Uncollapse',
                 'Added option to make vanilla Discord toolbar collapsible as well as CollapsibleUI\'s',
-                'Suppressed false code security errors',
-                'Fixed unintentional console spam',
-                'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
-                'Fixed plugin failing to load if a collapsed element does not exist',
+                'Fixed call container issues',
+                'Added OldTitleBar compatibility',
+                'Reworked toolbar insertion',
+                'Fixed elements not collapsing when their respective button is hidden',
+                'Added KeywordTracker compatibility',
+                'Fixed minor security vulnerability with tooltips',
+                'Stopped relying on aria labels for tooltips',
+                'Cleaned up code',
                 'Fixed plugin breaking on GNU/Linux',
+                'Fixed plugin failing to load if a collapsed element does not exist',
+                'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
+                'Fixed unintentional console spam',
+                'Suppressed false code security errors',
                 'Added additional checks for collapsible objects',
                 'Added out-of-the-box compatibility and overrides for Dark Matter theme',
                 'Implemented compatibility fix between Dark Matter and Horizontal Server List',
@@ -89,7 +91,7 @@ module.exports = (() => {
                 'Fixed settings bar alignment glitch',
                 'Fixed user area misalignment with transitions disabled',
                 'Added ChannelDMs compatibility',
-                'Fixed toolbar not initializing while in call',
+                'Fixed toolbar not initializing while in a call',
                 'Added minimal uncollapse delay, which should improve usability',
                 'Tweaked settings and fixed corruption issue (resets all settings to default)',
                 'Tweaked more settings to improve reactability (resets uncollapse distance and delay)',
@@ -123,8 +125,7 @@ module.exports = (() => {
                 'Fixed window bar dynamic uncollapse',
                 'Prevented sidebars from uncollapsing while hovering over message bar',
                 'Used more robust message bar hover detection (fixes some themes)',
-                'Implemented rudimentary Horizontal Server List support',
-                'Finished implementing Horizontal Server List support',
+                'Implemented Horizontal Server List support',
                 'Default settings tweaks (reset dynamic uncollapse distance)',
                 'Fixed dynamic enabling of Horizontal Server List',
                 'Added startup/shutdown logging',
@@ -134,6 +135,7 @@ module.exports = (() => {
                 'Added language localization',
                 'Fixed small tooltip error',
                 'Made channel list resize state persistent',
+                'Fixed minor channel list styling error',
                 'Fixed channel list not collapsing'
             ]
         }, {
@@ -159,14 +161,15 @@ module.exports = (() => {
                 'Actually fixed plugin crashing on reload',
                 'Fixed handling of plugin being disabled',
                 'Adjusted some pixel measurements to prevent cutting off the message bar while typing multiline messages',
-                'Added ZeresPluginLibrary support'
+                'Added ZeresPluginLibrary support',
+                'Fixed plugin auto-update'
             ]
         }, {
             title: '1.0.0 - 1.2.1',
             items: [
                 'Initial release',
                 'Added persistent button states',
-                'Fixed plugin crashing on reload (sorta)',
+                'Fixed plugin crashing on reload',
                 'Added a button to collapse the message bar',
                 'Added transitions to some elements',
                 'Improved support for non-english locales',

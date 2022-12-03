@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.3.1
+ * @version 6.3.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.3.1',
+            version: '6.3.2',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.3.1',
+            title: '6.3.2',
             items: [
-                'Fixed patch notes'
+                'Fixed members list not collapsing after a message search'
             ]
         }, {
-            title: '6.0.0 - 6.3.0',
+            title: '6.0.0 - 6.3.1',
             items: [
                 'Added customizable keybinds to all actions',
                 'Added ability to auto-collapse elements based on size of Discord window',
@@ -60,7 +60,8 @@ module.exports = (() => {
                 'Fixed Members List button functionality in forum channels',
                 'Fixed rare issue where tooltips would get stuck open',
                 'Increased fidelity of toolbar insertion',
-                'Overhauled dynamic uncollapse settings (reset dynamic uncollapse distance)'
+                'Overhauled dynamic uncollapse settings (reset dynamic uncollapse distance)',
+                'Fixed patch notes'
             ]
         }, {
             title: '5.0.0 - 5.7.2',
@@ -280,6 +281,7 @@ module.exports = (() => {
             this.classAppWrapper = 'app-2CXKsg';
             this.classChannelList = 'sidebar-1tnWFu';
             this.classUserPopout = 'userPopoutOuter-3AVBmJ';
+            this.classMembersListWrapper = 'container-2o3qEW';
 
             if (BdApi.Plugins.isEnabled('ChannelDms') && document.querySelector('.ChannelDms-channelmembers-wrap'))
                 this.classMembersList = 'ChannelDms-channelmembers-wrap';
@@ -455,9 +457,10 @@ module.exports = (() => {
             // Add mutation observer to the view wrapper
             if (this.viewWrapper) {
                 this.viewObserver = new MutationObserver((mutationList) => {
+                    console.log(mutationList)
                     try {
                         for (let i = 0; i < mutationList.length; i++) {
-                            if (mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersList))
+                            if ((mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersList)) || (mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersListWrapper)))
                                 cui.initialize();
                         }
                     } catch(e) {

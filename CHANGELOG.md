@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v6.3.2:
+* Fixed members list not collapsing after a message search
+
 ### v6.3.1:
 * Fixed patch notes
 

@@ -1,5 +1,12 @@
 # CollapsibleUI Patch Notes
 
+### v6.4.0:
+* Reduced number of mutationObservers
+* Changed plugin persistence algorithm (should be much more consistent)
+* Compatibility fix for ServerFolders
+* Introduced new conditional autocollapse option
+* Removed several "magic numbers" to improve code readability
+
 ### v6.3.2:
 * Fixed members list not collapsing after a message search
 

@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v6.5.0:
+* Added support for the new User Profile panel
+
 ### v6.4.2:
 * Improved plugin persistence (again)
 * Fixed SplitLargeMessages incompatibility

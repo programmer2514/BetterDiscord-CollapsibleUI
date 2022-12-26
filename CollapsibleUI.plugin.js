@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.4.2
+ * @version 6.5.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,20 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.4.2',
+            version: '6.5.0',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.4.2',
+            title: '6.5.0',
             items: [
-                'Improved plugin persistence (again)',
-                'Fixed SplitLargeMessages incompatibility',
-                'Cleaned up and refactored some code'
+                'Added support for the new User Profile panel'
             ]
         }, {
-            title: '6.0.0 - 6.4.1',
+            title: '6.0.0 - 6.4.2',
             items: [
                 'Added customizable keybinds to all actions',
                 'Added ability to auto-collapse elements based on size of Discord window',
@@ -72,7 +70,10 @@ module.exports = (() => {
                 'Removed several "magic numbers" to improve code readability',
                 'Cleaned up method of getting plugin instance',
                 'Fixed scrollbar issue when collapsing user area',
-                'Reworked method for removing Discord\'s default Members List button'
+                'Reworked method for removing Discord\'s default Members List button',
+                'Improved plugin persistence (again)',
+                'Fixed SplitLargeMessages incompatibility',
+                'Cleaned up and refactored some code'
             ]
         }, {
             title: '5.0.0 - 5.7.2',
@@ -272,6 +273,7 @@ module.exports = (() => {
                 this.settingsButtonsMaxWidth = 100;
                 this.toolbarIconMaxWidth = 300;
                 this.membersListMaxWidth = 240;
+                this.profilePanelMaxWidth = 340;
                 this.toolbarMaxWidth = 800;
                 this.userAreaMaxHeight = 300;
                 this.msgBarMaxHeight = 400;
@@ -324,6 +326,7 @@ module.exports = (() => {
                 this.wordMark = document.querySelector('.wordmark-2u86JB');
                 this.msgBar = document.querySelector('.form-3gdLxP');
                 this.userArea = document.querySelector('.panels-3wFtMD');
+                this.profilePanel = document.querySelector('.profilePanel-2PWEok');
                 this.membersList = document.querySelector('.' + this.classMembersList);
                 this.serverList = document.querySelector('.' + this.classServerList);
                 this.channelList = document.querySelector('.' + this.classChannelList);
@@ -334,6 +337,7 @@ module.exports = (() => {
                 this.avatarWrapper = document.querySelector('.avatarWrapper-1B9FTW');
                 this.moreButton = this.toolBar.querySelector('[d="M7 12.001C7 10.8964 6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 12.001C17 10.8964 17.8954 10.001 19 10.001Z"]');
                 this.membersListButton = this.toolBar.querySelector('[d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z"]')?.parentElement.parentElement;
+                this.profilePanelButton = this.toolBar.querySelector('[d="M12 22C12.4883 22 12.9684 21.965 13.438 21.8974C12.5414 20.8489 12 19.4877 12 18C12 17.6593 12.0284 17.3252 12.083 17H6V16.0244C6 14.0732 10 13 12 13C12.6215 13 13.436 13.1036 14.2637 13.305C15.2888 12.4882 16.5874 12 18 12C19.4877 12 20.8489 12.5414 21.8974 13.438C21.965 12.9684 22 12.4883 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 12C13.66 12 15 10.66 15 9C15 7.34 13.66 6 12 6C10.34 6 9 7.34 9 9C9 10.66 10.34 12 12 12Z"]')?.parentElement.parentElement.parentElement;
                 this.fullscreenButton = document.querySelector('[d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"]')?.parentElement.parentElement.parentElement;
 
                 this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
@@ -345,7 +349,8 @@ module.exports = (() => {
                                     windowBar: 'Window Bar',
                                     membersList: 'Members List',
                                     userArea: 'User Area',
-                                    callContainer: 'Call Container'};
+                                    callContainer: 'Call Container',
+                                    profilePanel: 'User Profile'};
 
                 // Initialize delay handlers
                 this.serverDUDelay = false;
@@ -402,6 +407,8 @@ module.exports = (() => {
                 // Hide default Members List button
                 if (this.membersListButton)
                     this.membersListButton.style.display = 'none';
+                if (this.profilePanelButton)
+                    this.profilePanelButton.style.display = 'none';
 
                 // Fix settings button alignment
                 if (this.settingsContainerBase)
@@ -757,6 +764,13 @@ module.exports = (() => {
                     BdApi.setData('CollapsibleUI', 'membersListMaxWidth', this.membersListMaxWidth.toString());
                 }
 
+                // profilePanelMaxWidth [Default: 340]
+                if (typeof(BdApi.getData('CollapsibleUI', 'profilePanelMaxWidth')) === 'string') {
+                    this.profilePanelMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'profilePanelMaxWidth'));
+                } else {
+                    BdApi.setData('CollapsibleUI', 'profilePanelMaxWidth', this.profilePanelMaxWidth.toString());
+                }
+
                 // toolbarMaxWidth [Default: 800]
                 if (typeof(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth')) === 'string') {
                     this.toolbarMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'));
@@ -834,6 +848,8 @@ module.exports = (() => {
                     if (i == this.buttonsOrder[this.I_MEMBERS_LIST]) {
                         if (this.buttonsOrder[this.I_MEMBERS_LIST] && this.membersList) {
                             this.membersListButton = this.addToolbarIcon(this.localeLabels.membersList, '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
+                        } else if (this.buttonsOrder[this.I_MEMBERS_LIST] && this.profilePanel) {
+                            this.membersListButton = this.addToolbarIcon(this.localeLabels.profilePanel, '<path fill="currentColor" d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill="currentColor" fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>', '-0.5 -0.5 16.5 16.5');
                         } else {
                             this.membersListButton = false;
                             buttonsActive[this.I_MEMBERS_LIST] = 0;
@@ -964,6 +980,11 @@ module.exports = (() => {
                         this.membersList.style.maxWidth = this.membersListMaxWidth + 'px';
                         this.membersList.style.minHeight = '100%';
                     }
+                    if (this.profilePanel) {
+                        this.profilePanel.style.overflow = 'hidden';
+                        this.profilePanel.style.maxWidth = this.profilePanelMaxWidth + 'px';
+                        this.profilePanel.style.minHeight = '100%';
+                    }
                     if (this.msgBar) {
                         this.msgBar.style.maxHeight = this.msgBarMaxHeight + 'px';
                     }
@@ -1075,15 +1096,24 @@ module.exports = (() => {
                 }
 
                 // Read stored user data to decide active state of Members List button
-                if (this.membersList) {
+                if (this.membersList || this.profilePanel) {
                     if (this.buttonsOrder[this.I_MEMBERS_LIST] || this.disabledButtonsStayCollapsed) {
                         if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
                             if (this.membersListButton) this.membersListButton.classList.remove(this.classSelected);
-                            if (this.disableTransitions) {
-                                this.membersList.style.display = 'none';
-                            } else {
-                                this.membersList.style.maxWidth = this.collapsedDistance + 'px';
-                                this.membersList.style.minWidth = '0px';
+                            if (this.membersList) {
+                                if (this.disableTransitions) {
+                                    this.membersList.style.display = 'none';
+                                } else {
+                                    this.membersList.style.maxWidth = this.collapsedDistance + 'px';
+                                    this.membersList.style.minWidth = '0px';
+                                }
+                            } else if (this.profilePanel) {
+                                if (this.disableTransitions) {
+                                    this.profilePanel.style.display = 'none';
+                                } else {
+                                    this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
+                                    this.profilePanel.style.minWidth = '0px';
+                                }
                             }
                         } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
                             if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
@@ -1203,35 +1233,37 @@ module.exports = (() => {
                         this.channelList.style.transition = 'none';
                         this.channelList.style.width = this.channelListWidth + 'px';
                     }
+
                     this.channelList.style.transition = 'width ' + this.transitionSpeed + 'ms';
-
                     this.serverList.style.transition = 'width ' + this.transitionSpeed + 'ms';
-                    if (this.windowBar) {
+
+                    if (this.windowBar)
                         this.windowBar.style.transition = 'height ' + this.transitionSpeed + 'ms';
-                    }
-                    if (this.membersList) {
+
+                    if (this.membersList)
                         this.membersList.style.transition = 'max-width ' + this.transitionSpeed + 'ms, min-width ' + this.transitionSpeed + 'ms';
-                    }
 
-                    if (this.msgBar) {
+                    if (this.profilePanel)
+                        this.profilePanel.style.transition = 'max-width ' + this.transitionSpeed + 'ms, min-width ' + this.transitionSpeed + 'ms';
+
+                    if (this.msgBar)
                         this.msgBar.style.transition = 'max-height ' + this.transitionSpeed + 'ms';
-                    }
 
-                    if (this.userArea) {
+                    if (this.userArea)
                         this.userArea.style.transition = 'max-height ' + this.transitionSpeed + 'ms';
-                    }
-                    if (document.querySelector('.' + this.classCallContainer)) {
+
+                    if (document.querySelector('.' + this.classCallContainer))
                         document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + this.transitionSpeed + 'ms';
-                    }
+
                     if (this.windowBase) {
                         if (this.isDarkMatterLoaded)
                             this.windowBase.style.transition = 'top ' + this.transitionSpeed + 'ms, min-width ' + this.transitionSpeed + 'ms';
                         else
                             this.windowBase.style.transition = 'top ' + this.transitionSpeed + 'ms';
                     }
-                    if (this.isDarkMatterLoaded) {
+
+                    if (this.isDarkMatterLoaded)
                         this.settingsContainerBase.style.transition = 'width ' + this.transitionSpeed + 'ms, left ' + this.transitionSpeed + 'ms';
-                    }
                 }
 
                 // Implement dynamic uncollapse features
@@ -1461,25 +1493,35 @@ module.exports = (() => {
                         }
 
                         // Members List
-                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && cui.membersList) {
-                            if (cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] && cui.isCollapsed[cui.I_MEMBERS_LIST] && cui.isNear(cui.membersList, cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && (cui.membersList || cui.profilePanel)) {
+                            if (cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] && cui.isCollapsed[cui.I_MEMBERS_LIST] && cui.isNear(cui.membersList ? cui.membersList : cui.profilePanel, cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                                 if (cui.membersDUDelay) {
                                     clearTimeout(cui.membersDUDelay);
                                     cui.membersDUDelay = false;
                                 }
                                 cui.membersDUDelay = setTimeout(() => {
-                                    cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
-                                    cui.membersList.style.removeProperty('min-width');
+                                    if (cui.membersList) {
+                                        cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
+                                        cui.membersList.style.removeProperty('min-width');
+                                    } else if (cui.profilePanel) {
+                                        cui.profilePanel.style.maxWidth = cui.profilePanelMaxWidth + 'px';
+                                        cui.profilePanel.style.removeProperty('min-width');
+                                    }
                                     cui.isCollapsed[cui.I_MEMBERS_LIST] = false;
                                     cui.membersDUDelay = false;
                                 }, cui.dynamicUncollapseDelay);
-                            } else if (!cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] || (!(cui.isCollapsed[cui.I_MEMBERS_LIST]) && !(cui.isNear(cui.membersList, cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY)) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY)))) {
+                            } else if (!cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] || (!(cui.isCollapsed[cui.I_MEMBERS_LIST]) && !(cui.isNear(cui.membersList ? cui.membersList : cui.profilePanel, cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY)) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY)))) {
                                 if (cui.membersDUDelay) {
                                     clearTimeout(cui.membersDUDelay);
                                     cui.membersDUDelay = false;
                                 }
-                                cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
-                                cui.membersList.style.minWidth = '0px';
+                                if (cui.membersList) {
+                                    cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
+                                    cui.membersList.style.minWidth = '0px';
+                                } else if (cui.profilePanel) {
+                                    cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
+                                    cui.profilePanel.style.minWidth = '0px';
+                                }
                                 cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
                             }
                         }
@@ -1594,13 +1636,18 @@ module.exports = (() => {
                         }
 
                         // Members List
-                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && cui.membersList && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY))) {
+                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && (cui.membersList || cui.profilePanel) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY))) {
                             if (cui.membersDUDelay) {
                                 clearTimeout(cui.membersDUDelay);
                                 cui.membersDUDelay = false;
                             }
-                            cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
-                            cui.membersList.style.minWidth = '0px';
+                            if (cui.membersList) {
+                                cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
+                                cui.membersList.style.minWidth = '0px';
+                            } else if (cui.profilePanel) {
+                                cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
+                                cui.profilePanel.style.minWidth = '0px';
+                            }
                             cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
                         }
 
@@ -1845,7 +1892,10 @@ module.exports = (() => {
                     }, {signal: this.eventListenerSignal});
 
                     this.membersListButton.addEventListener('mouseenter', function() {
-                        this.tooltip = cui.createTooltip(cui.localeLabels.membersList + ` (${cui.keyStringList[cui.I_MEMBERS_LIST]})`, this);
+                        if (cui.membersList)
+                            this.tooltip = cui.createTooltip(cui.localeLabels.membersList + ` (${cui.keyStringList[cui.I_MEMBERS_LIST]})`, this);
+                        else if (cui.profilePanel)
+                            this.tooltip = cui.createTooltip(cui.localeLabels.profilePanel + ` (${cui.keyStringList[cui.I_MEMBERS_LIST]})`, this);
                     }, {signal: this.eventListenerSignal});
 
                     this.membersListButton.addEventListener('mouseleave', function() {
@@ -1931,6 +1981,13 @@ module.exports = (() => {
                     this.membersList.style.removeProperty('overflow');
                     this.membersList.style.removeProperty('transition');
                     this.membersList.style.removeProperty('display');
+                }
+                if (this.profilePanel) {
+                    this.profilePanel.style.removeProperty('max-width');
+                    this.profilePanel.style.removeProperty('min-width');
+                    this.profilePanel.style.removeProperty('overflow');
+                    this.profilePanel.style.removeProperty('transition');
+                    this.profilePanel.style.removeProperty('display');
                 }
                 if (this.msgBar) {
                     this.msgBar.style.removeProperty('max-height');
@@ -2446,6 +2503,11 @@ module.exports = (() => {
                                                              BdApi.getData('CollapsibleUI', 'membersListMaxWidth'),
                                                              null,
                                                              {placeholder: 'Default: 240'});
+            var settingProfilePanelMaxWidth = new zps.Textbox('Profile Panel - Max Width',
+                                                             null,
+                                                             BdApi.getData('CollapsibleUI', 'profilePanelMaxWidth'),
+                                                             null,
+                                                             {placeholder: 'Default: 340'});
             var settingToolbarMaxWidth = new zps.Textbox('Toolbar - Max Width',
                                                          null,
                                                          BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'),
@@ -2471,6 +2533,7 @@ module.exports = (() => {
             groupAdvanced.append(settingSettingsButtonsMaxWidth);
             groupAdvanced.append(settingToolbarIconMaxWidth);
             groupAdvanced.append(settingMembersListMaxWidth);
+            groupAdvanced.append(settingProfilePanelMaxWidth);
             groupAdvanced.append(settingToolbarMaxWidth);
             groupAdvanced.append(settingUserAreaMaxHeight);
             groupAdvanced.append(settingMsgBarMaxHeight);
@@ -2826,6 +2889,9 @@ module.exports = (() => {
             settingMembersListMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'membersListMaxWidth', result);
             };
+            settingProfilePanelMaxWidth.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'profilePanelMaxWidth', result);
+            };
             settingToolbarMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', result);
             };
@@ -3080,20 +3146,38 @@ module.exports = (() => {
 
                 case 4: // I_MEMBERS_LIST
                     if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
-                        if (this.disableTransitions) {
-                            this.membersList.style.display = 'none';
-                        } else {
-                            this.membersList.style.maxWidth = this.collapsedDistance + 'px';
-                            this.membersList.style.minWidth = '0px';
+                        if (this.membersList) {
+                            if (this.disableTransitions) {
+                                this.membersList.style.display = 'none';
+                            } else {
+                                this.membersList.style.maxWidth = this.collapsedDistance + 'px';
+                                this.membersList.style.minWidth = '0px';
+                            }
+                        } else if (this.profilePanel) {
+                            if (this.disableTransitions) {
+                                this.profilePanel.style.display = 'none';
+                            } else {
+                                this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
+                                this.profilePanel.style.minWidth = '0px';
+                            }
                         }
                         BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
                         this.membersListButton.classList.remove(this.classSelected);
                     } else {
-                        if (this.disableTransitions) {
-                            this.membersList.style.removeProperty('display');
-                        } else {
-                            this.membersList.style.maxWidth = this.membersListMaxWidth + 'px';
-                            this.membersList.style.removeProperty('min-width');
+                        if (this.membersList) {
+                            if (this.disableTransitions) {
+                                this.membersList.style.removeProperty('display');
+                            } else {
+                                this.membersList.style.maxWidth = this.membersListMaxWidth + 'px';
+                                this.membersList.style.removeProperty('min-width');
+                            }
+                        } else if (this.profilePanel) {
+                            if (this.disableTransitions) {
+                                this.profilePanel.style.removeProperty('display');
+                            } else {
+                                this.profilePanel.style.maxWidth = this.profilePanelMaxWidth + 'px';
+                                this.profilePanel.style.removeProperty('min-width');
+                            }
                         }
                         BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
                         this.membersListButton.classList.add(this.classSelected);
@@ -3196,7 +3280,8 @@ module.exports = (() => {
                         windowBar: 'Vinduesbjælke',
                         membersList: 'Medlemmerliste',
                         userArea: 'Brugerområdet',
-                        callContainer: 'Opkaldsbeholder'};
+                        callContainer: 'Opkaldsbeholder',
+                        profilePanel: 'Brugerprofil'};
                     break;
                 case "de":
                     this.localeLabels = {
@@ -3206,7 +3291,8 @@ module.exports = (() => {
                         windowBar: 'Fenster-Bar',
                         membersList: 'Mitglieder-Liste',
                         userArea: 'Benutzer-Bereich',
-                        callContainer: 'Anruf-Container'};
+                        callContainer: 'Anruf-Container',
+                        profilePanel: 'Benutzerprofil'};
                     break;
                 case "es-ES":
                     this.localeLabels = {
@@ -3216,7 +3302,8 @@ module.exports = (() => {
                         windowBar: 'Barra de Ventana',
                         membersList: 'Lista de Miembros',
                         userArea: 'Área de Usuario',
-                        callContainer: 'Contenedor Llamadas'};
+                        callContainer: 'Contenedor Llamadas',
+                        profilePanel: 'Perfil del Usuario'};
                     break;
                 case "fr":
                     this.localeLabels = {
@@ -3226,7 +3313,8 @@ module.exports = (() => {
                         windowBar: 'Barre de Fenêtre',
                         membersList: 'Liste des Membres',
                         userArea: 'Espace Utilisateur',
-                        callContainer: 'Conteneur D&apos;appel'};
+                        callContainer: 'Conteneur D&apos;appel',
+                        profilePanel: 'Profil de L&apos;utilisateur'};
                     break;
                 case "hr":
                     this.localeLabels = {
@@ -3236,7 +3324,8 @@ module.exports = (() => {
                         windowBar: 'Traka Prozora',
                         membersList: 'Popis Članova',
                         userArea: 'Korisničko Područje',
-                        callContainer: 'Spremnik Poziva'};
+                        callContainer: 'Spremnik Poziva',
+                        profilePanel: 'Korisnički Profil'};
                     break;
                 case "it":
                     this.localeLabels = {
@@ -3246,7 +3335,8 @@ module.exports = (() => {
                         windowBar: 'Barra Finestra',
                         membersList: 'Elenco Membri',
                         userArea: 'Area Utente',
-                        callContainer: 'Chiama Contenitore'};
+                        callContainer: 'Chiama Contenitore',
+                        profilePanel: 'Profilo Utente'};
                     break;
                 case "lt":
                     this.localeLabels = {
@@ -3256,7 +3346,8 @@ module.exports = (() => {
                         windowBar: 'Langų Juosta',
                         membersList: 'Narių Sąrašas',
                         userArea: 'Naudotojo Sritis',
-                        callContainer: 'Skambučių Konteineris'};
+                        callContainer: 'Skambučių Konteineris',
+                        profilePanel: 'Naudotojo Profilis'};
                     break;
                 case "hu":
                     this.localeLabels = {
@@ -3266,7 +3357,8 @@ module.exports = (() => {
                         windowBar: 'Ablaksáv',
                         membersList: 'Tagok Lista',
                         userArea: 'Felhasználói Rész',
-                        callContainer: 'Hívás Konténer'};
+                        callContainer: 'Hívás Konténer',
+                        profilePanel: 'Felhasználói Profil'};
                     break;
                 case "nl":
                     this.localeLabels = {
@@ -3276,7 +3368,8 @@ module.exports = (() => {
                         windowBar: 'Vensterbar',
                         membersList: 'Ledenlijst',
                         userArea: 'Gebruikersgebied',
-                        callContainer: 'Bel Container'};
+                        callContainer: 'Bel Container',
+                        profilePanel: 'Gebruikersprofiel'};
                     break;
                 case "no":
                     this.localeLabels = {
@@ -3286,7 +3379,8 @@ module.exports = (() => {
                         windowBar: 'Vinduslinje',
                         membersList: 'Liste over Medlemmer',
                         userArea: 'Bruker-Området',
-                        callContainer: 'Kall Beholder'};
+                        callContainer: 'Kall Beholder',
+                        profilePanel: 'Brukerprofil'};
                     break;
                 case "pl":
                     this.localeLabels = {
@@ -3296,7 +3390,8 @@ module.exports = (() => {
                         windowBar: 'Pasek Okna',
                         membersList: 'Lista Członków',
                         userArea: 'Obszar Użytkownika',
-                        callContainer: 'Pojemnik na Telefony'};
+                        callContainer: 'Pojemnik na Telefony',
+                        profilePanel: 'Profil Użytkownika'};
                     break;
                 case "pt-BR":
                     this.localeLabels = {
@@ -3306,7 +3401,8 @@ module.exports = (() => {
                         windowBar: 'Barra de Janela',
                         membersList: 'Lista de Membros',
                         userArea: 'Área do Usuário',
-                        callContainer: 'Container de Chamadas'};
+                        callContainer: 'Container de Chamadas',
+                        profilePanel: 'Perfil do Usuário'};
                     break;
                 case "ro":
                     this.localeLabels = {
@@ -3316,7 +3412,8 @@ module.exports = (() => {
                         windowBar: 'Bara de Fereastră',
                         membersList: 'Lista Membrilor',
                         userArea: 'Zona de Utilizator',
-                        callContainer: 'Apelare Container'};
+                        callContainer: 'Apelare Container',
+                        profilePanel: 'Profil de Utilizator'};
                     break;
                 case "fi":
                     this.localeLabels = {
@@ -3326,7 +3423,8 @@ module.exports = (() => {
                         windowBar: 'Ikkunapalkki',
                         membersList: 'Jäsenluettelo',
                         userArea: 'Käyttäjäalue',
-                        callContainer: 'Kutsukontti'};
+                        callContainer: 'Kutsukontti',
+                        profilePanel: 'Käyttäjäprofiili'};
                     break;
                 case "sv-SE":
                     this.localeLabels = {
@@ -3336,7 +3434,8 @@ module.exports = (() => {
                         windowBar: 'Fönsterfält',
                         membersList: 'Medlemslista',
                         userArea: 'Användarområde',
-                        callContainer: 'Samtalsbehållare'};
+                        callContainer: 'Samtalsbehållare',
+                        profilePanel: 'Användarprofil'};
                     break;
                 case "vi":
                     this.localeLabels = {
@@ -3346,7 +3445,8 @@ module.exports = (() => {
                         windowBar: 'Thanh Cửa Sổ',
                         membersList: 'Danh sách Thành Viên',
                         userArea: 'Vùng Người Dùng',
-                        callContainer: 'Container Cuộc Gọi'};
+                        callContainer: 'Container Cuộc Gọi',
+                        profilePanel: 'Thông tin người dùng'};
                     break;
                 case "tr":
                     this.localeLabels = {
@@ -3356,7 +3456,8 @@ module.exports = (() => {
                         windowBar: 'Pencere Çubuğu',
                         membersList: 'Üye Listesi',
                         userArea: 'Kullanıcı Alanı',
-                        callContainer: 'Arama Kapsayıcısı'};
+                        callContainer: 'Arama Kapsayıcısı',
+                        profilePanel: 'Kullanıcı Profili'};
                     break;
                 case "cs":
                     this.localeLabels = {
@@ -3366,7 +3467,8 @@ module.exports = (() => {
                         windowBar: 'Panel Oken',
                         membersList: 'Seznam Členů',
                         userArea: 'Uživatelská Oblast',
-                        callContainer: 'Kontejner Volání'};
+                        callContainer: 'Kontejner Volání',
+                        profilePanel: 'Uživatelský Profil'};
                     break;
                 case "el":
                     this.localeLabels = {
@@ -3376,7 +3478,8 @@ module.exports = (() => {
                         windowBar: 'Γραμμή Παραθύρων',
                         membersList: 'Λίστα Μελών',
                         userArea: 'Περιοχή Χρήστη',
-                        callContainer: 'Δοχείο Κλήσεων'};
+                        callContainer: 'Δοχείο Κλήσεων',
+                        profilePanel: 'Προφίλ Χρήστη'};
                     break;
                 case "bg":
                     this.localeLabels = {
@@ -3386,7 +3489,8 @@ module.exports = (() => {
                         windowBar: 'Лента на Прозореца',
                         membersList: 'Списък на Членовете',
                         userArea: 'Потребителска Зона',
-                        callContainer: 'Контейнер за Повиквания'};
+                        callContainer: 'Контейнер за Повиквания',
+                        profilePanel: 'Потребителски Профил'};
                     break;
                 case "ru":
                     this.localeLabels = {
@@ -3396,7 +3500,8 @@ module.exports = (() => {
                         windowBar: 'Панель Окон',
                         membersList: 'Список Участников',
                         userArea: 'Область Пользователя',
-                        callContainer: 'Контейнер Вызовов'};
+                        callContainer: 'Контейнер Вызовов',
+                        profilePanel: 'Профиль Пользователя'};
                     break;
                 case "uk":
                     this.localeLabels = {
@@ -3406,7 +3511,8 @@ module.exports = (() => {
                         windowBar: 'Рядок Вікна',
                         membersList: 'Список Учасників',
                         userArea: 'Область Користувача',
-                        callContainer: 'Контейнер Викликів'};
+                        callContainer: 'Контейнер Викликів',
+                        profilePanel: 'Профіль Користувача'};
                     break;
                 case "hi":
                     this.localeLabels = {
@@ -3416,7 +3522,8 @@ module.exports = (() => {
                         windowBar: 'विंडो पट्टी',
                         membersList: 'सदस्यों की सूची',
                         userArea: 'उपयोगकर्ता क्षेत्र',
-                        callContainer: 'कॉल कंटेनर'};
+                        callContainer: 'कॉल कंटेनर',
+                        profilePanel: 'उपयोगकर्ता प्रोफ़ाइल'};
                     break;
                 case "th":
                     this.localeLabels = {
@@ -3426,7 +3533,8 @@ module.exports = (() => {
                         windowBar: 'แถบหน้าต่าง',
                         membersList: 'รายชื่อสมาชิก',
                         userArea: 'พื้นที่ผู้ใช้',
-                        callContainer: 'คอนเทนเนอร์การโทร'};
+                        callContainer: 'คอนเทนเนอร์การโทร',
+                        profilePanel: 'โปรไฟล์ผู้ใช้'};
                     break;
                 case "zh-CN":
                     this.localeLabels = {
@@ -3436,7 +3544,8 @@ module.exports = (() => {
                         windowBar: '窗口栏',
                         membersList: '成员列表',
                         userArea: '用户区',
-                        callContainer: '呼叫容器'};
+                        callContainer: '呼叫容器',
+                        profilePanel: '用户资料'};
                     break;
                 case "ja":
                     this.localeLabels = {
@@ -3446,7 +3555,8 @@ module.exports = (() => {
                         windowBar: 'ウィンドウズ・バー',
                         membersList: 'メンバーリスト',
                         userArea: 'ユーザーエリア',
-                        callContainer: 'コールコンテナ'};
+                        callContainer: 'コールコンテナ',
+                        profilePanel: 'ユーザープロフィール'};
                     break;
                 case "zh-TW":
                     this.localeLabels = {
@@ -3456,7 +3566,8 @@ module.exports = (() => {
                         windowBar: '視窗列',
                         membersList: '成員清單',
                         userArea: '用戶區',
-                        callContainer: '呼叫容器'};
+                        callContainer: '呼叫容器',
+                        profilePanel: '用戶資料'};
                     break;
                 case "ko":
                     this.localeLabels = {
@@ -3466,7 +3577,8 @@ module.exports = (() => {
                         windowBar: '창 바',
                         membersList: '멤버 목록',
                         userArea: '사용자 영역',
-                        callContainer: '통화 컨테이너'};
+                        callContainer: '통화 컨테이너',
+                        profilePanel: '사용자 프로필'};
                     break;
                 default:
                     this.localeLabels = {
@@ -3476,7 +3588,8 @@ module.exports = (() => {
                         windowBar: 'Window Bar',
                         membersList: 'Members List',
                         userArea: 'User Area',
-                        callContainer: 'Call Container'};
+                        callContainer: 'Call Container',
+                        profilePanel: 'User Profile'};
             }
         }
     }

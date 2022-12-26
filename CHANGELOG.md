@@ -1,5 +1,15 @@
 # CollapsibleUI Patch Notes
 
+### v6.4.2:
+* Improved plugin persistence (again)
+* Fixed SplitLargeMessages incompatibility
+* Cleaned up and refactored some code
+
+### v6.4.1:
+* Cleaned up method of getting plugin instance
+* Fixed scrollbar issue when collapsing user area
+* Reworked method for removing Discord's default Members List button
+
 ### v6.4.0:
 * Reduced number of mutationObservers
 * Changed plugin persistence algorithm (should be much more consistent)

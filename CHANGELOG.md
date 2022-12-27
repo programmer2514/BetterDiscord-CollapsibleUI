@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v6.5.1:
+* Fixed minor issues with User Profile panel
+* Prevented plugin rarely making server list completely inaccessible
+* Removed accidental console spam
+* Condensed changelog to save space
+
 ### v6.5.0:
 * Added support for the new User Profile panel
 

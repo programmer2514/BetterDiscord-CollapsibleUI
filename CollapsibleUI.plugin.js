@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.5.0
+ * @version 6.5.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,174 +19,23 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.5.0',
+            version: '6.5.1',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.5.0',
+            title: '6.5.1',
             items: [
-                'Added support for the new User Profile panel'
+                'Fixed minor issues with User Profile panel',
+                'Prevented plugin rarely making server list completely inaccessible',
+                'Removed accidental console spam',
+                'Condensed changelog to save space'
             ]
         }, {
-            title: '6.0.0 - 6.4.2',
+            title: '1.0.0 - 6.5.0',
             items: [
-                'Added customizable keybinds to all actions',
-                'Added ability to auto-collapse elements based on size of Discord window',
-                'Added better compatibility with DevilBro\'s plugins',
-                'Greatly increased plugin persistence',
-                'Fixed plugin not starting after another plugin is updated',
-                'Significantly refactored code for better modularity',
-                'Removed unnecessary plugin reloading when changing settings',
-                'Removed unnecessary console clutter',
-                'Minor tweaks to code and plugin description',
-                'Replaced all intervals with mutation observers',
-                'Removed reliance on ZeresPluginLibrary logger modification',
-                'Changed inefficient startup behavior',
-                'Fixed crash caused by BDFDB\'s stupidity',
-                'Plugin should now comply with updated code guidelines',
-                'Fixed several issues introduced in v6.1.0',
-                'Rewrote toolbar insertion code to play better with other plugins',
-                'Fixed BDFDB updates causing plugin to break',
-                'Added support for new Discord forum layout',
-                'Fixed keyboard shortcuts messing with non-english keyboard layouts',
-                'Fixed settings buttons not collapsing when a non-focused user sends a DM',
-                'Removed some pointless console spam',
-                'Fixed resizable channel list on latest update',
-                'Fixed plugin failing to load on initial app startup',
-                'Prevented members list from auto-collapsing when user popout is open',
-                'Fixed channel list margin remaining in fullscreen mode',
-                'Fixed Members List button functionality in forum channels',
-                'Fixed rare issue where tooltips would get stuck open',
-                'Increased fidelity of toolbar insertion',
-                'Overhauled dynamic uncollapse settings (reset dynamic uncollapse distance)',
-                'Fixed patch notes',
-                'Fixed members list not collapsing after a message search',
-                'Reduced number of mutationObservers',
-                'Changed plugin persistence algorithm (should be much more consistent)',
-                'Compatibility fix for ServerFolders',
-                'Introduced new conditional autocollapse option',
-                'Removed several "magic numbers" to improve code readability',
-                'Cleaned up method of getting plugin instance',
-                'Fixed scrollbar issue when collapsing user area',
-                'Reworked method for removing Discord\'s default Members List button',
-                'Improved plugin persistence (again)',
-                'Fixed SplitLargeMessages incompatibility',
-                'Cleaned up and refactored some code'
-            ]
-        }, {
-            title: '5.0.0 - 5.7.2',
-            items: [
-                'Decreased number of writes to the config file',
-                'Fixed plugin animations and events while on a call',
-                'Added ability to reset channel list size to default',
-                'Added ability to selectively enable Dynamic Uncollapse',
-                'Added option to make vanilla Discord toolbar collapsible as well as CollapsibleUI\'s',
-                'Fixed call container issues',
-                'Added OldTitleBar compatibility',
-                'Reworked toolbar insertion',
-                'Fixed elements not collapsing when their respective button is hidden',
-                'Added KeywordTracker compatibility',
-                'Fixed minor security vulnerability with tooltips',
-                'Stopped relying on aria labels for tooltips',
-                'Cleaned up code',
-                'Fixed plugin breaking on GNU/Linux',
-                'Fixed plugin failing to load if a collapsed element does not exist',
-                'Fixed incorrect settings indices for Selective Dynamic Uncollapse',
-                'Fixed unintentional console spam',
-                'Suppressed false code security errors',
-                'Added additional checks for collapsible objects',
-                'Added out-of-the-box compatibility and overrides for Dark Matter theme',
-                'Implemented compatibility fix between Dark Matter and Horizontal Server List',
-                'Fixed minor syntax errors',
-                'Fixed visual window bar glitch',
-                'Fixed settings bar alignment glitch',
-                'Fixed user area misalignment with transitions disabled',
-                'Added ChannelDMs compatibility',
-                'Fixed toolbar not initializing while in a call',
-                'Added minimal uncollapse delay, which should improve usability',
-                'Tweaked settings and fixed corruption issue (resets all settings to default)',
-                'Tweaked more settings to improve reactability (resets uncollapse distance and delay)',
-                'Clarified and moved a settings option to make it more usable',
-                'Fixed settings button alignment glitch',
-                'Fixed incorrect handling of disabled toolbar buttons',
-                'Fixed channel list being able to resize beyond window limits',
-                'Improved channel list fix (it actually works now)',
-                'Fixed plugin not loading during video call/screenshare when chat is hidden',
-                'Added settings option to change behavior of collapsed elements when their corresponding button is disabled',
-                'Greatly improved plugin loading times and stability',
-                'Decreased initial plugin loading time',
-                'Fixed incorrect logic causing elements to not remain collapsed',
-                'Fixed HSL integration'
-            ]
-        }, {
-            title: '4.0.0 - 4.4.2',
-            items: [
-                'Added settings panel',
-                'Small animation tweaks',
-                'Added dynamic uncollapse feature',
-                'Made call container collapsible',
-                'With settings collapse enabled, now collapses call area buttons correctly',
-                'Fixed a lot of bugs',
-                'Fixed patch notes',
-                'Fixed UI elements not collapsing on mouse leaving the window',
-                'Fixed settings collapse malfunction when in a voice call',
-                'Disabled call area buttons collapsing via settings collapse',
-                'Fixed dynamic uncollapse',
-                'Fixed tooltips not showing',
-                'Fixed window bar dynamic uncollapse',
-                'Prevented sidebars from uncollapsing while hovering over message bar',
-                'Used more robust message bar hover detection (fixes some themes)',
-                'Implemented Horizontal Server List support',
-                'Default settings tweaks (reset dynamic uncollapse distance)',
-                'Fixed dynamic enabling of Horizontal Server List',
-                'Added startup/shutdown logging',
-                'Fixed user area not fully uncollapsing while in a call',
-                'Fixed collapsing call container hiding the toolbar',
-                'Added new advanced option to leave elements partially uncollapsed',
-                'Added language localization',
-                'Fixed small tooltip error',
-                'Made channel list resize state persistent',
-                'Fixed minor channel list styling error',
-                'Fixed channel list not collapsing'
-            ]
-        }, {
-            title: '3.0.0 - 3.0.1',
-            items: [
-                'Added GNU/Linux support',
-                'Added theme support',
-                'Added thread support',
-                'Made channel list resizable',
-                'Added collapsible button panel feature',
-                'Added settings options in JSON file for advanced tweaking',
-                'Fixed styles on new Discord update',
-                'Fixed many, many bugs',
-                'Fixed BetterDiscord repo integration'
-            ]
-        }, {
-            title: '2.0.0 - 2.1.1',
-            items: [
-                'Added a button to collapse the window title bar',
-                'Updated the button icons to be more consistent',
-                'Finished adding transitions to collapsible elements',
-                'Fixed issues with persistent button states',
-                'Actually fixed plugin crashing on reload',
-                'Fixed handling of plugin being disabled',
-                'Adjusted some pixel measurements to prevent cutting off the message bar while typing multiline messages',
-                'Added ZeresPluginLibrary support',
-                'Fixed plugin auto-update'
-            ]
-        }, {
-            title: '1.0.0 - 1.2.1',
-            items: [
-                'Initial release',
-                'Added persistent button states',
-                'Fixed plugin crashing on reload',
-                'Added a button to collapse the message bar',
-                'Added transitions to some elements',
-                'Improved support for non-english locales',
-                'Improved handling of missing config'
+                'See the full changelog here:\nhttps://programmer2514.github.io/?l=cui-changelog'
             ]
         }]
     };
@@ -326,7 +175,8 @@ module.exports = (() => {
                 this.wordMark = document.querySelector('.wordmark-2u86JB');
                 this.msgBar = document.querySelector('.form-3gdLxP');
                 this.userArea = document.querySelector('.panels-3wFtMD');
-                this.profilePanel = document.querySelector('.profilePanel-2PWEok');
+                this.profilePanel = document.querySelector('.userPanelOuter-xc-WYi');
+                this.profilePanelWrapper = document.querySelector('.profilePanel-2PWEok');
                 this.membersList = document.querySelector('.' + this.classMembersList);
                 this.serverList = document.querySelector('.' + this.classServerList);
                 this.channelList = document.querySelector('.' + this.classChannelList);
@@ -405,9 +255,9 @@ module.exports = (() => {
 
 
                 // Hide default Members List button
-                if (this.membersListButton)
+                if (this.membersListButton && this.membersList)
                     this.membersListButton.style.display = 'none';
-                if (this.profilePanelButton)
+                if (this.profilePanelButton && this.profilePanel)
                     this.profilePanelButton.style.display = 'none';
 
                 // Fix settings button alignment
@@ -451,7 +301,6 @@ module.exports = (() => {
 
                 // Add mutation observer to reload my plugin when necessary
                 this.appObserver = new MutationObserver((mutationList) => {
-                    console.log(mutationList);
                     try {
                         // If there are a lot of mutations, assume we need to reload
                         // This increases performance a lot when switching views
@@ -964,6 +813,10 @@ module.exports = (() => {
                     }
                 }
 
+                // Adjust targeted elements if UI transitions are disabled
+                if (this.disableTransitions)
+                    this.profilePanel = this.profilePanelWrapper;
+
                 // Adjust UI element styling in preparation for transitions
                 if (!this.disableTransitions) {
                     document.querySelectorAll('.collapsible-ui-element').forEach(e => e.style.transition = 'max-width ' + this.transitionSpeed + 'ms, margin ' + this.transitionSpeed + 'ms, padding ' + this.transitionSpeed + 'ms');
@@ -985,6 +838,8 @@ module.exports = (() => {
                         this.profilePanel.style.maxWidth = this.profilePanelMaxWidth + 'px';
                         this.profilePanel.style.minHeight = '100%';
                     }
+                    if (this.profilePanelWrapper)
+                        this.profilePanelWrapper.style.width = 'auto';
                     if (this.msgBar) {
                         this.msgBar.style.maxHeight = this.msgBarMaxHeight + 'px';
                     }
@@ -1989,6 +1844,8 @@ module.exports = (() => {
                     this.profilePanel.style.removeProperty('transition');
                     this.profilePanel.style.removeProperty('display');
                 }
+                if (this.profilePanelWrapper)
+                    this.profilePanel.style.removeProperty('width');
                 if (this.msgBar) {
                     this.msgBar.style.removeProperty('max-height');
                     this.msgBar.style.removeProperty('overflow');

@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v6.5.2:
+* Fixed several overflow errors with user area and channel list
+
 ### v6.5.1:
 * Fixed minor issues with User Profile panel
 * Prevented plugin rarely making server list completely inaccessible

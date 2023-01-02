@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.5.1
+ * @version 6.5.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,21 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.5.1',
+            version: '6.5.2',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.5.1',
+            title: '6.5.2',
             items: [
-                'Fixed minor issues with User Profile panel',
-                'Prevented plugin rarely making server list completely inaccessible',
-                'Removed accidental console spam',
-                'Condensed changelog to save space'
+                'Fixed several overflow errors with user area and channel list'
             ]
         }, {
-            title: '1.0.0 - 6.5.0',
+            title: '1.0.0 - 6.5.1',
             items: [
                 'See the full changelog here:\nhttps://programmer2514.github.io/?l=cui-changelog'
             ]
@@ -840,18 +837,18 @@ module.exports = (() => {
                     }
                     if (this.profilePanelWrapper)
                         this.profilePanelWrapper.style.width = 'auto';
-                    if (this.msgBar) {
+                    if (this.msgBar)
                         this.msgBar.style.maxHeight = this.msgBarMaxHeight + 'px';
-                    }
-                    if (this.callContainerExists) {
+                    if (this.callContainerExists)
                         document.querySelector('.' + this.classCallContainer).style.minHeight = '0px';
-                    }
-                    if (document.querySelector('.' + this.classDMElement)) {
+                    if (document.querySelector('.' + this.classDMElement))
                         document.querySelectorAll('.' + this.classDMElement).forEach(e => e.style.maxWidth = '200000px');
-                    }
-                    if (this.avatarWrapper) {
+                    if (this.avatarWrapper)
                         this.avatarWrapper.style.minWidth = '0';
-                    }
+                    if (this.userArea)
+                        this.userArea.style.overflow = 'hidden';
+                    if (this.channelList)
+                        this.channelList.style.overflow = 'hidden';
                 }
 
                 // Read stored user data to decide active state of Server List button
@@ -1028,7 +1025,6 @@ module.exports = (() => {
                     if (this.resizableChannelList) {
                         this.channelList.style.resize = 'horizontal';
                         this.channelList.style.maxWidth = '80vw';
-                        this.channelList.style.overflow = 'hidden';
 
                         document.body.addEventListener('mousedown', function () {
                             cui.channelList.style.transition = 'none';
@@ -1868,6 +1864,7 @@ module.exports = (() => {
                     this.userArea.style.removeProperty('max-height');
                     this.userArea.style.removeProperty('transition');
                     this.userArea.style.removeProperty('display');
+                    this.userArea.style.removeProperty('overflow');
                 }
                 if (document.querySelector('.' + this.classCallContainer)) {
                     document.querySelector('.' + this.classCallContainer).style.removeProperty('height');

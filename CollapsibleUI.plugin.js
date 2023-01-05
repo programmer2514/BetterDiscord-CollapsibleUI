@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.5.2
+ * @version 6.6.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,21 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.5.2',
+            version: '6.6.0',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.5.2',
+            title: '6.6.0',
             items: [
-                'Fixed several overflow errors with user area and channel list'
+                'Separated collapsed states of members list and user profile',
+                'Clarified several settings options',
+                'Changed plugin startup method to work with Canary',
+                'Fixed plugin not loading immediately when first enabled'
             ]
         }, {
-            title: '1.0.0 - 6.5.1',
+            title: '1.0.0 - 6.5.2',
             items: [
                 'See the full changelog here:\nhttps://programmer2514.github.io/?l=cui-changelog'
             ]
@@ -948,24 +951,15 @@ module.exports = (() => {
                 }
 
                 // Read stored user data to decide active state of Members List button
-                if (this.membersList || this.profilePanel) {
+                if (this.membersList) {
                     if (this.buttonsOrder[this.I_MEMBERS_LIST] || this.disabledButtonsStayCollapsed) {
                         if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
                             if (this.membersListButton) this.membersListButton.classList.remove(this.classSelected);
-                            if (this.membersList) {
-                                if (this.disableTransitions) {
-                                    this.membersList.style.display = 'none';
-                                } else {
-                                    this.membersList.style.maxWidth = this.collapsedDistance + 'px';
-                                    this.membersList.style.minWidth = '0px';
-                                }
-                            } else if (this.profilePanel) {
-                                if (this.disableTransitions) {
-                                    this.profilePanel.style.display = 'none';
-                                } else {
-                                    this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
-                                    this.profilePanel.style.minWidth = '0px';
-                                }
+                            if (this.disableTransitions) {
+                                this.membersList.style.display = 'none';
+                            } else {
+                                this.membersList.style.maxWidth = this.collapsedDistance + 'px';
+                                this.membersList.style.minWidth = '0px';
                             }
                         } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
                             if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
@@ -974,6 +968,26 @@ module.exports = (() => {
                             if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
                         }
                     } else BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
+                }
+
+                // Read stored user data to decide active state of Profile Panel button
+                if (this.profilePanel) {
+                    if (this.buttonsOrder[this.I_MEMBERS_LIST] || this.disabledButtonsStayCollapsed) {
+                        if (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false') {
+                            if (this.membersListButton) this.membersListButton.classList.remove(this.classSelected);
+                            if (this.disableTransitions) {
+                                this.profilePanel.style.display = 'none';
+                            } else {
+                                this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
+                                this.profilePanel.style.minWidth = '0px';
+                            }
+                        } else if (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true') {
+                            if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
+                        } else {
+                            BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'true');
+                            if (this.membersListButton) this.membersListButton.classList.add(this.classSelected);
+                        }
+                    } else BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'true');
                 }
 
                 // Read stored user data to decide active state of User Area button
@@ -1165,6 +1179,12 @@ module.exports = (() => {
                                 (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[cui.I_MEMBERS_LIST] && BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false'))) {
                                 cui.toggleButton(cui.I_MEMBERS_LIST);
                             }
+                            if (cui.membersListButton &&
+                               ((cui.autoCollapseConditionals[cui.I_MEMBERS_LIST] === '') || !(cui.conditionalAutoCollapse)) &&
+                               ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[cui.I_MEMBERS_LIST] && BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true') ||
+                                (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[cui.I_MEMBERS_LIST] && BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false'))) {
+                                cui.toggleButton(cui.I_MEMBERS_LIST);
+                            }
                             if (cui.userAreaButton &&
                                ((cui.autoCollapseConditionals[cui.I_USER_AREA] === '') || !(cui.conditionalAutoCollapse)) &&
                                ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[cui.I_USER_AREA] && BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true') ||
@@ -1344,35 +1364,49 @@ module.exports = (() => {
                         }
 
                         // Members List
-                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && (cui.membersList || cui.profilePanel)) {
-                            if (cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] && cui.isCollapsed[cui.I_MEMBERS_LIST] && cui.isNear(cui.membersList ? cui.membersList : cui.profilePanel, cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && cui.membersList) {
+                            if (cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] && cui.isCollapsed[cui.I_MEMBERS_LIST] && cui.isNear(cui.membersList, cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
                                 if (cui.membersDUDelay) {
                                     clearTimeout(cui.membersDUDelay);
                                     cui.membersDUDelay = false;
                                 }
                                 cui.membersDUDelay = setTimeout(() => {
-                                    if (cui.membersList) {
-                                        cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
-                                        cui.membersList.style.removeProperty('min-width');
-                                    } else if (cui.profilePanel) {
-                                        cui.profilePanel.style.maxWidth = cui.profilePanelMaxWidth + 'px';
-                                        cui.profilePanel.style.removeProperty('min-width');
-                                    }
+                                    cui.membersList.style.maxWidth = cui.membersListMaxWidth + 'px';
+                                    cui.membersList.style.removeProperty('min-width');
                                     cui.isCollapsed[cui.I_MEMBERS_LIST] = false;
                                     cui.membersDUDelay = false;
                                 }, cui.dynamicUncollapseDelay);
-                            } else if (!cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] || (!(cui.isCollapsed[cui.I_MEMBERS_LIST]) && !(cui.isNear(cui.membersList ? cui.membersList : cui.profilePanel, cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY)) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY)))) {
+                            } else if (!cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] || (!(cui.isCollapsed[cui.I_MEMBERS_LIST]) && !(cui.isNear(cui.membersList, cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY)) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY)))) {
                                 if (cui.membersDUDelay) {
                                     clearTimeout(cui.membersDUDelay);
                                     cui.membersDUDelay = false;
                                 }
-                                if (cui.membersList) {
-                                    cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
-                                    cui.membersList.style.minWidth = '0px';
-                                } else if (cui.profilePanel) {
-                                    cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
-                                    cui.profilePanel.style.minWidth = '0px';
+                                cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
+                                cui.membersList.style.minWidth = '0px';
+                                cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
+                            }
+                        }
+
+                        // Profile Panel
+                        if ((BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false') && cui.profilePanel) {
+                            if (cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] && cui.isCollapsed[cui.I_MEMBERS_LIST] && cui.isNear(cui.profilePanel, cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY) && !(cui.isNear(cui.msgBar, 0, cui.mouseX, cui.mouseY))) {
+                                if (cui.membersDUDelay) {
+                                    clearTimeout(cui.membersDUDelay);
+                                    cui.membersDUDelay = false;
                                 }
+                                cui.membersDUDelay = setTimeout(() => {
+                                    cui.profilePanel.style.maxWidth = cui.profilePanelMaxWidth + 'px';
+                                    cui.profilePanel.style.removeProperty('min-width');
+                                    cui.isCollapsed[cui.I_MEMBERS_LIST] = false;
+                                    cui.membersDUDelay = false;
+                                }, cui.dynamicUncollapseDelay);
+                            } else if (!cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] || (!(cui.isCollapsed[cui.I_MEMBERS_LIST]) && !(cui.isNear(cui.profilePanel, cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST], cui.mouseX, cui.mouseY)) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY)))) {
+                                if (cui.membersDUDelay) {
+                                    clearTimeout(cui.membersDUDelay);
+                                    cui.membersDUDelay = false;
+                                }
+                                cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
+                                cui.profilePanel.style.minWidth = '0px';
                                 cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
                             }
                         }
@@ -1487,18 +1521,24 @@ module.exports = (() => {
                         }
 
                         // Members List
-                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && (cui.membersList || cui.profilePanel) && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY))) {
+                        if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && cui.membersList && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY))) {
                             if (cui.membersDUDelay) {
                                 clearTimeout(cui.membersDUDelay);
                                 cui.membersDUDelay = false;
                             }
-                            if (cui.membersList) {
-                                cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
-                                cui.membersList.style.minWidth = '0px';
-                            } else if (cui.profilePanel) {
-                                cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
-                                cui.profilePanel.style.minWidth = '0px';
+                            cui.membersList.style.maxWidth = cui.collapsedDistance + 'px';
+                            cui.membersList.style.minWidth = '0px';
+                            cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
+                        }
+
+                        // Profile Panel
+                        if ((BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false') && cui.profilePanel && !(cui.isNear(document.querySelector('.' + cui.classUserPopout), 10000, cui.mouseX, cui.mouseY))) {
+                            if (cui.membersDUDelay) {
+                                clearTimeout(cui.membersDUDelay);
+                                cui.membersDUDelay = false;
                             }
+                            cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
+                            cui.profilePanel.style.minWidth = '0px';
                             cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
                         }
 
@@ -1910,13 +1950,12 @@ module.exports = (() => {
 
         // Initialize the plugin when it is enabled
         start = () => {
-            Api.DiscordModules.UserStore.addConditionalChangeListener(() => {
-                if (Api.DiscordModules.UserStore.getCurrentUser()) {
-                    this.initialize();
-                    console.log('%c[CollapsibleUI] ' + `%c(v${BdApi.Plugins.get('CollapsibleUI').version}) ` + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
-                    return false;
-                }
-            });
+            if (Api.DiscordModules.UserStore.getCurrentUser()) {
+                console.log('%c[CollapsibleUI] ' + '%cAttempting pre-load...', 'color: #3a71c1; font-weight: 700;', '');
+                this.initialize();
+            }
+            Api.DiscordModules.Dispatcher.subscribe('POST_CONNECTION_OPEN', this.initialize);
+            console.log('%c[CollapsibleUI] ' + `%c(v${BdApi.Plugins.get('CollapsibleUI').version}) ` + '%chas started.', 'color: #3a71c1; font-weight: 700;', 'color: #666; font-weight: 600;', '');
         }
 
         // Restore the default UI when the plugin is disabled
@@ -2007,7 +2046,7 @@ module.exports = (() => {
                                                      BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[this.I_WINDOW_BAR],
                                                      null,
                                                      {placeholder: 'Default: Alt+W'});
-            var settingKBMembersList = new zps.Textbox('Toggle Members List - Shortcut',
+            var settingKBMembersList = new zps.Textbox('Toggle Members List/User Profile - Shortcut',
                                                        null,
                                                        BdApi.getData('CollapsibleUI', 'keyStringList').split(',')[this.I_MEMBERS_LIST],
                                                        null,
@@ -2100,12 +2139,12 @@ module.exports = (() => {
                                                       BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance').split(',')[this.I_WINDOW_BAR],
                                                       null,
                                                       {placeholder: 'Default: 30'});
-            var settingDUDistMembersList = new zps.Textbox('Members List - Opening Distance (px)',
+            var settingDUDistMembersList = new zps.Textbox('Members List/User Profile - Opening Distance (px)',
                                                       'Distance that mouse must be from element in order for it to expand',
                                                       BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance').split(',')[this.I_MEMBERS_LIST],
                                                       null,
                                                       {placeholder: 'Default: 30'});
-            var settingDUDistCMembersList = new zps.Textbox('Members List - Closing Distance (px)',
+            var settingDUDistCMembersList = new zps.Textbox('Members List/User Profile - Closing Distance (px)',
                                                       'Distance that mouse must be from element in order for it to collapse',
                                                       BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance').split(',')[this.I_MEMBERS_LIST],
                                                       null,
@@ -2152,8 +2191,8 @@ module.exports = (() => {
             var settingDUWindowBar = new zps.Switch('Window Bar',
                                                     'Toggles Dynamic Uncollapse for the window bar',
                                                     BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[this.I_WINDOW_BAR] === 'true');
-            var settingDUMembersList = new zps.Switch('Members List',
-                                                      'Toggles Dynamic Uncollapse for the members list',
+            var settingDUMembersList = new zps.Switch('Members List/User Profile',
+                                                      'Toggles Dynamic Uncollapse for the members list/user profile',
                                                       BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled').split(',')[this.I_MEMBERS_LIST] === 'true');
 
             // Append selective dynamic uncollapse settings to Selective Dynamic Uncollapse subgroup
@@ -2202,7 +2241,7 @@ module.exports = (() => {
                                                      BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[this.I_WINDOW_BAR],
                                                      null,
                                                      {placeholder: 'Default: 200'});
-            var settingACMembersList = new zps.Textbox('Members List - Threshold',
+            var settingACMembersList = new zps.Textbox('Members List/User Profile - Threshold',
                                                        'Maximum width for element to remain uncollapsed',
                                                        BdApi.getData('CollapsibleUI', 'autoCollapseThreshold').split(',')[this.I_MEMBERS_LIST],
                                                        null,
@@ -2255,7 +2294,7 @@ module.exports = (() => {
                                                      BdApi.getData('CollapsibleUI', 'autoCollapseConditionals').split(',')[this.I_WINDOW_BAR],
                                                      null,
                                                      {placeholder: 'Default: <blank>'});
-            var settingCAMembersList = new zps.Textbox('Members List',
+            var settingCAMembersList = new zps.Textbox('Members List/User Profile',
                                                        null,
                                                        BdApi.getData('CollapsibleUI', 'autoCollapseConditionals').split(',')[this.I_MEMBERS_LIST],
                                                        null,
@@ -2320,8 +2359,8 @@ module.exports = (() => {
                                                   BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[this.I_WINDOW_BAR],
                                                   null,
                                                   {markers:[0,1,2,3,4,5,6,7], stickToMarkers: true, equidistant: true});
-            var settingMembersList = new zps.Slider('Members List',
-                                                    '[Default = 7, Disabled = 0] - Sets order index of the Members List button (right panel)',
+            var settingMembersList = new zps.Slider('Members List/User Profile',
+                                                    '[Default = 7, Disabled = 0] - Sets order index of the Members List/User Profile button (right panel)',
                                                     0,
                                                     7,
                                                     BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',').map(Number)[this.I_MEMBERS_LIST],
@@ -2357,7 +2396,7 @@ module.exports = (() => {
                                                              BdApi.getData('CollapsibleUI', 'membersListMaxWidth'),
                                                              null,
                                                              {placeholder: 'Default: 240'});
-            var settingProfilePanelMaxWidth = new zps.Textbox('Profile Panel - Max Width',
+            var settingProfilePanelMaxWidth = new zps.Textbox('User Profile - Max Width',
                                                              null,
                                                              BdApi.getData('CollapsibleUI', 'profilePanelMaxWidth'),
                                                              null,
@@ -2862,6 +2901,10 @@ module.exports = (() => {
                  && ((eval(this.autoCollapseConditionals[this.I_MEMBERS_LIST]) && (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true'))
                   || (!eval(this.autoCollapseConditionals[this.I_MEMBERS_LIST]) && (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false'))))
                     this.toggleButton(this.I_MEMBERS_LIST);
+                if ((this.autoCollapseConditionals[this.I_MEMBERS_LIST] !== '')
+                 && ((eval(this.autoCollapseConditionals[this.I_MEMBERS_LIST]) && (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true'))
+                  || (!eval(this.autoCollapseConditionals[this.I_MEMBERS_LIST]) && (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false'))))
+                    this.toggleButton(this.I_MEMBERS_LIST);
                 if ((this.autoCollapseConditionals[this.I_USER_AREA] !== '')
                  && ((eval(this.autoCollapseConditionals[this.I_USER_AREA]) && (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true'))
                   || (!eval(this.autoCollapseConditionals[this.I_USER_AREA]) && (BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false'))))
@@ -2999,42 +3042,47 @@ module.exports = (() => {
                     break;
 
                 case 4: // I_MEMBERS_LIST
-                    if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
-                        if (this.membersList) {
+                    if (this.membersList) {
+                        if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
                             if (this.disableTransitions) {
                                 this.membersList.style.display = 'none';
                             } else {
                                 this.membersList.style.maxWidth = this.collapsedDistance + 'px';
                                 this.membersList.style.minWidth = '0px';
                             }
-                        } else if (this.profilePanel) {
-                            if (this.disableTransitions) {
-                                this.profilePanel.style.display = 'none';
-                            } else {
-                                this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
-                                this.profilePanel.style.minWidth = '0px';
-                            }
-                        }
-                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
-                        this.membersListButton.classList.remove(this.classSelected);
-                    } else {
-                        if (this.membersList) {
+                            BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
+                            this.membersListButton.classList.remove(this.classSelected);
+                        } else {
                             if (this.disableTransitions) {
                                 this.membersList.style.removeProperty('display');
                             } else {
                                 this.membersList.style.maxWidth = this.membersListMaxWidth + 'px';
                                 this.membersList.style.removeProperty('min-width');
                             }
-                        } else if (this.profilePanel) {
+                            BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
+                            this.membersListButton.classList.add(this.classSelected);
+                        }
+                    }
+                    if (this.profilePanel) {
+                        if (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true') {
+                            if (this.disableTransitions) {
+                                this.profilePanel.style.display = 'none';
+                            } else {
+                                this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
+                                this.profilePanel.style.minWidth = '0px';
+                            }
+                            BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'false');
+                            this.membersListButton.classList.remove(this.classSelected);
+                        } else {
                             if (this.disableTransitions) {
                                 this.profilePanel.style.removeProperty('display');
                             } else {
                                 this.profilePanel.style.maxWidth = this.profilePanelMaxWidth + 'px';
                                 this.profilePanel.style.removeProperty('min-width');
                             }
+                            BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'true');
+                            this.membersListButton.classList.add(this.classSelected);
                         }
-                        BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
-                        this.membersListButton.classList.add(this.classSelected);
                     }
                     break;
 

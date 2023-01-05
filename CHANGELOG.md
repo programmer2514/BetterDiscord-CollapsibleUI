@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v6.6.0:
+* Separated collapsed states of members list and user profile
+* Clarified several settings options
+* Changed plugin startup method to work with Canary
+* Fixed plugin not loading immediately when first enabled
+
 ### v6.5.2:
 * Fixed several overflow errors with user area and channel list
 

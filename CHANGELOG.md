@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v6.6.1:
+* Tweaked user profile toolbar icon
+* Fixed yet another BDFDB incompatibility issue
+
 ### v6.6.0:
 * Separated collapsed states of members list and user profile
 * Clarified several settings options

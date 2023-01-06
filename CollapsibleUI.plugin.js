@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 6.6.0
+ * @version 6.6.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,21 +19,19 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '6.6.0',
+            version: '6.6.1',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '6.6.0',
+            title: '6.6.1',
             items: [
-                'Separated collapsed states of members list and user profile',
-                'Clarified several settings options',
-                'Changed plugin startup method to work with Canary',
-                'Fixed plugin not loading immediately when first enabled'
+                'Tweaked user profile toolbar icon',
+                'Fixed yet another BDFDB incompatibility issue'
             ]
         }, {
-            title: '1.0.0 - 6.5.2',
+            title: '1.0.0 - 6.6.0',
             items: [
                 'See the full changelog here:\nhttps://programmer2514.github.io/?l=cui-changelog'
             ]
@@ -154,6 +152,7 @@ module.exports = (() => {
                 this.classTooltipPointer = 'tooltipPointer-3L49xb';
                 this.classTooltipContent = 'tooltipContent-Nejnvh';
                 this.classAppWrapper = 'app-2CXKsg';
+                this.classLayers = 'layers-1YQhyW';
                 this.classChannelList = 'sidebar-1tnWFu';
                 this.classServerList = 'wrapper-1_HaEi';
                 this.classUserPopout = 'userPopoutOuter-3AVBmJ';
@@ -301,6 +300,7 @@ module.exports = (() => {
 
                 // Add mutation observer to reload my plugin when necessary
                 this.appObserver = new MutationObserver((mutationList) => {
+                    console.log(mutationList);
                     try {
                         // If there are a lot of mutations, assume we need to reload
                         // This increases performance a lot when switching views
@@ -316,6 +316,7 @@ module.exports = (() => {
                         // This is required for BDFDB compatibility
                         for (let i = 0; i < mutationList.length; i++) {
                             if (mutationList[i].addedNodes[0]?.classList?.contains(cui.classAppWrapper)
+                             || mutationList[i].addedNodes[0]?.classList?.contains(cui.classLayers)
                              || mutationList[i].addedNodes[0]?.classList?.contains(cui.classChannelList)
                              || mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersList)
                              || mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersListWrapper)
@@ -698,7 +699,7 @@ module.exports = (() => {
                         if (this.buttonsOrder[this.I_MEMBERS_LIST] && this.membersList) {
                             this.membersListButton = this.addToolbarIcon(this.localeLabels.membersList, '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/><path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/><path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>', '-4 -4 24 24');
                         } else if (this.buttonsOrder[this.I_MEMBERS_LIST] && this.profilePanel) {
-                            this.membersListButton = this.addToolbarIcon(this.localeLabels.profilePanel, '<path fill="currentColor" d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill="currentColor" fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>', '-0.5 -0.5 16.5 16.5');
+                            this.membersListButton = this.addToolbarIcon(this.localeLabels.profilePanel, '<path fill="currentColor" d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill="currentColor" fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>', '-1 -1 18 18');
                         } else {
                             this.membersListButton = false;
                             buttonsActive[this.I_MEMBERS_LIST] = 0;

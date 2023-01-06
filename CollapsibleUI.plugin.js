@@ -300,7 +300,6 @@ module.exports = (() => {
 
                 // Add mutation observer to reload my plugin when necessary
                 this.appObserver = new MutationObserver((mutationList) => {
-                    console.log(mutationList);
                     try {
                         // If there are a lot of mutations, assume we need to reload
                         // This increases performance a lot when switching views

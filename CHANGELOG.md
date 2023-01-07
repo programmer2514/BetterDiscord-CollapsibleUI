@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v7.0.1:
+* Fixed full toolbar autocollapse functionality
+
 ### v7.0.0
 * Added full support for User Profile popout
 * Completely refactored all plugin code

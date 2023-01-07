@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v7.7.0
+* Added full support for User Profile popout
+* Completely refactored all plugin code
+
 ### v6.6.1:
 * Tweaked user profile toolbar icon
 * Fixed yet another BDFDB incompatibility issue

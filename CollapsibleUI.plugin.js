@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.0.0
+ * @version 7.0.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,26 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.0.0',
+            version: '7.0.1',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.0.0',
+            title: '7.0.1',
             items: [
-                'Added full support for User Profile popout',
-                'Completely refactored all plugin code',
-                `WARNING - This update (unfortunately) resets the following settings:
-  - Dynamic uncollapse opening/closing distances
-  - Autocollapse thresholds
-  - Conditional autocollapse entries
-  - The order of toolbar buttons
-  - Selective dynamic uncollapse settings
-  - Keyboard shortcuts`
+                'Fixed full toolbar autocollapse functionality'
             ]
         }, {
-            title: '1.0.0 - 6.6.1',
+            title: '1.0.0 - 7.0.0',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1095,7 +1087,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                 }
 
                 this.initUI();
-                this.addMiscEventListeners(buttonsActive, settingsButtons);
+                this.addMiscEventListeners(buttonsActive, settingsButtons, singleButtonWidth);
                 this.addButtonClickHandlers();
 
             } catch(e) {
@@ -1409,7 +1401,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         }
 
         // Adds miscellaneous event listeners
-        addMiscEventListeners = (buttonsActive, settingsButtons) => {
+        addMiscEventListeners = (buttonsActive, settingsButtons, singleButtonWidth) => {
             let cui = this; // Abstract CollapsibleUI as a variable
 
             // Implement dynamic uncollapse features
@@ -1590,10 +1582,10 @@ https://programmer2514.github.io/?l=cui-changelog`
             // Add event listeners to the Toolbar to update on hover
             if (this.enableFullToolbarCollapse) {
                 this.toolBar.addEventListener('mouseenter', function() {
-                    cui.style.maxWidth = cui.toolbarMaxWidth + 'px';
+                    this.style.maxWidth = cui.toolbarMaxWidth + 'px';
                 }, {signal: this.eventListenerSignal});
                 this.toolBar.addEventListener('mouseleave', function() {
-                    cui.style.maxWidth = singleButtonWidth;
+                    this.style.maxWidth = singleButtonWidth;
                 }, {signal: this.eventListenerSignal});
             }
 

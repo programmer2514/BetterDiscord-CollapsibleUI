@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.0.1
+ * @version 7.0.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.0.1',
+            version: '7.0.2',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.0.1',
+            title: '7.0.2',
             items: [
-                'Fixed full toolbar autocollapse functionality'
+                'Prevented message bar autocollapsing while user is actively typing a message'
             ]
         }, {
-            title: '1.0.0 - 7.0.0',
+            title: '1.0.0 - 7.0.1',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1240,6 +1240,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.classUserPopout = 'userPopoutOuter-3AVBmJ';
             this.classMembersListWrapper = 'container-2o3qEW';
             this.classProfilePanelWrapper = 'profilePanel-2PWEok';
+            this.classTextInput = '[data-slate-string="true"]';
 
             if (BdApi.Plugins.isEnabled('ChannelDms') && document.querySelector('.ChannelDms-channelmembers-wrap'))
                 this.classMembersList = 'ChannelDms-channelmembers-wrap';
@@ -1509,7 +1510,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                     }
 
                     // Message Bar
-                    if ((BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') && cui.msgBar) {
+                    if ((BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') && cui.msgBar && !(document.querySelector(cui.classTextInput)?.innerHTML)) {
                         if (cui.messageDUDelay) {
                             clearTimeout(cui.messageDUDelay);
                             cui.messageDUDelay = false;
@@ -1575,6 +1576,28 @@ https://programmer2514.github.io/?l=cui-changelog`
                         }
                         document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                         cui.isCollapsed[cui.I_CALL_CONTAINER] = true;
+                    }
+                }, {signal: this.eventListenerSignal});
+
+                window.addEventListener('keyup', function(e) {
+                    if (cui.dynamicUncollapseEnabled[cui.I_MSG_BAR]) {
+                        if (cui.isCollapsed[cui.I_MSG_BAR] && document.querySelector(cui.classTextInput)?.innerHTML) {
+                            if (cui.messageDUDelay) {
+                                clearTimeout(cui.messageDUDelay);
+                                cui.messageDUDelay = false;
+                            }
+                            cui.msgBar.style.maxHeight = cui.msgBarMaxHeight + 'px';
+                            cui.msgBar.style.removeProperty('overflow');
+                            cui.isCollapsed[cui.I_MSG_BAR] = false;
+                        } else if (!(cui.isCollapsed[cui.I_MSG_BAR]) && !(document.querySelector(cui.classTextInput)?.innerHTML)) {
+                            if (cui.messageDUDelay) {
+                                clearTimeout(cui.messageDUDelay);
+                                cui.messageDUDelay = false;
+                            }
+                            cui.msgBar.style.maxHeight = cui.collapsedDistance + 'px';
+                            cui.msgBar.style.overflow = 'hidden';
+                            cui.isCollapsed[cui.I_MSG_BAR] = true;
+                        }
                     }
                 }, {signal: this.eventListenerSignal});
             }
@@ -2859,11 +2882,13 @@ https://programmer2514.github.io/?l=cui-changelog`
                 if (this.buttonsOrder[this.I_MSG_BAR] || this.disabledButtonsStayCollapsed) {
                     if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') {
                         if (this.msgBarButton) this.msgBarButton.classList.remove(this.classSelected);
-                        if (this.disableTransitions) {
-                            this.msgBar.style.display = 'none';
-                        } else {
-                            this.msgBar.style.maxHeight = this.collapsedDistance + 'px';
-                            this.msgBar.style.overflow = 'hidden';
+                        if (!(document.querySelector(this.classTextInput)?.innerHTML)) {
+                            if (this.disableTransitions) {
+                                this.msgBar.style.display = 'none';
+                            } else {
+                                this.msgBar.style.maxHeight = this.collapsedDistance + 'px';
+                                this.msgBar.style.overflow = 'hidden';
+                            }
                         }
                     } else if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
                         if (this.msgBarButton) this.msgBarButton.classList.add(this.classSelected);
@@ -3186,7 +3211,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         cui.isCollapsed[cui.I_MSG_BAR] = false;
                         cui.messageDUDelay = false;
                     }, this.dynamicUncollapseDelay);
-                } else if (!this.dynamicUncollapseEnabled[this.I_MSG_BAR] || (!(this.isCollapsed[this.I_MSG_BAR]) && !(this.isNear(this.msgBar, this.dynamicUncollapseCloseDistance[this.I_MSG_BAR], this.mouseX, this.mouseY)))) {
+                } else if (!this.dynamicUncollapseEnabled[this.I_MSG_BAR] || (!(this.isCollapsed[this.I_MSG_BAR]) && !(this.isNear(this.msgBar, this.dynamicUncollapseCloseDistance[this.I_MSG_BAR], this.mouseX, this.mouseY)) && !(document.querySelector(this.classTextInput)?.innerHTML))) {
                     if (this.messageDUDelay) {
                         clearTimeout(this.messageDUDelay);
                         this.messageDUDelay = false;
@@ -3402,11 +3427,13 @@ https://programmer2514.github.io/?l=cui-changelog`
 
                 case 2: // I_MSG_BAR
                     if (BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true') {
-                        if (this.disableTransitions) {
-                            this.msgBar.style.display = 'none';
-                        } else {
-                            this.msgBar.style.maxHeight = this.collapsedDistance + 'px';
-                            this.msgBar.style.overflow = 'hidden';
+                        if (!(document.querySelector(this.classTextInput)?.innerHTML)) {
+                            if (this.disableTransitions) {
+                                this.msgBar.style.display = 'none';
+                            } else {
+                                this.msgBar.style.maxHeight = this.collapsedDistance + 'px';
+                                this.msgBar.style.overflow = 'hidden';
+                            }
                         }
                         BdApi.setData('CollapsibleUI', 'msgBarButtonActive', 'false');
                         this.msgBarButton.classList.remove(this.classSelected);

@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v7.0.2:
+* Prevented message bar autocollapsing while user is actively typing a message
+
 ### v7.0.1:
 * Fixed full toolbar autocollapse functionality
 

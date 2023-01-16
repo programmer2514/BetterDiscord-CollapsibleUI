@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.0.2
+ * @version 7.0.3
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.0.2',
+            version: '7.0.3',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.0.2',
+            title: '7.0.3',
             items: [
-                'Prevented message bar autocollapsing while user is actively typing a message'
+                'Fixed message bar autocollapsing when it is not supposed to'
             ]
         }, {
-            title: '1.0.0 - 7.0.1',
+            title: '1.0.0 - 7.0.2',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1580,7 +1580,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                 }, {signal: this.eventListenerSignal});
 
                 window.addEventListener('keyup', function(e) {
-                    if (cui.dynamicUncollapseEnabled[cui.I_MSG_BAR]) {
+                    if ((BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false') && cui.msgBar && cui.dynamicUncollapseEnabled[cui.I_MSG_BAR]) {
                         if (cui.isCollapsed[cui.I_MSG_BAR] && document.querySelector(cui.classTextInput)?.innerHTML) {
                             if (cui.messageDUDelay) {
                                 clearTimeout(cui.messageDUDelay);

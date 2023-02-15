@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.0.3
+ * @version 7.0.4
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,19 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.0.3',
+            version: '7.0.4',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.0.3',
+            title: '7.0.4',
             items: [
-                'Fixed message bar autocollapsing when it is not supposed to'
+                'Fixed call area not maintaining custom size when switching between channels',
+                'Fixed channel list expanding unexpectedly on UI refresh if set to a custom width'
             ]
         }, {
-            title: '1.0.0 - 7.0.2',
+            title: '1.0.0 - 7.0.3',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1173,7 +1174,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                     this.userArea.style.removeProperty('overflow');
                 }
                 if (document.querySelector('.' + this.classCallContainer)) {
-                    document.querySelector('.' + this.classCallContainer).style.removeProperty('height');
+                    document.querySelector('.' + this.classCallContainer).style.maxHeight = (BdApi.DOM.screenHeight - 222) + 'px';
                     document.querySelector('.' + this.classCallContainer).style.removeProperty('transition');
                     document.querySelector('.' + this.classCallContainer).style.removeProperty('display');
                     if (document.querySelector('.' + this.classCallUserWrapper))
@@ -1574,7 +1575,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                             clearTimeout(cui.callDUDelay);
                             cui.callDUDelay = false;
                         }
-                        document.querySelector('.' + cui.classCallContainer).style.height = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                        document.querySelector('.' + cui.classCallContainer).style.maxHeight = document.querySelector('.' + cui.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                         cui.isCollapsed[cui.I_CALL_CONTAINER] = true;
                     }
                 }, {signal: this.eventListenerSignal});
@@ -2992,7 +2993,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                             if (this.disableTransitions) {
                                 document.querySelector('.' + this.classCallContainer).style.display = 'none';
                             } else {
-                                document.querySelector('.' + this.classCallContainer).style.height = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                                document.querySelector('.' + this.classCallContainer).style.maxHeight = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                                 if (document.querySelector('.' + this.classCallUserWrapper))
                                     document.querySelector('.' + this.classCallUserWrapper).style.display = 'none';
                             }
@@ -3068,7 +3069,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                     });
                     this.channelListWidthObserver.observe(this.channelList, {attributeFilter:['style']});
                 }
-                if (this.channelListWidth != 0) {
+                if (((!this.isCollapsed[this.I_CHANNEL_LIST]) || (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true')) && this.channelListWidth != 0) {
                     this.channelList.style.transition = 'none';
                     this.channelList.style.width = this.channelListWidth + 'px';
                 }
@@ -3092,7 +3093,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                     this.userArea.style.transition = 'max-height ' + this.transitionSpeed + 'ms';
 
                 if (document.querySelector('.' + this.classCallContainer))
-                    document.querySelector('.' + this.classCallContainer).style.transition = 'height ' + this.transitionSpeed + 'ms';
+                    document.querySelector('.' + this.classCallContainer).style.transition = 'max-height ' + this.transitionSpeed + 'ms';
 
                 if (this.windowBase) {
                     if (this.isDarkMatterLoaded)
@@ -3336,7 +3337,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         this.callDUDelay = false;
                     }
                     this.callDUDelay = setTimeout(() => {
-                        document.querySelector('.' + cui.classCallContainer).style.removeProperty('height');
+                        document.querySelector('.' + cui.classCallContainer).style.maxHeight = (BdApi.DOM.screenHeight - 222) + 'px';
                         if (document.querySelector('.' + cui.classCallUserWrapper))
                             document.querySelector('.' + cui.classCallUserWrapper).style.removeProperty('display');
                         cui.isCollapsed[cui.I_CALL_CONTAINER] = false;
@@ -3348,7 +3349,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         this.callDUDelay = false;
                     }
                     if (document.querySelector('.' + this.classCallHeaderWrapper))
-                        document.querySelector('.' + this.classCallContainer).style.height = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                        document.querySelector('.' + this.classCallContainer).style.maxHeight = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                     if (document.querySelector('.' + this.classCallUserWrapper))
                         document.querySelector('.' + this.classCallUserWrapper).style.display = 'none';
                     this.isCollapsed[this.I_CALL_CONTAINER] = true;
@@ -3531,7 +3532,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                             if (this.disableTransitions) {
                                 document.querySelector('.' + this.classCallContainer).style.display = 'none';
                             } else {
-                                document.querySelector('.' + this.classCallContainer).style.height = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                                document.querySelector('.' + this.classCallContainer).style.maxHeight = document.querySelector('.' + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
                                 if (document.querySelector('.' + this.classCallUserWrapper))
                                     document.querySelector('.' + this.classCallUserWrapper).style.display = 'none';
                             }
@@ -3543,7 +3544,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                             if (this.disableTransitions) {
                                 document.querySelector('.' + this.classCallContainer).style.removeProperty('display');
                             } else {
-                                document.querySelector('.' + this.classCallContainer).style.removeProperty('height');
+                                document.querySelector('.' + this.classCallContainer).style.maxHeight = (BdApi.DOM.screenHeight - 222) + 'px';
                                 if (document.querySelector('.' + this.classCallUserWrapper))
                                     document.querySelector('.' + this.classCallUserWrapper).style.removeProperty('display');
                             }

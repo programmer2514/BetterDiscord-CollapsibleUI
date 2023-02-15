@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v7.0.4:
+* Fixed call area not maintaining custom size when switching between channels
+* Fixed channel list expanding unexpectedly on UI refresh if set to a custom width
+
 ### v7.0.3:
 * Fixed message bar autocollapsing when it is not supposed to
 

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.0.5
+ * @version 7.0.6
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,20 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.0.5',
+            version: '7.0.6',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.0.5',
+            title: '7.0.6',
             items: [
-                'Fixed unnecessary blank space in server call area'
+                'Removed unnecessary channel resize handle due to buggy rendering',
+                'Fixed channel list with a custom width stuttering when switching channels',
+                'Improved responsiveness of channel list resizing'
             ]
         }, {
-            title: '1.0.0 - 7.0.4',
+            title: '1.0.0 - 7.0.5',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1504,6 +1506,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                             clearTimeout(cui.channelDUDelay);
                             cui.channelDUDelay = false;
                         }
+                        cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                         cui.channelList.style.width = cui.collapsedDistance + 'px';
                         if (cui.isDarkMatterLoaded) {
                             cui.settingsContainer.style.display = 'none';
@@ -2865,6 +2868,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         if (this.disableTransitions) {
                             this.channelList.style.display = 'none';
                         } else {
+                            this.channelList.style.transition = 'width ' + this.transitionSpeed + 'ms';
                             this.channelList.style.width = this.collapsedDistance + 'px';
                             if (this.isDarkMatterLoaded) {
                                 this.settingsContainer.style.display = 'none';
@@ -3018,11 +3022,11 @@ https://programmer2514.github.io/?l=cui-changelog`
                     this.channelList.style.resize = 'horizontal';
                     this.channelList.style.maxWidth = '80vw';
 
+                    // Hide webkit resizer
+                    document.styleSheets[0].addRule('::-webkit-resizer','display: none;');
+
                     document.body.addEventListener('mousedown', function () {
                         cui.channelList.style.transition = 'none';
-                    }, {signal: this.eventListenerSignal});
-                    document.body.addEventListener('mouseup', function () {
-                        cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                     }, {signal: this.eventListenerSignal});
 
                     if (this.fullscreenButton) {
@@ -3042,6 +3046,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         } catch {}
                         cui.channelListWidth = 0;
                         BdApi.setData('CollapsibleUI', 'channelListWidth', cui.channelListWidth.toString());
+                        cui.channelList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
                         cui.channelList.style.removeProperty('width');
                         try {
                             cui.channelListWidthObserver.observe(cui.channelList, {attributeFilter:['style']});
@@ -3077,7 +3082,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                     this.channelList.style.width = this.channelListWidth + 'px';
                 }
 
-                this.channelList.style.transition = 'width ' + this.transitionSpeed + 'ms';
+                this.channelList.style.transition = 'none';
                 this.serverList.style.transition = 'width ' + this.transitionSpeed + 'ms';
 
                 if (this.windowBar)
@@ -3407,6 +3412,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         if (this.disableTransitions) {
                             this.channelList.style.display = 'none';
                         } else {
+                            this.channelList.style.transition = 'width ' + this.transitionSpeed + 'ms';
                             this.channelList.style.width = this.collapsedDistance + 'px';
                             if (this.isDarkMatterLoaded) {
                                 this.settingsContainer.style.display = 'none';
@@ -3420,6 +3426,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                         if (this.disableTransitions) {
                             this.channelList.style.removeProperty('display');
                         } else {
+                            this.channelList.style.transition = 'width ' + this.transitionSpeed + 'ms';
                             this.channelList.style.removeProperty('width');
                             if (this.isDarkMatterLoaded) {
                                 this.settingsContainer.style.removeProperty('display');

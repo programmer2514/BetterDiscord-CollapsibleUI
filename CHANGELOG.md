@@ -1,5 +1,10 @@
 # CollapsibleUI Patch Notes
 
+### v7.0.6:
+* Removed unnecessary channel resize handle due to buggy rendering
+* Fixed channel list with a custom width stuttering when switching channels
+* Improved responsiveness of channel list resizing
+
 ### v7.0.5:
 * Fixed unnecessary blank space in server call area
 

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.0.6
+ * @version 7.1.0
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,20 +19,19 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.0.6',
+            version: '7.1.0',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.0.6',
+            title: '7.1.0',
             items: [
-                'Removed unnecessary channel resize handle due to buggy rendering',
-                'Fixed channel list with a custom width stuttering when switching channels',
-                'Improved responsiveness of channel list resizing'
+                'Fixed plugin crashing Discord when the inspect tool is opened',
+                'Updated to support newest Discord release (breaks plugin on Discord versions <177136)'
             ]
         }, {
-            title: '1.0.0 - 7.0.5',
+            title: '1.0.0 - 7.0.6',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1203,6 +1202,9 @@ https://programmer2514.github.io/?l=cui-changelog`
                     this.avatarWrapper.style.removeProperty('min-width');
                 }
 
+                // Delete plugin stylesheet
+                this.pluginStyle?.parentNode?.removeChild(this.pluginStyle);
+
                 // Abort listeners & observers
                 if (this.eventListenerController)
                     this.eventListenerController.abort();
@@ -1230,14 +1232,15 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.classCallUserWrapper = 'voiceCallWrapper-3UtDiC';
             this.classConnectionArea = 'connection-3k9QeF';
             this.classDMElement = 'channel-1Shao0';
-            this.classTooltipWrapper = 'layer-2aCOJ3';
-            this.classTooltipWrapperDPE = 'disabledPointerEvents-2AmYRc';
-            this.classTooltip = 'tooltip-14MtrL';
-            this.classTooltipBottom = 'tooltipBottom-2WzfVx';
-            this.classTooltipPrimary = 'tooltipPrimary-3qLMbS';
-            this.classTooltipDPE = 'tooltipDisablePointerEvents-1huO19';
-            this.classTooltipPointer = 'tooltipPointer-3L49xb';
-            this.classTooltipContent = 'tooltipContent-Nejnvh';
+            this.classTooltipWrapper = 'layer-2BGhQ8';
+            this.classTooltipWrapperDPE = 'disabledPointerEvents-cGr1My';
+            this.classTooltip = 'tooltip-33Jwqe';
+            this.classTooltipBottom = 'tooltipBottom-1itlv3';
+            this.classTooltipPrimary = 'tooltipPrimary-2466a2';
+            this.classTooltipDPE = 'tooltipDisablePointerEvents-3dgGo3';
+            this.classTooltipPointer = 'tooltipPointer-sMBQqe';
+            this.classTooltipContent = 'tooltipContent-38tm3I';
+            this.classTooltipLayerContainer = 'layerContainer-2lfOPe'
             this.classAppWrapper = 'app-2CXKsg';
             this.classLayers = 'layers-1YQhyW';
             this.classChannelList = 'sidebar-1tnWFu';
@@ -1859,7 +1862,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                 newTooltip.innerHTML = `<div class="${this.classTooltip} ${this.classTooltipBottom} ${this.classTooltipPrimary} ${this.classTooltipDPE}" style="opacity: 1; transform: none;"><div class="${this.classTooltipPointer}"></div><div class="${this.classTooltipContent}">${msg}</div></div>`;
 
             // Insert tooltip into tooltip layer
-            document.querySelectorAll('.layerContainer-2v_Sit')[1].appendChild(newTooltip);
+            document.querySelectorAll('.' + this.classTooltipLayerContainer)[1].appendChild(newTooltip);
 
             // Get tooltip dimensions
             var ttwidth = newTooltip.getBoundingClientRect().width;
@@ -3023,7 +3026,11 @@ https://programmer2514.github.io/?l=cui-changelog`
                     this.channelList.style.maxWidth = '80vw';
 
                     // Hide webkit resizer
-                    document.styleSheets[0].addRule('::-webkit-resizer','display: none;');
+                    this.pluginStyle = document.createElement("style");
+                    this.pluginStyle.setAttribute('id', 'cui-stylesheet');
+                    this.pluginStyle.appendChild(document.createTextNode(""));
+                    document.head.appendChild(this.pluginStyle);
+                    this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 0);
 
                     document.body.addEventListener('mousedown', function () {
                         cui.channelList.style.transition = 'none';

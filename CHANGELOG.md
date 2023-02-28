@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v7.1.0:
+* Fixed plugin crashing Discord when the inspect tool is opened
+* Updated to support newest Discord release (breaks plugin on Discord versions <177136)
+
 ### v7.0.6:
 * Removed unnecessary channel resize handle due to buggy rendering
 * Fixed channel list with a custom width stuttering when switching channels

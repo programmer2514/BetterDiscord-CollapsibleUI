@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.1.1
+ * @version 7.1.2
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,18 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.1.1',
+            version: '7.1.2',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.1.1',
+            title: '7.1.2',
             items: [
-                'Made message bar buttons collapsible'
+                'Added an outdated plugin warning for future updates'
             ]
         }, {
-            title: '1.0.0 - 7.1.0',
+            title: '1.0.0 - 7.1.1',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -76,6 +76,12 @@ https://programmer2514.github.io/?l=cui-changelog`
 
         // Initialize the plugin when it is enabled
         start = () => {
+            this.getJSON('https://api.github.com/repos/programmer2514/BetterDiscord-CollapsibleUI/releases')
+            .then((data) => {
+                if (data[0].tag_name.substring(1) != BdApi.Plugins.get('CollapsibleUI').version)
+                    BdApi.UI.showNotice(`Your version (v${BdApi.Plugins.get('CollapsibleUI').version}) of CollapsibleUI is outdated and may be missing features! You can either wait for v${data[0].tag_name.substring(1)} to be approved, or download it manually.`, {timeout: '0'});
+            });
+
             if (Api.DiscordModules.UserStore.getCurrentUser()) {
                 console.log('%c[CollapsibleUI] ' + '%cAttempting pre-load...', 'color: #3a71c1; font-weight: 700;', '');
                 this.initialize();
@@ -1913,6 +1919,12 @@ https://programmer2514.github.io/?l=cui-changelog`
 
             // Return DOM element of newly-created tooltip
             return newTooltip;
+        }
+
+        // Returns a JSON object from a specified URL
+        getJSON = async (url) => {
+            const response = await fetch(url);
+            return response.json();
         }
 
         // Returns the correct language strings for each locale

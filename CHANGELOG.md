@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v7.1.2:
+* Added an outdated plugin warning for future updates
+
 ### v7.1.1:
 * Made message bar buttons collapsible
 

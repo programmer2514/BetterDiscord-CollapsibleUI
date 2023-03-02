@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.1.0
+ * @version 7.1.1
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -19,19 +19,18 @@ module.exports = (() => {
                 discord_id: '563652755814875146',
                 github_username: 'programmer2514'
             }],
-            version: '7.1.0',
+            version: '7.1.1',
             description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
             github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
             github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
         },
         changelog: [{
-            title: '7.1.0',
+            title: '7.1.1',
             items: [
-                'Fixed plugin crashing Discord when the inspect tool is opened',
-                'Updated to support newest Discord release (breaks plugin on Discord versions <177136)'
+                'Made message bar buttons collapsible'
             ]
         }, {
-            title: '1.0.0 - 7.0.6',
+            title: '1.0.0 - 7.1.0',
             items: [
                 `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -121,6 +120,9 @@ https://programmer2514.github.io/?l=cui-changelog`
             var settingDisableSettingsCollapse = new zps.Switch('Disable User Settings Auto-collapse',
                                                                 'Disables the automatic collapsing of the mute/deafen and call buttons',
                                                                 BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'true');
+            var settingDisableMsgBarBtnCollapse = new zps.Switch('Disable Message Bar Button Auto-collapse',
+                                                                 'Disables the automatic collapsing of the GIF, sticker, emoji, and gift buttons',
+                                                                 BdApi.getData('CollapsibleUI', 'disableMsgBarBtnCollapse') === 'true');
             var settingEnableFullToolbarCollapse = new zps.Switch('Enable Full Toolbar Auto-collapse',
                                                                   'Enables the automatic collapsing of the full vanilla Discord toolbar',
                                                                   BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'true');
@@ -133,6 +135,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             groupMain.append(settingTransitionSpeed);
             groupMain.append(settingDisableToolbarCollapse);
             groupMain.append(settingDisableSettingsCollapse);
+            groupMain.append(settingDisableMsgBarBtnCollapse);
             groupMain.append(settingEnableFullToolbarCollapse);
             groupMain.append(settingResizableChannelList);
 
@@ -555,6 +558,11 @@ https://programmer2514.github.io/?l=cui-changelog`
                                                                  BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'),
                                                                  null,
                                                                  {placeholder: 'Default: 100'});
+            var settingMessageBarButtonsMaxWidth = new zps.Textbox('Message Bar Buttons - Max Width',
+                                                                   null,
+                                                                   BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth'),
+                                                                   null,
+                                                                   {placeholder: 'Default: 200'});
             var settingToolbarIconMaxWidth = new zps.Textbox('Toolbar Icons - Max Width',
                                                              null,
                                                              BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'),
@@ -593,6 +601,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
             // Append advanced settings to Advanced subgroup
             groupAdvanced.append(settingSettingsButtonsMaxWidth);
+            groupAdvanced.append(settingMessageBarButtonsMaxWidth);
             groupAdvanced.append(settingToolbarIconMaxWidth);
             groupAdvanced.append(settingMembersListMaxWidth);
             groupAdvanced.append(settingProfilePanelMaxWidth);
@@ -634,6 +643,12 @@ https://programmer2514.github.io/?l=cui-changelog`
                     BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'true');
                 else
                     BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
+            };
+            settingDisableMsgBarBtnCollapse.onChange = function(result) {
+                if (result)
+                    BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'true');
+                else
+                    BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'false');
             };
             settingEnableFullToolbarCollapse.onChange = function(result) {
                 if (result)
@@ -980,6 +995,9 @@ https://programmer2514.github.io/?l=cui-changelog`
             settingSettingsButtonsMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
             };
+            settingMessageBarButtonsMaxWidth.onChange = function(result) {
+                BdApi.setData('CollapsibleUI', 'messageBarButtonsMaxWidth', result);
+            };
             settingToolbarIconMaxWidth.onChange = function(result) {
                 BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', result);
             };
@@ -1085,6 +1103,13 @@ https://programmer2514.github.io/?l=cui-changelog`
                             settingsButtons[i].style.transition = 'max-width ' + this.transitionSpeed + 'ms';
                         settingsButtons[i].style.overflow = 'hidden';
                     }
+                }
+
+                // Collapse message bar buttons
+                if ((!this.disableMsgBarBtnCollapse) && this.msgBarBtnContainer) {
+                    this.msgBarBtnContainer.style.maxWidth = '40px';
+                    if (!this.disableTransitions)
+                        this.msgBarBtnContainer.style.transition = 'max-width ' + this.transitionSpeed + 'ms';
                 }
 
                 this.initUI();
@@ -1281,6 +1306,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.membersListButton = this.toolBar.querySelector('[d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z"]')?.parentElement.parentElement;
             this.profilePanelButton = this.toolBar.querySelector('[d="M12 22C12.4883 22 12.9684 21.965 13.438 21.8974C12.5414 20.8489 12 19.4877 12 18C12 17.6593 12.0284 17.3252 12.083 17H6V16.0244C6 14.0732 10 13 12 13C12.6215 13 13.436 13.1036 14.2637 13.305C15.2888 12.4882 16.5874 12 18 12C19.4877 12 20.8489 12.5414 21.8974 13.438C21.965 12.9684 22 12.4883 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22ZM12 12C13.66 12 15 10.66 15 9C15 7.34 13.66 6 12 6C10.34 6 9 7.34 9 9C9 10.66 10.34 12 12 12Z"]')?.parentElement.parentElement.parentElement;
             this.fullscreenButton = document.querySelector('[d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"]')?.parentElement.parentElement.parentElement;
+            this.msgBarBtnContainer = document.querySelector('.buttons-uaqb-5');
 
             this.callContainerExists = (document.querySelector('.' + this.classCallContainer));
         }
@@ -1682,6 +1708,16 @@ https://programmer2514.github.io/?l=cui-changelog`
                     for (let i = 0; i < (settingsButtons.length - 1); i++) {
                         settingsButtons[i].style.maxWidth = '0px';
                     }
+                }, {signal: this.eventListenerSignal});
+            }
+
+            // Add event listeners to the Message Bar Button Container to update on hover
+            if ((!this.disableMsgBarBtnCollapse) && this.msgBarBtnContainer) {
+                this.msgBarBtnContainer.addEventListener('mouseenter', function() {
+                    this.style.maxWidth = cui.messageBarButtonsMaxWidth + 'px';
+                }, {signal: this.eventListenerSignal});
+                this.msgBarBtnContainer.addEventListener('mouseleave', function() {
+                    this.style.maxWidth = '40px';
                 }, {signal: this.eventListenerSignal});
             }
 
@@ -2303,6 +2339,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
             this.disableToolbarCollapse = false;
             this.disableSettingsCollapse = false;
+            this.disableMsgBarBtnCollapse = false;
             this.enableFullToolbarCollapse = false;
 
             this.dynamicUncollapse = true;
@@ -2326,6 +2363,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.keyStringList = ["Alt+S", "Alt+C", "Alt+T", "Alt+W", "Alt+M", "Alt+U", "Alt+P", "Alt+I"];
 
             this.settingsButtonsMaxWidth = 100;
+            this.messageBarButtonsMaxWidth = 200;
             this.toolbarIconMaxWidth = 300;
             this.membersListMaxWidth = 240;
             this.profilePanelMaxWidth = 340;
@@ -2450,6 +2488,15 @@ https://programmer2514.github.io/?l=cui-changelog`
                 this.disableSettingsCollapse = true;
             } else {
                 BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
+            }
+
+            // disableMsgBarBtnCollapse [Default: false]
+            if (BdApi.getData('CollapsibleUI', 'disableMsgBarBtnCollapse') === 'false') {
+                this.disableMsgBarBtnCollapse = false;
+            } else if (BdApi.getData('CollapsibleUI', 'disableMsgBarBtnCollapse') === 'true') {
+                this.disableMsgBarBtnCollapse = true;
+            } else {
+                BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'false');
             }
 
             // enableFullToolbarCollapse [Default: false]
@@ -2604,6 +2651,13 @@ https://programmer2514.github.io/?l=cui-changelog`
                 this.settingsButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'));
             } else {
                 BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', this.settingsButtonsMaxWidth.toString());
+            }
+
+            // messageBarButtonsMaxWidth [Default: 200]
+            if (typeof(BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth')) === 'string') {
+                this.messageBarButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth'));
+            } else {
+                BdApi.setData('CollapsibleUI', 'messageBarButtonsMaxWidth', this.messageBarButtonsMaxWidth.toString());
             }
 
             // toolbarIconMaxWidth [Default: 300]

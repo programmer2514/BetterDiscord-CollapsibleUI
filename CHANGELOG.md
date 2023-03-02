@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v7.1.1:
+* Made message bar buttons collapsible
+
 ### v7.1.0:
 * Fixed plugin crashing Discord when the inspect tool is opened
 * Updated to support newest Discord release (breaks plugin on Discord versions <177136)

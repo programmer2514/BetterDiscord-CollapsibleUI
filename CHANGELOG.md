@@ -1,5 +1,10 @@
 # CollapsibleUI Patch Notes
 
+### v7.2.0:
+* Added a fudge factor to collapsible button panels (should decrease jitter)
+* Introduced additional advanced settings to control the message bar buttons
+* Collabsible button panels are now bound to dynamic uncollapse and its corresponding constraints
+
 ### v7.1.2:
 * Added an outdated plugin warning for future updates
 

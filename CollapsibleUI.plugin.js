@@ -29,7 +29,7 @@ module.exports = (() => {
             items: [
                 'Added a fudge factor to collapsible button panels (should decrease jitter)',
                 'Introduced additional advanced settings to control the message bar buttons',
-                'Collabsible toolbar buttons are now bound to dynamic uncollapse and its corresponding constraints'
+                'Collapsible toolbar buttons are now bound to dynamic uncollapse and its corresponding constraints'
             ]
         }, {
             title: '1.0.0 - 7.1.2',

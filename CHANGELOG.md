@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v7.2.1:
+* Reworked code formatting to reduce size and increase readability
+
 ### v7.2.0:
 * Added a fudge factor to collapsible button panels (should decrease jitter)
 * Introduced additional advanced settings to control the message bar buttons

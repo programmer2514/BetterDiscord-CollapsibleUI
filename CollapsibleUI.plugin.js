@@ -3,7 +3,9 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.2.1
+ * @version 7.2.2
+ * @donate https://ko-fi.com/benjaminpryor
+ * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
  * @source https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js
  */
@@ -20,18 +22,19 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '7.2.1',
+      version: '7.2.2',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '7.2.1',
+        title: '7.2.2',
         items: [
-          'Reworked code formatting to reduce size and increase readability'
+          'Fixed residual styles on message bar buttons on plugin termination/reload',
+          'Added donation links'
         ]
       }, {
-        title: '1.0.0 - 7.2.0',
+        title: '1.0.0 - 7.2.1',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1155,6 +1158,10 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.settingsContainer.children[i].style.removeProperty('display');
           }
           this.settingsContainer.style.removeProperty('display');
+        }
+        if (this.msgBarBtnContainer) {
+          this.msgBarBtnContainer.style.removeProperty('transition');
+          this.msgBarBtnContainer.style.removeProperty('max-width');
         }
         if (this.spotifyContainer) { this.spotifyContainer.style.removeProperty('display'); }
         if (this.userArea) {

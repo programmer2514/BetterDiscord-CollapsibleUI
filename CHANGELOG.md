@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v7.2.2:
+* Fixed residual styles on message bar buttons on plugin termination/reload
+* Added donation links
+
 ### v7.2.1:
 * Reworked code formatting to reduce size and increase readability
 

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.2.2
+ * @version 7.2.3
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,19 +22,19 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '7.2.2',
+      version: '7.2.3',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '7.2.2',
+        title: '7.2.3',
         items: [
-          'Fixed residual styles on message bar buttons on plugin termination/reload',
-          'Added donation links'
+          'Fixed plugin occasionally failing to reload when switching channels/accounts',
+          'Clarified autocollapse dependencies'
         ]
       }, {
-        title: '1.0.0 - 7.2.1',
+        title: '1.0.0 - 7.2.2',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -99,7 +99,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     }
 
     // Re-initialize the plugin on switch
-    onSwitch = this.initialize;
+    onSwitch = () => { this.initialize(); }
 
     // Add settings panel
     getSettingsPanel = () => {
@@ -202,7 +202,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Create dynamic uncollapse settings
       var settingDynamicUncollapse = new zps.Switch('Dynamic Uncollapse',
-          'Makes collapsed UI elements expand when the mouse is near them. Does not work with transitions disabled',
+          'Makes collapsed UI elements expand when the mouse is near them. When disabled, autocollapse is also disabled. Does not work with transitions disabled',
           BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true');
       var settingCollapsedDistance = new zps.Textbox('Collapsed Element Distance',
           'Sets the size (px) of UI elements when they are collapsed',
@@ -347,7 +347,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Create autocollapse settings
       var settingACEnabled = new zps.Switch('Autocollapse Enabled',
-          'Enables auto-collapse of UI elements based on window size',
+          'Enables auto-collapse of UI elements based on window size. Does not work with dynamic uncollapse disabled',
           BdApi.getData('CollapsibleUI', 'autoCollapse') === 'true');
       var settingACServerList = new zps.Textbox('Server List - Threshold',
           'Maximum width for element to remain uncollapsed. Specifies height if Horizontal Server List is enabled',

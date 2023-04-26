@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v7.2.3:
+* Fixed plugin occasionally failing to reload when switching channels/accounts
+* Clarified autocollapse dependencies
+
 ### v7.2.2:
 * Fixed residual styles on message bar buttons on plugin termination/reload
 * Added donation links

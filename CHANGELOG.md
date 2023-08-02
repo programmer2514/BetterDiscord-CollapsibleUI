@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v7.2.4:
+* Fixed plugin reloading when user presses shift while hovering the mouse over certain messages
+* Updated classes to work with the new themed user profiles
+
 ### v7.2.3:
 * Fixed plugin occasionally failing to reload when switching channels/accounts
 * Clarified autocollapse dependencies

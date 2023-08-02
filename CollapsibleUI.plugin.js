@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.2.3
+ * @version 7.2.4
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,19 +22,19 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '7.2.3',
+      version: '7.2.4',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '7.2.3',
+        title: '7.2.4',
         items: [
-          'Fixed plugin occasionally failing to reload when switching channels/accounts',
-          'Clarified autocollapse dependencies'
+          'Fixed plugin reloading when user presses shift while hovering the mouse over certain messages',
+          'Updated classes to work with the new themed user profiles'
         ]
       }, {
-        title: '1.0.0 - 7.2.2',
+        title: '1.0.0 - 7.2.3',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1245,6 +1245,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.classProfilePanelWrapper = 'profilePanel-2PWEok';
       this.classTextInput = '[data-slate-string="true"]';
       this.classNoChat = 'noChat-sb1z07';
+      this.classMsgButtons = 'wrapper-2vIMkT';
 
       if (BdApi.Plugins.isEnabled('ChannelDms') && document.querySelector('.ChannelDms-channelmembers-wrap'))
         this.classMembersList = 'ChannelDms-channelmembers-wrap';
@@ -1261,7 +1262,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.wordMark = document.querySelector('.wordmark-2u86JB');
       this.msgBar = document.querySelector('.form-3gdLxP');
       this.userArea = document.querySelector('.panels-3wFtMD');
-      this.profilePanel = document.querySelector('.userPanelOuter-xc-WYi');
+      this.profilePanel = document.querySelector('.profilePanel-2VBkh8');
       this.profilePanelWrapper = document.querySelector('.' + this.classProfilePanelWrapper);
       this.membersList = document.querySelector('.' + this.classMembersList);
       this.serverList = document.querySelector('.' + this.classServerList);
@@ -2215,7 +2216,9 @@ https://programmer2514.github.io/?l=cui-changelog`
           // This is intentional, as it maintains the user's preferences throughout transitions
           // This in turn prevents collapsed elements from "jumping" while the plugin reloads
           if (mutationList.length > cui.MAX_ITER_MUTATIONS) {
-            cui.initialize();
+            // Prevent UI jumping when user presses Shift
+            if (!mutationList[0].target.classList.contains(cui.classMsgButtons))
+              cui.initialize();
             return;
           }
 

@@ -3906,9 +3906,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                     cui.membersList.style.transition = 'none';
                     cui.membersList.style.width = cui.membersListWidth + 'px';
                     cui.membersList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
-                  } //else {
-                    //cui.membersList.style.width = 'var(--members-width)';
-                 // }
+                  }
                   if (oldMembersListWidth != cui.membersListWidth)
                     BdApi.setData('CollapsibleUI', 'membersListWidth',
                       cui.membersListWidth.toString());

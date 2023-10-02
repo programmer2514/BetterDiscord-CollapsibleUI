@@ -1,5 +1,10 @@
 # CollapsibleUI Patch Notes
 
+### v7.3.0:
+* Fixed dynamic handling of user profile popout
+* Made members list resizable
+* Reformatted plugin code
+
 ### v7.2.4:
 * Fixed plugin reloading when user presses shift while hovering the mouse over certain messages
 * Updated classes to work with the new themed user profiles

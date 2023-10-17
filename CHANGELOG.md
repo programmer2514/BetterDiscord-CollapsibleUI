@@ -1,5 +1,12 @@
 # CollapsibleUI Patch Notes
 
+### v7.4.0
+* Updated to support newest Discord release (breaks plugin on Discord versions <237546)
+* Bumped settings version and cleaned up old JSON
+* Fixed Members List not resizing correctly in GCs
+* Fixed broken transitions
+* Added DateViewer compatibility
+
 ### v7.3.0:
 * Fixed dynamic handling of user profile popout
 * Made members list resizable

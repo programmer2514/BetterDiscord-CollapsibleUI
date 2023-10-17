@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.3.0
+ * @version 7.4.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,20 +22,22 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '7.3.0',
+      version: '7.4.0',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '7.3.0',
+        title: '7.4.0',
         items: [
-          'Fixed dynamic handling of user profile popout',
-          'Made members list resizable',
-          'Reformatted plugin code'
+          'Updated to support newest Discord release (breaks plugin on Discord versions <237546)',
+          'Bumped settings version and cleaned up old JSON',
+          'Fixed Members List not resizing correctly in GCs',
+          'Fixed broken transitions',
+          'Added DateViewer compatibility'
         ]
       }, {
-        title: '1.0.0 - 7.2.4',
+        title: '1.0.0 - 7.3.0',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1383,6 +1385,9 @@ https://programmer2514.github.io/?l=cui-changelog`
         document.querySelectorAll('.collapsible-ui-element')
           .forEach(e => e.remove());
 
+        document.querySelectorAll('.' + this.classMembersListMember)
+          .forEach(e => e.style.removeProperty('max-width'));
+
         // Re-enable the original Members List icon
         try {
           this.searchBar.previousElementSibling.style.removeProperty('display');
@@ -1421,11 +1426,15 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.membersList.style.removeProperty('transition');
           this.membersList.style.removeProperty('display');
           this.membersList.style.removeProperty('transform');
+        }
+        if (this.membersListInner) {
           this.membersListInner.style.removeProperty('max-width');
           this.membersListInner.style.removeProperty('min-width');
           this.membersListInner.style.removeProperty('transform');
-          document.querySelectorAll('.' + this.classMembersListMember)
-            .forEach(e => e.style.removeProperty('max-width'));
+        }
+        if (this.contentWindow) {
+          this.contentWindow.style.removeProperty('transition');
+          this.contentWindow.style.removeProperty('max-width');
         }
         if (this.profilePanel) {
           this.profilePanel.style.removeProperty('max-width');
@@ -1545,7 +1554,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.classChannelList = 'sidebar-1tnWFu';
       this.classServerList = 'wrapper-1_HaEi';
       this.classUserPopout = 'userPopoutOuter-3AVBmJ';
-      this.classMembersListWrapper = 'container-2o3qEW';
+      this.classMembersListWrapper = 'container-2vWgD2';
       this.classMembersListMember = 'member-2gU6Ar';
       this.classProfilePanelWrapper = 'profilePanel-2VBkh8';
       this.classTextInput = '[data-slate-string="true"]';
@@ -1555,7 +1564,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       if (BdApi.Plugins.isEnabled('ChannelDms')
         && document.querySelector('.ChannelDms-channelmembers-wrap')) {
         this.classMembersList = 'ChannelDms-channelmembers-wrap';
-      } else this.classMembersList = 'membersWrap-3NUR2t';
+      } else this.classMembersList = 'membersWrap-3GwLFp';
 
       // Elements
       this.windowBase = document.querySelector('.base-2jDfDU');
@@ -1573,7 +1582,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.membersList = document.querySelector('.' + this.classMembersList);
       this.serverList = document.querySelector('.' + this.classServerList);
       this.channelList = document.querySelector('.' + this.classChannelList);
-      this.settingsContainerBase = document.querySelector('.container-YkUktl');
+      this.settingsContainerBase = document.querySelector('.container-1CH86i');
       this.settingsContainer = this.settingsContainerBase
         .querySelector('.flex-2S1XBF');
       this.spotifyContainer = document.querySelector('.container-6sXIoE');
@@ -1604,7 +1613,9 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.fullscreenButton = document.querySelector('[d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"]')
         ?.parentElement.parentElement.parentElement;
       this.msgBarBtnContainer = document.querySelector('.buttons-uaqb-5');
-      this.membersListInner = document.querySelector('.members-3WRCEx');
+      this.membersListInner = document.querySelector('.members-2y1nVj');
+      this.membersListNotices = document.querySelector('.membersListNotices-3yhEwx');
+      this.contentWindow = document.querySelector('.container-3H3gr7');
 
       this.callContainerExists = (document.querySelector('.'
         + this.classCallContainer));
@@ -1941,8 +1952,12 @@ https://programmer2514.github.io/?l=cui-changelog`
               clearTimeout(cui.membersDUDelay);
               cui.membersDUDelay = false;
             }
-            cui.membersList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
+            cui.membersList.style.transition = 'width ' + cui.transitionSpeed
+              + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+            cui.contentWindow.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
             cui.membersList.style.width = cui.collapsedDistance + 'px';
+            cui.membersList.style.minWidth = cui.collapsedDistance + 'px';
+            cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.collapsedDistance + 'px)';
             cui.isCollapsed[cui.I_MEMBERS_LIST] = true;
           }
 
@@ -2926,6 +2941,13 @@ https://programmer2514.github.io/?l=cui-changelog`
         // Set new settings version
         BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '9');
       }
+      if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 10) {
+        // Clean up (v10)
+        BdApi.deleteData('CollapsibleUI', 'membersListMaxWidth');
+
+        // Set new settings version
+        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '10');
+      }
 
       // disableTransitions [Default: false]
       if (BdApi.getData('CollapsibleUI', 'disableTransitions') === 'false')
@@ -3498,9 +3520,14 @@ https://programmer2514.github.io/?l=cui-changelog`
         }
         if (this.membersList) {
           this.membersList.style.overflow = 'hidden';
-          this.membersList.style.minWidth = '0px';
-          this.membersList.style.width = 'var(--members-width)';
+          this.membersList.style.minWidth = 'var(--cui-members-width)';
+          this.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+          this.membersList.style.width = 'var(--cui-members-width)';
           this.membersList.style.minHeight = '100%';
+        }
+        if (this.membersListNotices) {
+          this.membersListNotices.style.width = '0px';
+          this.membersListNotices.style.overflow = 'visible';
         }
         if (this.profilePanel) {
           this.profilePanel.style.overflow = 'hidden';
@@ -3649,24 +3676,38 @@ https://programmer2514.github.io/?l=cui-changelog`
             if (this.disableTransitions) {
               this.membersList.style.display = 'none';
             } else {
-              this.membersList.style.transition = 'width ' + this.transitionSpeed + 'ms';
+              this.membersList.style.transition = 'width ' + this.transitionSpeed
+                + 'ms, min-width ' + this.transitionSpeed + 'ms';
+              this.contentWindow.style.transition = 'max-width ' + this.transitionSpeed + 'ms';
               this.membersList.style.width = this.collapsedDistance + 'px';
+              this.membersList.style.minWidth = this.collapsedDistance + 'px';
+              this.contentWindow.style.maxWidth = 'calc(100% - ' + this.collapsedDistance + 'px)';
             }
           } else if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
             if (this.membersListButton)
               this.membersListButton.classList.add(this.classSelected);
-            if (this.membersListWidth != 0)
+            if (this.membersListWidth != 0) {
               this.membersList.style.width = this.membersListWidth + 'px';
-            else
-              this.membersList.style.width = 'var(--members-width)';
+              this.membersList.style.minWidth = this.membersListWidth + 'px';
+              this.contentWindow.style.maxWidth = 'calc(100% - ' + this.membersListWidth + 'px)';
+            } else {
+              this.membersList.style.width = 'var(--cui-members-width)';
+              this.membersList.style.minWidth = 'var(--cui-members-width)';
+              this.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+            }
           } else {
             BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
             if (this.membersListButton)
               this.membersListButton.classList.add(this.classSelected);
-            if (this.membersListWidth != 0)
+            if (this.membersListWidth != 0) {
               this.membersList.style.width = this.membersListWidth + 'px';
-            else
-              this.membersList.style.width = 'var(--members-width)';
+              this.membersList.style.minWidth = this.membersListWidth + 'px';
+              this.contentWindow.style.maxWidth = 'calc(100% - ' + this.membersListWidth + 'px)';
+            } else {
+              this.membersList.style.width = 'var(--cui-members-width)';
+              this.membersList.style.minWidth = 'var(--cui-members-width)';
+              this.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+            }
           }
         } else
           BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
@@ -3751,17 +3792,20 @@ https://programmer2514.github.io/?l=cui-changelog`
       // Apply transitions to UI elements
       if (!this.disableTransitions) {
 
+        // Create plugin stylesheet
+        this.pluginStyle = document.createElement("style");
+        this.pluginStyle.setAttribute('id', 'cui-stylesheet');
+        this.pluginStyle.appendChild(document.createTextNode(""));
+        document.head.appendChild(this.pluginStyle);
+        this.pluginStyle.sheet.insertRule(":root {--cui-members-width: 240px}", 0);
+
         // Handle resizing channel list
         if (this.resizableChannelList) {
           this.channelList.style.resize = 'horizontal';
           this.channelList.style.maxWidth = '80vw';
 
           // Hide webkit resizer
-          this.pluginStyle = document.createElement("style");
-          this.pluginStyle.setAttribute('id', 'cui-stylesheet');
-          this.pluginStyle.appendChild(document.createTextNode(""));
-          document.head.appendChild(this.pluginStyle);
-          this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 0);
+          this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 1);
 
           document.body.addEventListener('mousedown', function () {
             cui.channelList.style.transition = 'none';
@@ -3837,7 +3881,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (this.windowBar)
           this.windowBar.style.transition = 'height ' + this.transitionSpeed + 'ms';
 
-        if (this.membersList) {
+        if (this.membersList && this.membersListInner) {
 
           // Handle resizing members list
           if (this.resizableMembersList) {
@@ -3849,22 +3893,25 @@ https://programmer2514.github.io/?l=cui-changelog`
             // Without affecting the elements inside
             this.membersList.style.transform = 'scaleX(-1)';
             this.membersListInner.style.transform = 'scaleX(-1)';
+
             this.membersListInner.style.minWidth = '100%';
             this.membersListInner.style.maxWidth = '100%';
             document.querySelectorAll('.' + this.classMembersListMember)
               .forEach(e => e.style.maxWidth = '100%');
 
             // Hide webkit resizer
-            if (!this.pluginStyle) {
-              this.pluginStyle = document.createElement("style");
-              this.pluginStyle.setAttribute('id', 'cui-stylesheet');
-              this.pluginStyle.appendChild(document.createTextNode(""));
-              document.head.appendChild(this.pluginStyle);
-              this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 0);
+            if (!this.resizableChannelList) {
+              this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 1);
             }
+
+            // DateViewer compatibility
+            this.pluginStyle.sheet.insertRule("#dv-mount {transform: scaleX(-1);}", 2);
 
             document.body.addEventListener('mousedown', function () {
               cui.membersList.style.transition = 'none';
+              cui.contentWindow.style.transition = 'none';
+              cui.membersList.style.minWidth = '0';
+              //cui.contentWindow.style.maxWidth = '100%';
             }, { signal: this.eventListenerSignal });
 
             if (this.fullscreenButton) {
@@ -3883,8 +3930,12 @@ https://programmer2514.github.io/?l=cui-changelog`
               cui.membersListWidth = 0;
               BdApi.setData('CollapsibleUI', 'membersListWidth',
                 cui.membersListWidth.toString());
-              cui.membersList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
-              cui.membersList.style.width = 'var(--members-width)';
+              cui.membersList.style.transition = 'width ' + cui.transitionSpeed
+                + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+              cui.contentWindow.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
+              cui.membersList.style.width = 'var(--cui-members-width)';
+              cui.membersList.style.minWidth = 'var(--cui-members-width)';
+              cui.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
               try {
                 cui.membersListWidthObserver.observe(cui.membersList,
                   { attributeFilter: ['style'] });
@@ -3902,10 +3953,16 @@ https://programmer2514.github.io/?l=cui-changelog`
                   var oldMembersListWidth = cui.membersListWidth;
                   if (parseInt(cui.membersList.style.width)) {
                     cui.membersListWidth = parseInt(cui.membersList.style.width);
+                    cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
                   } else if (cui.membersListWidth != 0) {
                     cui.membersList.style.transition = 'none';
+                    cui.contentWindow.style.transition = 'none';
                     cui.membersList.style.width = cui.membersListWidth + 'px';
-                    cui.membersList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
+                    cui.membersList.style.minWidth = cui.membersListWidth + 'px';
+                    cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+                    cui.membersList.style.transition = 'width ' + cui.transitionSpeed
+                      + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+                    cui.contentWindow.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
                   }
                   if (oldMembersListWidth != cui.membersListWidth)
                     BdApi.setData('CollapsibleUI', 'membersListWidth',
@@ -3926,10 +3983,14 @@ https://programmer2514.github.io/?l=cui-changelog`
             && this.membersListWidth != 0) {
 
             this.membersList.style.transition = 'none';
+            this.contentWindow.style.transition = 'none';
             this.membersList.style.width = this.membersListWidth + 'px';
+            this.membersList.style.minWidth = this.membersListWidth + 'px';
+            this.contentWindow.style.maxWidth = 'calc(100% - ' + this.membersListWidth + 'px)';
           }
 
           this.membersList.style.transition = 'none';
+          this.contentWindow.style.transition = 'none';
         }
 
         if (this.profilePanel)
@@ -4194,11 +4255,18 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.membersDUDelay = false;
           }
           this.membersDUDelay = setTimeout(() => {
-            cui.membersList.style.transition = 'width ' + cui.transitionSpeed + 'ms';
-            if (cui.membersListWidth != 0)
+            cui.membersList.style.transition = 'width ' + cui.transitionSpeed
+              + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+            cui.contentWindow.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
+            if (cui.membersListWidth != 0) {
               cui.membersList.style.width = cui.membersListWidth + 'px';
-            else
-              cui.membersList.style.width = 'var(--members-width)';
+              cui.membersList.style.minWidth = cui.membersListWidth + 'px';
+              cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+            } else {
+              cui.membersList.style.width = 'var(--cui-members-width)';
+              cui.membersList.style.minWidth = 'var(--cui-members-width)';
+              cui.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+            }
             cui.isCollapsed[cui.I_MEMBERS_LIST] = false;
             cui.membersDUDelay = false;
           }, this.dynamicUncollapseDelay);
@@ -4212,8 +4280,12 @@ https://programmer2514.github.io/?l=cui-changelog`
             clearTimeout(this.membersDUDelay);
             this.membersDUDelay = false;
           }
-          this.membersList.style.transition = 'width ' + this.transitionSpeed + 'ms';
+          this.membersList.style.transition = 'width ' + this.transitionSpeed
+            + 'ms, min-width ' + this.transitionSpeed + 'ms';
+          this.contentWindow.style.transition = 'max-width ' + this.transitionSpeed + 'ms';
           this.membersList.style.width = this.collapsedDistance + 'px';
+          this.membersList.style.minWidth = this.collapsedDistance + 'px';
+          this.contentWindow.style.maxWidth = 'calc(100% - ' + this.collapsedDistance + 'px)';
           this.isCollapsed[this.I_MEMBERS_LIST] = true;
         }
       }
@@ -4467,9 +4539,12 @@ https://programmer2514.github.io/?l=cui-changelog`
           if (this.disableTransitions) {
             this.membersList.style.display = 'none';
           } else {
-            this.membersList.style.transition = 'width '
-              + this.transitionSpeed + 'ms';
+            this.membersList.style.transition = 'width ' + this.transitionSpeed
+              + 'ms, min-width ' + this.transitionSpeed + 'ms';
+            this.contentWindow.style.transition = 'max-width ' + this.transitionSpeed + 'ms';
             this.membersList.style.width = this.collapsedDistance + 'px';
+            this.membersList.style.minWidth = this.collapsedDistance + 'px';
+            this.contentWindow.style.maxWidth = 'calc(100% - ' + this.collapsedDistance + 'px)';
           }
           BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'false');
           this.membersListButton.classList.remove(this.classSelected);
@@ -4477,12 +4552,18 @@ https://programmer2514.github.io/?l=cui-changelog`
           if (this.disableTransitions) {
             this.membersList.style.removeProperty('display');
           } else {
-            this.membersList.style.transition = 'width '
-              + this.transitionSpeed + 'ms';
-            if (this.membersListWidth != 0)
+            this.membersList.style.transition = 'width ' + this.transitionSpeed
+              + 'ms, min-width ' + this.transitionSpeed + 'ms';
+            this.contentWindow.style.transition = 'max-width ' + this.transitionSpeed + 'ms';
+            if (this.membersListWidth != 0) {
               this.membersList.style.width = this.membersListWidth + 'px';
-            else
-              this.membersList.style.width = 'var(--members-width)';
+              this.membersList.style.minWidth = this.membersListWidth + 'px';
+              this.contentWindow.style.maxWidth = 'calc(100% - ' + this.membersListWidth + 'px)';
+            } else {
+              this.membersList.style.width = 'var(--cui-members-width)';
+              this.membersList.style.minWidth = 'var(--cui-members-width)';
+              this.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+            }
           }
           BdApi.setData('CollapsibleUI', 'membersListButtonActive', 'true');
           this.membersListButton.classList.add(this.classSelected);

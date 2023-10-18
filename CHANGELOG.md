@@ -1,11 +1,11 @@
 # CollapsibleUI Patch Notes
 
-### v7.4.1
+### v7.4.1:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <238110)
 * Fixed Call Container button appearing when it shouldn\'t
 * Improved compatibility with certain themes
 
-### v7.4.0
+### v7.4.0:
 * Updated to support newest Discord release (breaks plugin on Discord versions <237546)
 * Bumped settings version and cleaned up old JSON
 * Fixed Members List not resizing correctly in GCs

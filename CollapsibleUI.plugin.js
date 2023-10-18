@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.4.0
+ * @version 7.4.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,22 +22,20 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '7.4.0',
+      version: '7.4.1',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '7.4.0',
+        title: '7.4.1',
         items: [
-          'Updated to support newest Discord release (breaks plugin on Discord versions <237546)',
-          'Bumped settings version and cleaned up old JSON',
-          'Fixed Members List not resizing correctly in GCs',
-          'Fixed broken transitions',
-          'Added DateViewer compatibility'
+          'Hotfix for newest Discord release (breaks plugin on Discord versions <238110)',
+          'Fixed Call Container button appearing when it shouldn\'t',
+          'Improved compatibility with certain themes'
         ]
       }, {
-        title: '1.0.0 - 7.3.0',
+        title: '1.0.0 - 7.4.0',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -1426,6 +1424,7 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.membersList.style.removeProperty('transition');
           this.membersList.style.removeProperty('display');
           this.membersList.style.removeProperty('transform');
+          this.membersList.style.removeProperty('flex-basis');
         }
         if (this.membersListInner) {
           this.membersListInner.style.removeProperty('max-width');
@@ -1536,9 +1535,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.classIconWrapper = 'iconWrapper-2awDjA';
       this.classClickable = 'clickable-ZD7xvu';
       this.classCallContainer = 'wrapper-1gVUIN';
-      this.classCallHeaderWrapper = 'headerWrapper-1ULEPv';
       this.classCallUserWrapper = 'voiceCallWrapper-3UtDiC';
-      this.classConnectionArea = 'connection-3k9QeF';
       this.classDMElement = 'channel-1Shao0';
       this.classTooltipWrapper = 'layer-2BGhQ8';
       this.classTooltipWrapperDPE = 'disabledPointerEvents-cGr1My';
@@ -1553,12 +1550,12 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.classLayers = 'layers-1YQhyW';
       this.classChannelList = 'sidebar-1tnWFu';
       this.classServerList = 'wrapper-1_HaEi';
-      this.classUserPopout = 'userPopoutOuter-3AVBmJ';
+      this.classUserPopout = 'userPopoutOuter-1OHwPL';
       this.classMembersListWrapper = 'container-2vWgD2';
       this.classMembersListMember = 'member-2gU6Ar';
       this.classProfilePanelWrapper = 'profilePanel-2VBkh8';
       this.classTextInput = '[data-slate-string="true"]';
-      this.classNoChat = 'noChat-sb1z07';
+      this.classNoChat = 'noChat-2UYgeE';
       this.classMsgButtons = 'wrapper-2vIMkT';
 
       if (BdApi.Plugins.isEnabled('ChannelDms')
@@ -1572,11 +1569,11 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.toolBar = document.querySelector('.toolbar-3_r2xA');
       this.searchBar = document.querySelector('.search-39IXmY');
       this.inviteToolbar = document.querySelector('.inviteToolbar-2k2nqz');
-      this.windowBar = document.querySelector('.typeWindows-2-g3UY');
-      this.wordMark = document.querySelector('.wordmark-2u86JB');
-      this.msgBar = document.querySelector('.form-3gdLxP');
+      this.windowBar = document.querySelector('.typeWindows-3ILlhq');
+      this.wordMark = document.querySelector('.wordmark-3wYFg6');
+      this.msgBar = document.querySelector('.form-3qe0Ni');
       this.userArea = document.querySelector('.panels-3wFtMD');
-      this.profilePanel = document.querySelector('.profilePanel-2VBkh8');
+      this.profilePanel = document.querySelector('.userPanelOuter-XfFELn');
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);
       this.membersList = document.querySelector('.' + this.classMembersList);
@@ -1586,8 +1583,8 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.settingsContainer = this.settingsContainerBase
         .querySelector('.flex-2S1XBF');
       this.spotifyContainer = document.querySelector('.container-6sXIoE');
-      this.appWrapper = document.querySelector('.app-3xd6d0');
-      this.avatarWrapper = document.querySelector('.avatarWrapper-1B9FTW');
+      this.appWrapper = document.querySelector('.app-1BipOi');
+      this.avatarWrapper = document.querySelector('.avatarWrapper-12uuu4');
       this.moreButton = this.toolBar.querySelector('[d="M7 12.001C7 10.8964 '
         + '6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 '
         + '3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 '
@@ -1610,7 +1607,8 @@ https://programmer2514.github.io/?l=cui-changelog`
         + '17.5228 6.47715 22 12 22ZM12 12C13.66 12 15 10.66 15 9C15 7.34 13.66 '
         + '6 12 6C10.34 6 9 7.34 9 9C9 10.66 10.34 12 12 12Z"]')?.parentElement
         .parentElement.parentElement;
-      this.fullscreenButton = document.querySelector('[d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"]')
+      this.fullscreenButton =
+        document.querySelector('[d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"]')
         ?.parentElement.parentElement.parentElement;
       this.msgBarBtnContainer = document.querySelector('.buttons-uaqb-5');
       this.membersListInner = document.querySelector('.members-2y1nVj');
@@ -1995,9 +1993,7 @@ https://programmer2514.github.io/?l=cui-changelog`
               clearTimeout(cui.callDUDelay);
               cui.callDUDelay = false;
             }
-            document.querySelector('.' + cui.classCallContainer).style.maxHeight =
-              document.querySelector('.' + cui.classCallHeaderWrapper)
-              .getBoundingClientRect().height + 'px';
+            document.querySelector('.' + cui.classCallContainer).style.maxHeight = '0px';
             cui.isCollapsed[cui.I_CALL_CONTAINER] = true;
           }
         }, { signal: this.eventListenerSignal });
@@ -3454,7 +3450,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         }
         if (i == this.buttonsOrder[this.I_CALL_CONTAINER]) {
           if (this.buttonsOrder[this.I_CALL_CONTAINER]
-            && document.querySelector('.' + this.classConnectionArea)) {
+            && document.querySelector('.' + this.classCallContainer)) {
 
             this.callContainerButton = this.addToolbarIcon(this.localeLabels.callContainer,
               '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.'
@@ -3524,6 +3520,7 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
           this.membersList.style.width = 'var(--cui-members-width)';
           this.membersList.style.minHeight = '100%';
+          this.membersList.style.flexBasis = 'auto';
         }
         if (this.membersListNotices) {
           this.membersListNotices.style.width = '0px';
@@ -3770,9 +3767,7 @@ https://programmer2514.github.io/?l=cui-changelog`
               if (this.disableTransitions) {
                 document.querySelector('.' + this.classCallContainer).style.display = 'none';
               } else {
-                document.querySelector('.' + this.classCallContainer)
-                  .style.maxHeight = document.querySelector('.'
-                  + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+                document.querySelector('.' + this.classCallContainer).style.maxHeight = '0px';
                 if (document.querySelector('.' + this.classCallUserWrapper))
                   document.querySelector('.' + this.classCallUserWrapper).style.display = 'none';
               }
@@ -4391,10 +4386,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             clearTimeout(this.callDUDelay);
             this.callDUDelay = false;
           }
-          if (document.querySelector('.' + this.classCallHeaderWrapper))
-            document.querySelector('.' + this.classCallContainer)
-              .style.maxHeight = document.querySelector('.' + this.classCallHeaderWrapper)
-              .getBoundingClientRect().height + 'px';
+          document.querySelector('.' + this.classCallContainer).style.maxHeight = '0px';
           if (document.querySelector('.' + this.classCallUserWrapper))
             document.querySelector('.' + this.classCallUserWrapper)
               .style.display = 'none';
@@ -4596,9 +4588,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             if (this.disableTransitions) {
               document.querySelector('.' + this.classCallContainer).style.display = 'none';
             } else {
-              document.querySelector('.' + this.classCallContainer)
-                .style.maxHeight = document.querySelector('.'
-                + this.classCallHeaderWrapper).getBoundingClientRect().height + 'px';
+              document.querySelector('.' + this.classCallContainer).style.maxHeight = '0px';
               if (document.querySelector('.' + this.classCallUserWrapper))
                 document.querySelector('.' + this.classCallUserWrapper)
                   .style.display = 'none';

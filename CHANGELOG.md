@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v7.4.2: 
+* Fix for recent Discord sweeping classes/elements changes
+
 ### v7.4.1:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <238110)
 * Fixed Call Container button appearing when it shouldn\'t

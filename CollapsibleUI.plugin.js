@@ -1589,7 +1589,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         .querySelector('.flex_f5fbb7');
       this.spotifyContainer = document.querySelector('.container-6sXIoE');
       this.appWrapper = document.querySelector('.app_b1f720');
-      this.avatarWrapper = document.querySelector('.avatarWrapper-12uuu4');
+      this.avatarWrapper = document.querySelector('.avatarWrapper_ba5175');
       this.moreButton = this.toolBar.querySelector('[d="M7 12.001C7 10.8964 '
         + '6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 '
         + '3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 '

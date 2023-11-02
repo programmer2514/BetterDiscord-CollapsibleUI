@@ -2134,7 +2134,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       newToolbarIcon.setAttribute('tabindex', '0');
       newToolbarIcon.style.display = 'inline-block';
       newToolbarIcon.style.overflow = 'hidden';
-      newToolbarIcon.innerHTML = '<svg x="0" y="0" class="icon-2xnN2Y" '
+      newToolbarIcon.innerHTML = '<svg x="0" y="0" class="icon__4cb88" '
         + 'aria-hidden="false" width="24" height="24" viewBox="'
         + viewBox + '">' + rawSVGData + '</svg>';
 
@@ -2766,7 +2766,6 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Add mutation observer to reload my plugin when necessary
       this.appObserver = new MutationObserver((mutationList) => {
-    console.log();
         try {
           // If there are a lot of mutations, assume we need to reload
           // This increases performance a lot when switching views

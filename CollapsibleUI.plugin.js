@@ -1587,7 +1587,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.settingsContainerBase = document.querySelector('.container_ca50b9');
       this.settingsContainer = this.settingsContainerBase
         .querySelector('.flex_f5fbb7');
-      this.spotifyContainer = document.querySelector('.container-6sXIoE');
+      this.spotifyContainer = document.querySelector('.container_6sXIoE');
       this.appWrapper = document.querySelector('.app_b1f720');
       this.avatarWrapper = document.querySelector('.avatarWrapper_ba5175');
       this.moreButton = this.toolBar.querySelector('[d="M7 12.001C7 10.8964 '

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 7.4.2
+ * @version 8.0.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,25 +22,23 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '7.4.2',
+      version: '8.0.0',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '7.4.2',
+        title: '8.0.0',
         items: [
-          'Fix for recent Discord sweeping classes/elements changes'
+          'Fix for more Discord class/element changes',
+          'Fixed elements occasionally collapsing on scroll',
+          'Made User Profile panel resizable',
+          'Updated plugin icons to match Discord\'s new theme more closely',
+          'Made uncollapsed elements float instead of shifting other elements over (can be disabled in Settings > Dynamic Uncollapse)',
+          'Added a persistent badge in the top-left showing a total of unread DMs (can be disabled in Settings > Main)'
         ]
       }, {
-        title: '7.4.1',
-        items: [
-          'Hotfix for newest Discord release (breaks plugin on Discord versions <238110)',
-          'Fixed Call Container button appearing when it shouldn\'t',
-          'Improved compatibility with certain themes'
-        ]
-      }, {
-        title: '1.0.0 - 7.4.0',
+        title: '1.0.0 - 7.4.2',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -129,6 +127,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     // Add settings panel
     getSettingsPanel = () => {
       var zps = Library.Settings;
+      var cui = this;
 
       // Create root settings node
       var settingsRoot = new zps.SettingPanel();
@@ -175,6 +174,16 @@ https://programmer2514.github.io/?l=cui-changelog`
           'Allows the members list to be resized horizontally by \
             clicking-and-dragging on its bottom-left corner',
           BdApi.getData('CollapsibleUI', 'resizableMembersList') === 'true');
+      var settingResizableUserProfile =
+        new zps.Switch('Resizable User Profile',
+          'Allows the user profile to be resized horizontally by \
+            clicking-and-dragging on its bottom-left corner',
+          BdApi.getData('CollapsibleUI', 'resizableUserProfile') === 'true');
+      var settingPersistentUnreadBadge =
+        new zps.Switch('Persistent Unread DM Badge',
+          'Displays a badge next to the Discord wordmark showing the number of \
+            unread DMs',
+          BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'true');
 
       // Append main settings to Main subgroup
       groupMain.append(settingDisableTransitions);
@@ -185,6 +194,8 @@ https://programmer2514.github.io/?l=cui-changelog`
       groupMain.append(settingEnableFullToolbarCollapse);
       groupMain.append(settingResizableChannelList);
       groupMain.append(settingResizableMembersList);
+      groupMain.append(settingResizableUserProfile);
+      groupMain.append(settingPersistentUnreadBadge);
 
       // Create Keyboard Shortcuts subgroup
       var groupKB = new zps.SettingGroup('Keyboard Shortcuts');
@@ -258,6 +269,10 @@ https://programmer2514.github.io/?l=cui-changelog`
             When disabled, autocollapse is also disabled. Does not work with \
             transitions disabled',
           BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true');
+      var settingFloatingDynamicUncollapse = new zps.Switch('Floating Dynamic Uncollapse',
+          'Makes dynamically uncollapsed UI elements float above other elements, \
+            instead of pushing them aside',
+          BdApi.getData('CollapsibleUI', 'floatingDynamicUncollapse') === 'true');
       var settingCollapsedDistance = new zps.Textbox('Collapsed Element Distance',
           'Sets the size (px) of UI elements when they are collapsed',
           BdApi.getData('CollapsibleUI', 'collapsedDistance'),
@@ -372,6 +387,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Append autocollapse settings to Autocollapse subgroup
       groupDU.append(settingDynamicUncollapse);
+      groupDU.append(settingFloatingDynamicUncollapse);
       groupDU.append(settingCollapsedDistance);
       groupDU.append(settingButtonCollapseFudgeFactor);
       groupDU.append(settingDynamicUncollapseDelay);
@@ -703,11 +719,6 @@ https://programmer2514.github.io/?l=cui-changelog`
           null,
           BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'),
           null, { placeholder: 'Default: 300' });
-      var settingProfilePanelMaxWidth =
-        new zps.Textbox('User Profile - Max Width',
-          null,
-          BdApi.getData('CollapsibleUI', 'profilePanelMaxWidth'),
-          null, { placeholder: 'Default: 340' });
       var settingToolbarMaxWidth = new zps.Textbox('Toolbar - Max Width',
           null,
           BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'),
@@ -730,7 +741,6 @@ https://programmer2514.github.io/?l=cui-changelog`
       groupAdvanced.append(settingMessageBarButtonsMaxWidth);
       groupAdvanced.append(settingMessageBarButtonsMinWidth);
       groupAdvanced.append(settingToolbarIconMaxWidth);
-      groupAdvanced.append(settingProfilePanelMaxWidth);
       groupAdvanced.append(settingToolbarMaxWidth);
       groupAdvanced.append(settingUserAreaMaxHeight);
       groupAdvanced.append(settingMsgBarMaxHeight);
@@ -793,6 +803,19 @@ https://programmer2514.github.io/?l=cui-changelog`
           BdApi.setData('CollapsibleUI', 'resizableMembersList', 'true');
         else
           BdApi.setData('CollapsibleUI', 'resizableMembersList', 'false');
+      };
+      settingResizableUserProfile.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'false');
+      };
+      settingPersistentUnreadBadge.onChange = function (result) {
+        cui.updateDMBadge(!result);
+        if (result)
+          BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'false');
       };
 
       // Register button settings onChange events
@@ -857,6 +880,12 @@ https://programmer2514.github.io/?l=cui-changelog`
           BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
         else
           BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'false');
+      };
+      settingFloatingDynamicUncollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'false');
       };
       settingCollapsedDistance.onChange = function (result) {
         BdApi.setData('CollapsibleUI', 'collapsedDistance', result);
@@ -1251,9 +1280,6 @@ https://programmer2514.github.io/?l=cui-changelog`
       settingToolbarIconMaxWidth.onChange = function (result) {
         BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', result);
       };
-      settingProfilePanelMaxWidth.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'profilePanelMaxWidth', result);
-      };
       settingToolbarMaxWidth.onChange = function (result) {
         BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', result);
       };
@@ -1404,11 +1430,19 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.channelList.style.removeProperty('max-width');
           this.channelList.style.removeProperty('display');
           this.channelList.style.removeProperty('overflow');
+          this.channelList.style.removeProperty('position');
+          this.channelList.style.removeProperty('z-index');
+          this.channelList.style.removeProperty('max-height');
+          this.channelList.style.removeProperty('height');
         }
         if (this.serverList) {
           this.serverList.style.removeProperty('width');
           this.serverList.style.removeProperty('transition');
           this.serverList.style.removeProperty('display');
+          this.serverList.style.removeProperty('position');
+          this.serverList.style.removeProperty('z-index');
+          this.serverList.style.removeProperty('max-height');
+          this.serverList.style.removeProperty('overflow-y');
         }
         if (this.windowBar) {
           this.wordMark.style.removeProperty('display');
@@ -1430,6 +1464,11 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.membersList.style.removeProperty('display');
           this.membersList.style.removeProperty('transform');
           this.membersList.style.removeProperty('flex-basis');
+          this.membersList.style.removeProperty('position');
+          this.membersList.style.removeProperty('z-index');
+          this.membersList.style.removeProperty('max-height');
+          this.membersList.style.removeProperty('height');
+          this.membersList.style.removeProperty('right');
         }
         if (this.membersListInner) {
           this.membersListInner.style.removeProperty('max-width');
@@ -1443,12 +1482,33 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (this.profilePanel) {
           this.profilePanel.style.removeProperty('max-width');
           this.profilePanel.style.removeProperty('min-width');
-          this.profilePanel.style.removeProperty('overflow');
-          this.profilePanel.style.removeProperty('transition');
-          this.profilePanel.style.removeProperty('display');
-        }
-        if (this.profilePanelWrapper)
           this.profilePanel.style.removeProperty('width');
+          this.profilePanel.style.removeProperty('overflow');
+          this.profilePanel.style.removeProperty('resize');
+          this.profilePanel.style.removeProperty('transition');
+          this.profilePanel.style.removeProperty('transform');
+          this.profilePanel.style.removeProperty('display');
+          this.profilePanel.style.removeProperty('position');
+          this.profilePanel.style.removeProperty('z-index');
+          this.profilePanel.style.removeProperty('max-height');
+          this.profilePanel.style.removeProperty('height');
+          this.profilePanel.style.removeProperty('right');
+        }
+        if (this.profilePanelWrapper) {
+          this.profilePanelWrapper.style.removeProperty('width');
+        }
+        if (this.profilePanelInner) {
+          this.profilePanelInner.style.removeProperty('max-width');
+          this.profilePanelInner.style.removeProperty('width');
+          this.profilePanelInner.style.removeProperty('transform');
+        }
+        if (this.profileBannerSVGWrapper) {
+          this.profileBannerSVGWrapper.style.removeProperty('max-height');
+          this.profileBannerSVGWrapper.style.removeProperty('min-width');
+          this.profileBannerSVGWrapper.querySelector('mask rect')
+            .setAttribute('width', '100%')
+          this.profileBannerSVGWrapper.setAttribute('viewBox', '0 0 340 120');
+        }
         if (this.msgBar) {
           this.msgBar.style.removeProperty('max-height');
           this.msgBar.style.removeProperty('overflow');
@@ -1511,6 +1571,10 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.avatarWrapper.style.removeProperty('min-width');
         }
 
+        if (this.wordMark) {
+          this.wordMark.style.removeProperty('margin-left');
+        }
+
         // Delete plugin stylesheet
         this.pluginStyle?.parentNode?.removeChild(this.pluginStyle);
 
@@ -1525,6 +1589,8 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.channelListWidthObserver.disconnect();
         if (this.membersListWidthObserver)
           this.membersListWidthObserver.disconnect();
+        if (this.profilePanelWidthObserver)
+          this.profilePanelWidthObserver.disconnect();
 
       } catch (e) {
         console.warn('%c[CollapsibleUI] ' + '%cCould not successfully terminate \
@@ -1550,7 +1616,6 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.classTooltipDPE = 'tooltipDisablePointerEvents__14727';
       this.classTooltipPointer = 'tooltipPointer_a79354';
       this.classTooltipContent = 'tooltipContent__79a2d';
-      this.classTooltipLayerContainer = 'layerContainer_d5a653';
       this.classAppWrapper = 'app_de4237';
       this.classLayers = 'layers_a23c37';
       this.classChannelList = 'sidebar_ded4b5';
@@ -1562,6 +1627,13 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.classTextInput = '[data-slate-string="true"]';
       this.classNoChat = 'noChat_ce920d';
       this.classMsgButtons = 'wrapper_c727b6';
+      this.classEphemeralContent = 'content__23cab';
+      this.classUnreadDMBadge = 'numberBadge__50328';
+      this.classUnreadDmBadgeBase = 'base__92a12';
+      this.classUnreadDmBadgeEyebrow = 'eyebrow__60985';
+      this.classUnreadDmBadgeShape = 'baseShapeRound__95d0f';
+      this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop_ada847';
+
 
       if (BdApi.Plugins.isEnabled('ChannelDms')
         && document.querySelector('.ChannelDms-channelmembers-wrap')) {
@@ -1579,8 +1651,11 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.msgBar = document.querySelector('.form__13a2c');
       this.userArea = document.querySelector('.panels__58331');
       this.profilePanel = document.querySelector('.userPanelOuter__880e5');
+      this.profilePanelInner = document.querySelector('.userPanelInner_eddf4c')
+        ?.firstElementChild;
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);
+      this.profileBannerSVGWrapper = document.querySelector('.bannerSVGWrapper__3e7b0');
       this.membersList = document.querySelector('.' + this.classMembersList);
       this.serverList = document.querySelector('.' + this.classServerList);
       this.channelList = document.querySelector('.' + this.classChannelList);
@@ -1590,30 +1665,30 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.spotifyContainer = document.querySelector('.container_6sXIoE');
       this.appWrapper = document.querySelector('.app_b1f720');
       this.avatarWrapper = document.querySelector('.avatarWrapper_ba5175');
-      this.moreButton = this.toolBar.querySelector('[d="M7 12.001C7 10.8964 '
-        + '6.10457 10.001 5 10.001C3.89543 10.001 3 10.8964 3 12.001C3 13.1055 '
-        + '3.89543 14.001 5 14.001C6.10457 14.001 7 13.1055 7 12.001ZM14 '
-        + '12.001C14 10.8964 13.1046 10.001 12 10.001C10.8954 10.001 10 10.8964 '
-        + '10 12.001C10 13.1055 10.8954 14.001 12 14.001C13.1046 14.001 14 '
-        + '13.1055 14 12.001ZM19 10.001C20.1046 10.001 21 10.8964 21 12.001C21 '
-        + '13.1055 20.1046 14.001 19 14.001C17.8954 14.001 17 13.1055 17 '
-        + '12.001C17 10.8964 17.8954 10.001 19 10.001Z"]');
-      this.membersListButton = this.toolBar.querySelector('[d="M14 8.00598C14 '
-        + '10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 '
-        + '5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 '
-        + '8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 '
-        + '15.473 18 19.006V20.006H2V19.006Z"]')?.parentElement.parentElement;
-      this.profilePanelButton = this.toolBar.querySelector('[d="M12 22C12.4883 '
-        + '22 12.9684 21.965 13.438 21.8974C12.5414 20.8489 12 19.4877 12 18C12 '
-        + '17.6593 12.0284 17.3252 12.083 17H6V16.0244C6 14.0732 10 13 12 '
-        + '13C12.6215 13 13.436 13.1036 14.2637 13.305C15.2888 12.4882 16.5874 '
-        + '12 18 12C19.4877 12 20.8489 12.5414 21.8974 13.438C21.965 12.9684 22 '
-        + '12.4883 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 '
-        + '17.5228 6.47715 22 12 22ZM12 12C13.66 12 15 10.66 15 9C15 7.34 13.66 '
-        + '6 12 6C10.34 6 9 7.34 9 9C9 10.66 10.34 12 12 12Z"]')?.parentElement
-        .parentElement.parentElement;
-      this.fullscreenButton =
-        document.querySelector('[d="M19,3H14V5h5v5h2V5A2,2,0,0,0,19,3Z"]')
+      this.moreButton = this.toolBar.querySelector('[d="M4 14a2 2 0 1 0 0-4 2 2'
+        + ' 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 '
+        + '0 0 1 4 0Z"]');
+      this.membersListButton = this.toolBar.querySelector('[d="M14.5 8a3 3 0 1 '
+        + '0-2.7-4.3c-.2.4.06.86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM'
+        + '18.44 17.27c.15.43.54.73 1 .73h1.06c.83 0 1.5-.67 1.5-1.5a7.5 7.5 0 '
+        + '0 0-6.5-7.43c-.55-.08-.99.38-1.1.92-.06.3-.15.6-.26.87-.23.58-.05 1.'
+        + '3.47 1.63a9.53 9.53 0 0 1 3.83 4.78ZM12.5 9a3 3 0 1 1-6 0 3 3 0 0 1 '
+        + '6 0ZM2 20.5a7.5 7.5 0 0 1 15 0c0 .83-.67 1.5-1.5 1.5a.2.2 0 0 1-.2-.'
+        + '16c-.2-.96-.56-1.87-.88-2.54-.1-.23-.42-.15-.42.1v2.1a.5.5 0 0 1-.5.'
+        + '5h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-.1-.32.67-.67 1.58-.88 '
+        + '2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 20.5Z"]')?.parentElement.parentElement;
+      this.profilePanelButton = this.toolBar.querySelector('[d="M23 12.38c-.02.'
+        + '38-.45.58-.78.4a6.97 6.97 0 0 0-6.27-.08.54.54 0 0 1-.44 0 8.97 8.97'
+        + ' 0 0 0-11.16 3.55c-.1.15-.1.35 0 .5.37.58.8 1.13 1.28 1.61.24.24.64.'
+        + '15.8-.15.19-.38.39-.73.58-1.02.14-.21.43-.1.4.15l-.19 1.96c-.02.19.0'
+        + '7.37.23.47A8.96 8.96 0 0 0 12 21a.4.4 0 0 1 .38.27c.1.33.25.65.4.95.'
+        + '18.34-.02.76-.4.77L12 23a11 11 0 1 1 11-10.62ZM15.5 7.5a3.5 3.5 0 1 '
+        + '1-7 0 3.5 3.5 0 0 1 7 0Z"]')?.parentElement.parentElement;
+      this.fullscreenButton = document.querySelector('[d="M4 6c0-1.1.9-2 2-2h3a'
+        + '1 1 0 0 0 0-2H6a4 4 0 0 0-4 4v3a1 1 0 0 0 2 0V6ZM4 18c0 1.1.9 2 2 2h'
+        + '3a1 1 0 1 1 0 2H6a4 4 0 0 1-4-4v-3a1 1 0 1 1 2 0v3ZM18 4a2 2 0 0 1 2'
+        + ' 2v3a1 1 0 1 0 2 0V6a4 4 0 0 0-4-4h-3a1 1 0 1 0 0 2h3ZM20 18a2 2 0 0'
+        + ' 1-2 2h-3a1 1 0 1 0 0 2h3a4 4 0 0 0 4-4v-3a1 1 0 1 0-2 0v3Z"]')
         ?.parentElement.parentElement.parentElement;
       this.msgBarBtnContainer = document.querySelector('.buttons_ce5b56');
       this.membersListInner = document.querySelector('.members__9f47b');
@@ -1973,8 +2048,9 @@ https://programmer2514.github.io/?l=cui-changelog`
               clearTimeout(cui.panelDUDelay);
               cui.panelDUDelay = false;
             }
-            cui.profilePanel.style.maxWidth = cui.collapsedDistance + 'px';
-            cui.profilePanel.style.minWidth = '0px';
+            cui.profilePanel.style.transition = 'width ' + cui.transitionSpeed
+              + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+            cui.profilePanel.style.width = cui.collapsedDistance + 'px';
             cui.isCollapsed[cui.I_USER_PROFILE] = true;
           }
 
@@ -2322,10 +2398,11 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Create tooltip
       var newTooltip = document.createElement('div');
+      newTooltip.classList.add('collapsible-ui-element');
       newTooltip.classList.add(this.classTooltipWrapper);
       newTooltip.classList.add(this.classTooltipWrapperDPE);
-      newTooltip.classList.add('collapsible-ui-element');
       newTooltip.style.position = 'fixed';
+      newTooltip.style.zIndex = '10000';
       newTooltip.style.textAlign = 'center';
       newTooltip.innerHTML = `<div class="${this.classTooltip} `
         + `${this.classTooltipBottom} ${this.classTooltipPrimary} `
@@ -2333,9 +2410,8 @@ https://programmer2514.github.io/?l=cui-changelog`
         + `<div class="${this.classTooltipPointer}"></div>`
         + `<div class="${this.classTooltipContent}">${msg}</div></div>`;
 
-      // Insert tooltip into tooltip layer
-      document.querySelectorAll('.' + this.classTooltipLayerContainer)[1]
-        .appendChild(newTooltip);
+      // Insert tooltip into window
+      document.body.appendChild(newTooltip);
 
       // Get tooltip dimensions
       var ttwidth = newTooltip.getBoundingClientRect().width;
@@ -2350,6 +2426,90 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Return DOM element of newly-created tooltip
       return newTooltip;
+    }
+
+    // Sets the floating status of an element by index
+    floatElement = (index, floating) => {
+      switch (index) {
+      case 0: // I_SERVER_LIST
+        if (floating && this.floatingDynamicUncollapse) {
+          this.serverList.style.position = 'absolute';
+          this.serverList.style.zIndex = '191';
+          this.serverList.style.maxHeight = '100%';
+          this.serverList.style.overflowY = 'scroll';
+        } else {
+          this.serverList.style.removeProperty('position');
+          this.serverList.style.removeProperty('z-index');
+          this.serverList.style.removeProperty('max-height');
+          this.serverList.style.removeProperty('overflow-y');
+        }
+        break;
+
+      case 1: // I_CHANNEL_LIST
+        if (floating && this.floatingDynamicUncollapse) {
+          this.channelList.style.position = 'absolute';
+          this.channelList.style.zIndex = '190';
+          this.channelList.style.maxHeight = '100%';
+          this.channelList.style.height = '100%';
+        } else {
+          this.channelList.style.removeProperty('position');
+          this.channelList.style.removeProperty('z-index');
+          this.channelList.style.removeProperty('max-height');
+          this.channelList.style.removeProperty('height');
+        }
+        break;
+
+      case 2: // I_MSG_BAR
+        // Element is unable to be properly floated
+        break;
+
+      case 3: // I_WINDOW_BAR
+        // Floating this element doesn't make sense
+        break;
+
+      case 4: // I_MEMBERS_LIST
+        if (floating && this.floatingDynamicUncollapse) {
+          this.membersList.style.position = 'absolute';
+          this.membersList.style.zIndex = '190';
+          this.membersList.style.maxHeight = '100%';
+          this.membersList.style.height = '100%';
+          this.membersList.style.right = '0';
+        } else {
+          this.membersList.style.removeProperty('position');
+          this.membersList.style.removeProperty('z-index');
+          this.membersList.style.removeProperty('max-height');
+          this.membersList.style.removeProperty('height');
+          this.membersList.style.removeProperty('right');
+        }
+        break;
+
+      case 5: // I_USER_AREA
+        // Element already floats
+        break;
+
+      case 6: // I_CALL_CONTAINER
+        // Element already floats
+        break;
+
+      case 7: // I_USER_PROFILE
+        if (floating && this.floatingDynamicUncollapse) {
+          this.profilePanel.style.position = 'absolute';
+          this.profilePanel.style.zIndex = '190';
+          this.profilePanel.style.maxHeight = '100%';
+          this.profilePanel.style.height = '100%';
+          this.profilePanel.style.right = '0';
+        } else {
+          this.profilePanel.style.removeProperty('position');
+          this.profilePanel.style.removeProperty('z-index');
+          this.profilePanel.style.removeProperty('max-height');
+          this.profilePanel.style.removeProperty('height');
+          this.profilePanel.style.removeProperty('right');
+        }
+        break;
+
+      default:
+        break;
+      }
     }
 
     // Returns a JSON object from a specified URL
@@ -2773,8 +2933,9 @@ https://programmer2514.github.io/?l=cui-changelog`
           // This is intentional, as it maintains the user's preferences throughout transitions
           // This in turn prevents collapsed elements from "jumping" while the plugin reloads
           if (mutationList.length > cui.MAX_ITER_MUTATIONS) {
-            // Prevent UI jumping when user presses Shift
-            if (!mutationList[0].target.classList.contains(cui.classMsgButtons))
+            // Prevent UI jumping when user presses Shift or unimportant data is reloaded
+            if ((!mutationList[0].target.classList.contains(cui.classMsgButtons))
+              && (!mutationList[0].target.classList.contains(cui.classEphemeralContent)))
               cui.initialize();
             return;
           }
@@ -2788,6 +2949,7 @@ https://programmer2514.github.io/?l=cui-changelog`
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classServerList)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersList)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersListWrapper)
+               || mutationList[i].addedNodes[0]?.classList?.contains(cui.classProfilePanel)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classProfilePanelWrapper)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classCallContainer)
                || mutationList[i].removedNodes[0]?.classList?.contains(cui.classCallContainer)) {
@@ -2799,6 +2961,12 @@ https://programmer2514.github.io/?l=cui-changelog`
           // If mutations are noncritical, just update autocollapse conditionals
           if (cui.dynamicUncollapse && !cui.disableTransitions)
             cui.applyAutocollapseConditionals();
+
+          // Update DM badge
+          if (this.persistentUnreadBadge)
+            this.updateDMBadge();
+          else
+            this.updateDMBadge(true);
 
         } catch (e) {
           console.warn('%c[CollapsibleUI] ' + '%cFailed to trigger \
@@ -2826,6 +2994,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.enableFullToolbarCollapse = false;
 
       this.dynamicUncollapse = true;
+      this.floatingDynamicUncollapse = true;
       this.dynamicUncollapseDistance = [30, 30, 30, 30, 30, 30, 30, 30];
       this.dynamicUncollapseCloseDistance = [30, 30, 30, 30, 30, 30, 30, 30];
       this.dynamicUncollapseDelay = 15;
@@ -2837,8 +3006,10 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       this.resizableChannelList = true;
       this.resizableMembersList = true;
+      this.resizableUserProfile = true;
       this.channelListWidth = 0;
       this.membersListWidth = 0;
+      this.profilePanelWidth = 0;
 
       this.buttonsOrder = [1, 2, 4, 6, 7, 3, 5, 8];
       this.dynamicUncollapseEnabled = [true, true, true, true, true, true, true, true];
@@ -2851,13 +3022,14 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.messageBarButtonsMaxWidth = 200;
       this.messageBarButtonsMinWidth = 40;
       this.toolbarIconMaxWidth = 300;
-      this.profilePanelMaxWidth = 340;
       this.toolbarMaxWidth = 800;
       this.userAreaMaxHeight = 300;
       this.msgBarMaxHeight = 400;
       this.windowBarHeight = 18;
       this.collapsedDistance = 0;
       this.buttonCollapseFudgeFactor = 10;
+
+      this.persistentUnreadBadge = true;
 
       // Make sure settings version is set
       if (!BdApi.getData('CollapsibleUI', 'cuiSettingsVersion'))
@@ -2944,9 +3116,13 @@ https://programmer2514.github.io/?l=cui-changelog`
       if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 10) {
         // Clean up (v10)
         BdApi.deleteData('CollapsibleUI', 'membersListMaxWidth');
+      }
+      if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 11) {
+        // Clean up (v11)
+        BdApi.deleteData('CollapsibleUI', 'profilePanelMaxWidth');
 
         // Set new settings version
-        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '10');
+        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '11');
       }
 
       // disableTransitions [Default: false]
@@ -3002,6 +3178,14 @@ https://programmer2514.github.io/?l=cui-changelog`
         this.dynamicUncollapse = true;
       else
         BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
+
+      // floatingDynamicUncollapse [Default: true]
+      if (BdApi.getData('CollapsibleUI', 'floatingDynamicUncollapse') === 'false')
+        this.floatingDynamicUncollapse = false;
+      else if (BdApi.getData('CollapsibleUI', 'floatingDynamicUncollapse') === 'true')
+        this.floatingDynamicUncollapse = true;
+      else
+        BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'true');
 
       // dynamicUncollapseDistance [Default: [30, 30, 30, 30, 30, 30, 30, 30]]
       if (typeof(BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')) === 'string') {
@@ -3099,6 +3283,14 @@ https://programmer2514.github.io/?l=cui-changelog`
       else
         BdApi.setData('CollapsibleUI', 'resizableMembersList', 'true');
 
+      // resizableUserProfile [Default: true]
+      if (BdApi.getData('CollapsibleUI', 'resizableUserProfile') === 'false')
+        this.resizableUserProfile = false;
+      else if (BdApi.getData('CollapsibleUI', 'resizableUserProfile') === 'true')
+        this.resizableUserProfile = true;
+      else
+        BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'true');
+
       // channelListWidth [Default: 0]
       if (typeof(BdApi.getData('CollapsibleUI', 'channelListWidth')) === 'string')
         this.channelListWidth = parseInt(BdApi.getData('CollapsibleUI',
@@ -3112,8 +3304,16 @@ https://programmer2514.github.io/?l=cui-changelog`
         this.membersListWidth = parseInt(BdApi.getData('CollapsibleUI',
           'membersListWidth'));
       else
-        BdApi.setData('CollapsibleUI', 'channelListWidth',
-          this.channelListWidth.toString());
+        BdApi.setData('CollapsibleUI', 'membersListWidth',
+          this.membersListWidth.toString());
+
+      // profilePanelWidth [Default: 0]
+      if (typeof(BdApi.getData('CollapsibleUI', 'profilePanelWidth')) === 'string')
+        this.profilePanelWidth = parseInt(BdApi.getData('CollapsibleUI',
+          'profilePanelWidth'));
+      else
+        BdApi.setData('CollapsibleUI', 'profilePanelWidth',
+          this.profilePanelWidth.toString());
 
       // buttonsOrder [Default: [1, 2, 4, 6, 7, 3, 5, 8]]
       if (typeof(BdApi.getData('CollapsibleUI', 'buttonsOrder')) === 'string') {
@@ -3207,14 +3407,6 @@ https://programmer2514.github.io/?l=cui-changelog`
         BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth',
           this.toolbarIconMaxWidth.toString());
 
-      // profilePanelMaxWidth [Default: 340]
-      if (typeof(BdApi.getData('CollapsibleUI', 'profilePanelMaxWidth')) === 'string')
-        this.profilePanelMaxWidth = parseInt(BdApi.getData('CollapsibleUI',
-          'profilePanelMaxWidth'));
-      else
-        BdApi.setData('CollapsibleUI', 'profilePanelMaxWidth',
-          this.profilePanelMaxWidth.toString());
-
       // toolbarMaxWidth [Default: 800]
       if (typeof(BdApi.getData('CollapsibleUI', 'toolbarMaxWidth')) === 'string')
         this.toolbarMaxWidth = parseInt(BdApi.getData('CollapsibleUI',
@@ -3262,6 +3454,14 @@ https://programmer2514.github.io/?l=cui-changelog`
       else
         BdApi.setData('CollapsibleUI', 'buttonCollapseFudgeFactor',
           this.buttonCollapseFudgeFactor.toString());
+
+      // persistentUnreadBadge [Default: true]
+      if (BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'false')
+        this.persistentUnreadBadge = false;
+      else if (BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'true')
+        this.persistentUnreadBadge = true;
+      else
+        BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'true');
     }
 
     // Initializes integration with various themes
@@ -3299,6 +3499,11 @@ https://programmer2514.github.io/?l=cui-changelog`
     // Creates and inserts CollapsibleUI toolbar
     initToolbar = () => {
       // Define & add toolbar container
+      // Original icon sources:
+      //   - Discord (Some icons are identical to their vanilla counterparts)
+      //   - Bootstrap Icons: https://icons.getbootstrap.com/
+      //   - Jam Icons: https://jam-icons.com/
+      // Icons modified to fit Discord's theme by me
       this.toolbarContainer = document.createElement('div');
       this.toolbarContainer.setAttribute('id', 'cui-toolbar-container');
       this.toolbarContainer.classList.add('collapsible-ui-element');
@@ -3327,19 +3532,16 @@ https://programmer2514.github.io/?l=cui-changelog`
       }
 
       // Define & add new toolbar icons
-      // Icons are part of the Bootstrap Icons library, which can be found at https://icons.getbootstrap.com/
       var buttonsActive = this.buttonsOrder;
       for (var i = 1; i <= this.buttonsOrder.length; i++) { // lgtm[js/unused-index-variable]
         if (i == this.buttonsOrder[this.I_SERVER_LIST]) {
           if (this.buttonsOrder[this.I_SERVER_LIST]) {
             this.serverListButton = this.addToolbarIcon(this.localeLabels.serverList,
-              '<path fill="currentColor" d="M-3.429,0.857C-3.429-0.72-2.149-2-0.'
-              + '571-2h17.143c1.578,0,2.857,1.28,2.857,2.857v14.286c0,1.578-1.'
-              + '279,2.857-2.857,2.857H-0.571c-1.578,0-2.857-1.279-2.857-2.857V0.'
-              + '857z M3.714-0.571v17.143h12.857c0.789,0,1.429-0.64,1.429-1.429V0.'
-              + '857c0-0.789-0.64-1.428-1.429-1.428H3.714z M2.286-0.571h-2.857C-1.'
-              + '36-0.571-2,0.068-2,0.857v14.286c0,0.789,0.64,1.429,1.429,1.429h2.'
-              + '857V-0.571z"/>', '-4 -4 24 24');
+              '<path fill="currentColor" d="M18.9,2.5H5.1C2.8,2.5,1,4.3,1,6.6v1'
+              + '0.8c0,2.3,1.8,4.1,4.1,4.1h13.7c2.3,0,4.1-1.8,4.1-4.1V6.6C23,4.'
+              + '3,21.2,2.5,18.9,2.5z M21.6,17.4c0,1.5-1.2,2.7-2.8,2.7H8.3c-1.5'
+              + ',0-2.7-1.2-2.7-2.7V6.6c0-1.5,1.2-2.7,2.8-2.7h10.5c1.5,0,2.8,1.'
+              + '2,2.8,2.7V17.4z"/>', '0 0 24 24');
           } else {
             this.serverListButton = false;
             buttonsActive[this.I_SERVER_LIST] = 0;
@@ -3348,17 +3550,21 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (i == this.buttonsOrder[this.I_CHANNEL_LIST]) {
           if (this.buttonsOrder[this.I_CHANNEL_LIST]) {
             this.channelListButton = this.addToolbarIcon(this.localeLabels.channelList,
-              '<path fill="currentColor" d="M3.5,13.5c0-0.414,0.335-0.75,0.75-0.'
-              + '75h13.5c0.414,0,0.75,0.336,0.75,0.75s-0.336,0.75-0.75,0.75H4.'
-              + '25C3.835,14.25,3.5,13.914,3.5,13.5z M3.5,7.5c0-0.415,0.335-0.'
-              + '75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.75-0.'
-              + '75,0.75H4.25C3.835,8.25,3.5,7.915,3.5,7.5z M3.5,1.5c0-0.415,0.'
-              + '335-0.75,0.75-0.75h13.5c0.414,0,0.75,0.335,0.75,0.75s-0.336,0.'
-              + '75-0.75,0.75H4.25C3.835,2.25,3.5,1.915,3.5,1.5z M-1,3c0.828,0,1.'
-              + '5-0.672,1.5-1.5S-0.172,0-1,0s-1.5,0.672-1.5,1.5S-1.828,3-1,3z '
-              + 'M-1,9c0.828,0,1.5-0.672,1.5-1.5S-0.172,6-1,6s-1.5,0.672-1.5,1.'
-              + '5S-1.828,9-1,9z M-1,15c0.828,0,1.5-0.671,1.5-1.5S-0.172,12-1,'
-              + '12s-1.5,0.671-1.5,1.5S-1.828,15-1,15z"/>', '-4 -4 24 24');
+              '<path fill="currentColor" d="M4.1,12c0,0.9-0.7,1.6-1.6,1.6S1,12.'
+              + '9,1,12s0.7-1.6,1.6-1.6S4.1,11.1,4.1,12z M2.6,16.4c-0.9,0-1.6,0'
+              + '.7-1.6,1.6c0,0.9,0.7,1.6,1.6,1.6s1.6-0.7,1.6-1.6C4.1,17.1,3.4,'
+              + '16.4,2.6,16.4z M2.6,4.5C1.7,4.5,1,5.2,1,6.1s0.7,1.6,1.6,1.6s1.'
+              + '6-0.7,1.6-1.6S3.4,4.5,2.6,4.5z M7.4,7C7.5,7,7.5,7,7.4,7C7.5,7,'
+              + '7.5,7,7.4,7H22c0,0,0,0,0,0c0,0,0,0,0,0c0.6,0,1-0.4,1-1c0-0.5-0'
+              + '.4-1-1-1c0,0,0,0,0,0c0,0,0,0,0,0H7.5c0,0,0,0,0,0c0,0,0,0,0,0c-'
+              + '0.6,0-1,0.4-1,1C6.4,6.6,6.9,7,7.4,7z M7.4,13C7.5,13,7.5,13,7.4'
+              + ',13C7.5,13,7.5,13,7.4,13h9c0,0,0,0,0,0c0,0,0,0,0,0c0.6,0,1-0.4'
+              + ',1-1c0-0.5-0.4-1-1-1c0,0,0,0,0,0c0,0,0,0,0,0H7.5c0,0,0,0,0,0c0'
+              + ',0,0,0,0,0c-0.6,0-1,0.4-1,1C6.4,12.5,6.9,13,7.4,13z M7.4,18.9C'
+              + '7.5,18.9,7.5,18.9,7.4,18.9C7.5,18.9,7.5,18.9,7.4,18.9l12.4,0c0'
+              + ',0,0,0,0,0c0,0,0,0,0,0c0.6,0,1-0.4,1-1c0-0.5-0.4-1-1-1c0,0,0,0'
+              + ',0,0c0,0,0,0,0,0L7.5,17c0,0,0,0,0,0c0,0,0,0,0,0c-0.6,0-1,0.4-1'
+              + ',1C6.4,18.5,6.9,18.9,7.4,18.9z"/>', '0 0 24 24');
           } else {
             this.channelListButton = false;
             buttonsActive[this.I_CHANNEL_LIST] = 0;
@@ -3367,26 +3573,25 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (i == this.buttonsOrder[this.I_MSG_BAR]) {
           if (this.buttonsOrder[this.I_MSG_BAR] && this.msgBar) {
             this.msgBarButton = this.addToolbarIcon(this.localeLabels.msgBar,
-              '<path fill="currentColor" d="M7.5,3c0-0.415,0.335-0.75,0.75-0.75c1.'
-              + '293,0,2.359,0.431,3.09,0.85c0.261,0.147,0.48,0.296,0.66,0.428c0.'
-              + '178-0.132,0.398-0.28,0.66-0.428c0.939-0.548,2.002-0.841,3.09-0.'
-              + '85c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.75,0.75c-0.'
-              + '959,0-1.766,0.319-2.348,0.65c-0.229,0.132-0.446,0.278-0.652,0.'
-              + '442v6.407h0.75c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.336,0.75-0.'
-              + '75,0.75h-0.75v6.407c0.148,0.12,0.371,0.281,0.652,0.442c0.582,0.'
-              + '331,1.389,0.65,2.348,0.65c0.414,0,0.75,0.335,0.75,0.75c0,0.414-0.'
-              + '336,0.75-0.75,0.75c-1.088-0.01-2.15-0.302-3.09-0.85c-0.229-0.'
-              + '129-0.449-0.271-0.66-0.425c-0.212,0.155-0.433,0.297-0.66,0.428c-0.'
-              + '939,0.546-2.004,0.837-3.09,0.848c-0.415,0-0.75-0.335-0.75-0.75c0-0.'
-              + '414,0.335-0.75,0.75-0.75c0.957,0,1.765-0.319,2.346-0.651c0.281-0.'
-              + '16,0.502-0.319,0.654-0.439v-6.41H10.5c-0.415,0-0.75-0.336-0.75-0.'
-              + '75c0-0.415,0.335-0.75,0.75-0.75h0.75V4.843c-0.207-0.164-0.426-0.'
-              + '311-0.654-0.442C9.884,3.984,9.075,3.759,8.25,3.75C7.835,3.75,7.5,3.'
-              + '414,7.5,3z"/><path fill="currentColor" d="M15,7.5h6c0.828,0,1.5,0.'
-              + '671,1.5,1.5v6c0,0.829-0.672,1.5-1.5,1.5h-6V18h6c1.656,0,3-1.344,'
-              + '3-3V9c0-1.657-1.344-3-3-3h-6V7.5z M9,7.5V6H3C1.343,6,0,7.343,0,'
-              + '9v6c0,1.656,1.343,3,3,3h6v-1.5H3c-0.829,0-1.5-0.671-1.5-1.5V9c0-0.'
-              + '829,0.671-1.5,1.5-1.5H9z"/>', '0 0 24 24');
+              '<path fill="currentColor" d="M7.5,3c0-0.4,0.3-0.8,0.8-0.8c1.3,0,'
+              + '2.4,0.4,3.1,0.8c0.3,0.1,0.5,0.3,0.7,0.4c0.2-0.1,0.4-0.3,0.7-0.'
+              + '4c0.9-0.5,2-0.8,3.1-0.8c0.4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.'
+              + '8,0.8c-1,0-1.8,0.3-2.3,0.7c-0.2,0.1-0.4,0.3-0.7,0.4v6.4h0.8c0.'
+              + '4,0,0.8,0.3,0.8,0.8c0,0.4-0.3,0.8-0.8,0.8h-0.8v6.4c0.1,0.1,0.4'
+              + ',0.3,0.7,0.4c0.6,0.3,1.4,0.6,2.3,0.6c0.4,0,0.8,0.3,0.8,0.8c0,0'
+              + '.4-0.3,0.8-0.8,0.8c-1.1,0-2.1-0.3-3.1-0.9c-0.2-0.1-0.4-0.3-0.7'
+              + '-0.4c-0.2,0.2-0.4,0.3-0.7,0.4c-0.9,0.5-2,0.8-3.1,0.8c-0.4,0-0.'
+              + '8-0.3-0.8-0.8c0-0.4,0.3-0.8,0.8-0.8c1,0,1.8-0.3,2.3-0.7c0.3-0.'
+              + '2,0.5-0.3,0.7-0.4v-6.4h-0.8c-0.4,0-0.8-0.3-0.8-0.8c0-0.4,0.3-0'
+              + '.8,0.8-0.8h0.8V4.8c-0.2-0.2-0.4-0.3-0.7-0.4C9.9,4,9.1,3.8,8.2,'
+              + '3.8C7.8,3.8,7.5,3.4,7.5,3z"/><path fill="currentColor" d="M15.'
+              + '7,7.5h4.5c1.2,0,2.2,1,2.2,2.2v4.5c0,1.2-1,2.2-2.2,2.2h-4.5c-0.'
+              + '4,0-0.7,0.3-0.7,0.8l0,0c0,0.4,0.3,0.8,0.7,0.8h4.5c2.1,0,3.8-1.'
+              + '7,3.8-3.7V9.7C24,7.7,22.3,6,20.2,6h-4.5C15.3,6,15,6.3,15,6.7v0'
+              + 'C15,7.2,15.3,7.5,15.7,7.5z M9,6.8L9,6.8C9,6.3,8.7,6,8.3,6H3.7C'
+              + '1.7,6,0,7.7,0,9.7v4.5C0,16.3,1.7,18,3.7,18h4.5C8.7,18,9,17.7,9'
+              + ',17.2l0,0c0-0.4-0.3-0.8-0.7-0.8H3.7c-1.2,0-2.2-1-2.2-2.2V9.7c0'
+              + '-1.2,1-2.2,2.2-2.2h4.5C8.7,7.5,9,7.2,9,6.8z"/>', '0 0 24 24');
           } else {
             this.msgBarButton = false;
             buttonsActive[this.I_MSG_BAR] = 0;
@@ -3397,20 +3602,20 @@ https://programmer2514.github.io/?l=cui-changelog`
             && !(BdApi.Plugins.isEnabled('OldTitleBar'))) {
 
             this.windowBarButton = this.addToolbarIcon(this.localeLabels.windowBar,
-              '<path fill="currentColor" d="M0.143,2.286c0.395,0,0.714-0.319,0.'
-              + '714-0.714c0-0.395-0.319-0.714-0.714-0.714c-0.395,0-0.714,0.32-0.'
-              + '714,0.714C-0.571,1.966-0.252,2.286,0.143,2.286z M3,1.571c0,0.'
-              + '395-0.319,0.714-0.714,0.714c-0.395,0-0.714-0.319-0.714-0.714c0-0.'
-              + '395,0.32-0.714,0.714-0.714C2.681,0.857,3,1.177,3,1.571z M4.429,2.'
-              + '286c0.395,0,0.714-0.319,0.714-0.714c0-0.395-0.32-0.714-0.714-0.'
-              + '714c-0.395,0-0.714,0.32-0.714,0.714C3.714,1.966,4.034,2.286,4.'
-              + '429,2.286z"/><path fill="currentColor" d="M-0.571-2c-1.578,0-2.'
-              + '857,1.279-2.857,2.857v14.286c0,1.578,1.279,2.857,2.857,2.857h17.'
-              + '143c1.577,0,2.857-1.279,2.857-2.857V0.857c0-1.578-1.28-2.857-2.'
-              + '857-2.857H-0.571z M18,0.857v2.857H-2V0.857c0-0.789,0.64-1.428,1.'
-              + '429-1.428h17.143C17.361-0.571,18,0.068,18,0.857z M-0.571,16.'
-              + '571C-1.36,16.571-2,15.933-2,15.143v-10h20v10c0,0.79-0.639,1.'
-              + '429-1.429,1.429H-0.571z"/>', '-4 -4 24 24');
+              '<path fill="currentColor" d="M22.3,4.3C22,3.8,21.5,3.4,21,3.1c-0'
+              + '.6-0.4-1.4-0.6-2.2-0.6H5.1C4.3,2.5,3.6,2.7,3,3.1C2.6,3.3,2.2,3'
+              + '.6,1.9,4C1.3,4.7,1,5.6,1,6.6v10.9c0,2.2,1.8,4.1,4.1,4.1h13.7c2'
+              + '.3,0,4.1-1.8,4.1-4.1V6.6C23,5.7,22.8,5,22.3,4.3z M10.5,3.6c0.5'
+              + ',0,0.9,0.4,0.9,0.9c0,0.5-0.4,0.9-0.9,0.9c-0.5,0-1-0.4-1-0.9C9.'
+              + '5,4,9.9,3.6,10.5,3.6z M7.6,3.6c0.5,0,0.9,0.4,0.9,0.9c0,0.5-0.4'
+              + ',0.9-0.9,0.9c-0.5,0-1-0.4-1-0.9C6.7,4,7.1,3.6,7.6,3.6z M4.8,3.'
+              + '6c0.5,0,1,0.4,1,0.9c0,0.5-0.4,0.9-1,0.9c-0.5,0-0.9-0.4-0.9-0.9'
+              + 'C3.9,4,4.3,3.6,4.8,3.6z M21.6,17.4c0,0.7-0.3,1.4-0.8,1.9c-0.1,'
+              + '0.1-0.1,0.1-0.2,0.2c-0.1,0.1-0.1,0.1-0.2,0.2c-0.2,0.2-0.5,0.3-'
+              + '0.7,0.3c-0.3,0.1-0.5,0.1-0.8,0.1H5.1c-0.3,0-0.6,0-0.8-0.1c-0.3'
+              + '-0.1-0.5-0.2-0.7-0.3c-0.1,0-0.2-0.1-0.2-0.2c-0.1-0.1-0.1-0.1-0'
+              + '.2-0.2c-0.5-0.5-0.8-1.2-0.8-1.9V9.3c0-1.5,1.2-2.8,2.8-2.8h13.8'
+              + 'c1.5,0,2.7,1.2,2.7,2.7V17.4z"/>', '0 0 24 24');
           } else {
             this.windowBarButton = false;
             buttonsActive[this.I_WINDOW_BAR] = 0;
@@ -3419,15 +3624,16 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (i == this.buttonsOrder[this.I_MEMBERS_LIST]) {
           if (this.buttonsOrder[this.I_MEMBERS_LIST] && this.membersList) {
             this.membersListButton = this.addToolbarIcon(this.localeLabels.membersList,
-              '<path fill="currentColor" d="M6.5,17c0,0-1.5,0-1.5-1.5s1.5-6,7.'
-              + '5-6s7.5,4.5,7.5,6S18.5,17,18.5,17H6.5z M12.5,8C14.984,8,17,5.'
-              + '985,17,3.5S14.984-1,12.5-1S8,1.015,8,3.5S10.016,8,12.5,8z"/>'
-              + '<path fill="currentColor" d="M3.824,17C3.602,16.531,3.49,16.'
-              + '019,3.5,15.5c0-2.033,1.021-4.125,2.904-5.58C5.464,9.631,4.483,9.'
-              + '488,3.5,9.5c-6,0-7.5,4.5-7.5,6S-2.5,17-2.5,17H3.824z"/>'
-              + '<path fill="currentColor" d="M2.75,8C4.821,8,6.5,6.321,6.5,4.'
-              + '25S4.821,0.5,2.75,0.5S-1,2.179-1,4.25S0.679,8,2.75,8z"/>',
-              '-4 -4 24 24');
+              '<path fill="currentColor" d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.'
+              + '86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM18.44 17.27c.'
+              + '15.43.54.73 1 .73h1.06c.83 0 1.5-.67 1.5-1.5a7.5 7.5 0 0 0-6.5'
+              + '-7.43c-.55-.08-.99.38-1.1.92-.06.3-.15.6-.26.87-.23.58-.05 1.3'
+              + '.47 1.63a9.53 9.53 0 0 1 3.83 4.78ZM12.5 9a3 3 0 1 1-6 0 3 3 0'
+              + ' 0 1 6 0ZM2 20.5a7.5 7.5 0 0 1 15 0c0 .83-.67 1.5-1.5 1.5a.2.2'
+              + ' 0 0 1-.2-.16c-.2-.96-.56-1.87-.88-2.54-.1-.23-.42-.15-.42.1v2'
+              + '.1a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-'
+              + '.1-.32.67-.67 1.58-.88 2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 '
+              + '20.5Z"/>', '0 0 24 24');
           } else {
             this.membersListButton = false;
             buttonsActive[this.I_MEMBERS_LIST] = 0;
@@ -3436,17 +3642,18 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (i == this.buttonsOrder[this.I_USER_AREA]) {
           if (this.buttonsOrder[this.I_USER_AREA] && this.userArea) {
             this.userAreaButton = this.addToolbarIcon(this.localeLabels.userArea,
-              '<path fill="currentColor" d="M-2.5,4.25c-0.829,0-1.5,0.672-1.5,1.'
-              + '5v4.5c0,0.829,0.671,1.5,1.5,1.5h21c0.83,0,1.5-0.671,1.5-1.5v-4.'
-              + '5 c0-0.828-0.67-1.5-1.5-1.5H-2.5z M14.75,5.75c0.415,0,0.75,0.'
-              + '335,0.75,0.75s-0.335,0.75-0.75,0.75S14,6.915,14,6.5 S14.335,5.'
-              + '75,14.75,5.75z M17.75,5.75c0.415,0,0.75,0.335,0.75,0.75s-0.335,'
-              + '0.75-0.75,0.75S17,6.915,17,6.5S17.335,5.75,17.75,5.75z M-2.5,6.'
-              + '5c0-0.415,0.335-0.75,0.75-0.75h7.5c0.415,0,0.75,0.335,0.75,0.'
-              + '75S6.165,7.25,5.75,7.25h-7.5 C-2.165,7.25-2.5,6.915-2.5,6.5z '
-              + 'M-2.125,8.75h8.25C6.333,8.75,6.5,8.917,6.5,9.125S6.333,9.5,6.'
-              + '125,9.5h-8.25 C-2.333,9.5-2.5,9.333-2.5,9.125S-2.333,8.75-2.'
-              + '125,8.75z"/>', '-4 -4 24 24');
+              '<path fill="currentColor" d="M21.2,7.6H2.8C1.3,7.6,0,8.8,0,10.3v'
+              + '3.3c0,1.5,1.3,2.8,2.8,2.8h18.4c1.5,0,2.8-1.3,2.8-2.8v-3.3C24,8'
+              + '.8,22.7,7.6,21.2,7.6z M17.4,10.7c0.7,0,1.3,0.6,1.3,1.3s-0.6,1.'
+              + '3-1.3,1.3s-1.3-0.6-1.3-1.3S16.7,10.7,17.4,10.7z M3.9,10.1c1.1,'
+              + '0,1.9,0.9,1.9,1.9S5,13.9,3.9,13.9S2,13.1,2,12S2.9,10.1,3.9,10.'
+              + '1z M20.7,10.7c0.7,0,1.3,0.6,1.3,1.3s-0.6,1.3-1.3,1.3s-1.3-0.6-'
+              + '1.3-1.3S20,10.7,20.7,10.7z M6.5,10.8C6.5,10.8,6.5,10.8,6.5,10.'
+              + '8c0-0.4,0.3-0.7,0.8-0.7h6.3c0.4,0,0.7,0.3,0.8,0.7c0,0,0,0,0,0v'
+              + '0c0,0.4-0.3,0.8-0.8,0.8H7.2C6.8,11.6,6.5,11.2,6.5,10.8L6.5,10.'
+              + '8z M7.2,12.4h6.3c0.4,0,0.8,0.3,0.8,0.8c0,0,0,0,0,0.1c0,0.4-0.4'
+              + ',0.7-0.7,0.7H7.2c-0.4,0-0.7-0.3-0.7-0.7c0,0,0,0,0-0.1C6.5,12.8'
+              + ',6.8,12.4,7.2,12.4z"/>', '0 0 24 24');
           } else {
             this.userAreaButton = false;
             buttonsActive[this.I_USER_AREA] = 0;
@@ -3457,23 +3664,15 @@ https://programmer2514.github.io/?l=cui-changelog`
             && document.querySelector('.' + this.classCallContainer)) {
 
             this.callContainerButton = this.addToolbarIcon(this.localeLabels.callContainer,
-              '<path fill="currentColor" d="M2.567-0.34c-0.287-0.37-0.82-0.436-1.'
-              + '189-0.149c-0.028,0.021-0.055,0.045-0.079,0.07L0.006,0.875C-0.597,'
-              + '1.48-0.82,2.336-0.556,3.087c1.095,3.11,2.875,5.933,5.21,8.259c2.'
-              + '328,2.336,5.15,4.116,8.26,5.21c0.752,0.264,1.606,0.042,2.212-0.'
-              + '562l1.292-1.294c0.332-0.329,0.332-0.866,0.002-1.196c-0.024-0.'
-              + '026-0.052-0.049-0.08-0.07l-2.884-2.244c-0.205-0.158-0.474-0.'
-              + '215-0.725-0.151l-2.737,0.684c-0.744,0.186-1.53-0.032-2.071-0.'
-              + '573l-3.07-3.072C4.311,7.536,4.092,6.75,4.278,6.007l0.685-2.738C5'
-              + '.026,3.017,4.97,2.75,4.81,2.543L2.567-0.34z M0.354-1.361c0.'
-              + '852-0.852,2.234-0.852,3.085,0C3.504-1.297,3.564-1.229,3.62-1.'
-              + '158l2.242,2.883c0.412,0.529,0.557,1.218,0.394,1.868L5.573,6.33C5.'
-              + '501,6.618,5.585,6.923,5.795,7.134l3.071,3.071c0.21,0.21,0.516,0.'
-              + '295,0.806,0.222l2.734-0.684c0.651-0.161,1.34-0.017,1.868,0.395l2.'
-              + '883,2.242c1.035,0.806,1.131,2.338,0.204,3.264l-1.293,1.292c-0.'
-              + '925,0.925-2.307,1.332-3.596,0.879c-3.299-1.162-6.293-3.05-8.'
-              + '763-5.525C1.234,9.82-0.654,6.826-1.815,3.527C-2.267,2.24-1.'
-              + '861,0.856-0.936-0.069l1.292-1.292H0.354z"/>', '-4 -4 24 24');
+              '<path fill="currentColor" d="M20.7,16.2c-0.1-0.1-0.2-0.2-0.3-0.'
+              + '2c-0.5-0.4-1-0.8-1.6-1.1l-0.3-0.2c-0.7-0.5-1.3-0.7-1.8-0.7c-0.'
+              + '8,0-1.4,0.4-2,1.2c-0.2,0.4-0.5,0.5-0.9,0.5c-0.3,0-0.5-0.1-0.7-'
+              + '0.2c-2.2-1-3.7-2.5-4.6-4.4C8,10.2,8.2,9.5,8.9,9c0.4-0.3,1.2-0.'
+              + '8,1.2-1.8C10,6,7.4,2.5,6.3,2.1C5.9,2,5.4,2,4.9,2.1C3.7,2.5,2.8'
+              + ',3.3,2.3,4.2c-0.4,0.9-0.4,2,0.1,3.2C3.7,10.7,5.6,13.6,8,16c2.4'
+              + ',2.3,5.2,4.2,8.6,5.7c0.3,0.1,0.6,0.2,0.9,0.3c0.1,0,0.1,0,0.2,0'
+              + 'c0,0,0.1,0,0.1,0h0c1.6,0,3.5-1.4,4.1-3.1C22.4,17.5,21.4,16.8,'
+              + '20.7,16.2z"/>', '0 0 24 24');
           } else {
             this.callContainerButton = false;
             buttonsActive[this.I_CALL_CONTAINER] = 0;
@@ -3482,10 +3681,15 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (i == this.buttonsOrder[this.I_USER_PROFILE]) {
           if (this.buttonsOrder[this.I_USER_PROFILE] && this.profilePanel) {
             this.profilePanelButton = this.addToolbarIcon(this.localeLabels.profilePanel,
-              '<path fill="currentColor" d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>'
-              + '<path fill="currentColor" fill-rule="evenodd" d="M0 8a8 8 0 1 1 '
-              + '16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 '
-              + '10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>', '-1 -1 18 18');
+              '<path fill="currentColor" fill-rule="evenodd" d="M23 12.38c-.02.'
+              + '38-.45.58-.78.4a6.97 6.97 0 0 0-6.27-.08.54.54 0 0 1-.44 0 8.97'
+              + ' 8.97 0 0 0-11.16 3.55c-.1.15-.1.35 0 .5.37.58.8 1.13 1.28 1.61'
+              + '.24.24.64.15.8-.15.19-.38.39-.73.58-1.02.14-.21.43-.1.4.15l-.19'
+              + ' 1.96c-.02.19.07.37.23.47A8.96 8.96 0 0 0 12 21a.4.4 0 0 1 .38'
+              + '.27c.1.33.25.65.4.95.18.34-.02.76-.4.77L12 23a11 11 0 1 1 11-10'
+              + '.62ZM15.5 7.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z" clip-rule='
+              + '"evenodd"></path><path fill="currentColor" d="M24 19a5 5 0 1 1'
+              + '-10 0 5 5 0 0 1 10 0Z"></path>', '0 0 24 24');
           } else {
             this.profilePanelButton = false;
             buttonsActive[this.I_USER_PROFILE] = 0;
@@ -3521,8 +3725,6 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (this.membersList) {
           this.membersList.style.overflow = 'hidden';
           this.membersList.style.minWidth = 'var(--cui-members-width)';
-          this.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
-          this.membersList.style.width = 'var(--cui-members-width)';
           this.membersList.style.minHeight = '100%';
           this.membersList.style.flexBasis = 'auto';
         }
@@ -3532,8 +3734,8 @@ https://programmer2514.github.io/?l=cui-changelog`
         }
         if (this.profilePanel) {
           this.profilePanel.style.overflow = 'hidden';
-          this.profilePanel.style.maxWidth = this.profilePanelMaxWidth + 'px';
           this.profilePanel.style.minHeight = '100%';
+          this.profilePanel.style.width = 'var(--cui-profile-width)';
         }
         if (this.profilePanelWrapper)
           this.profilePanelWrapper.style.width = 'auto';
@@ -3555,6 +3757,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Read stored user data to decide active state of Server List button
       if (this.serverList) {
+        this.floatElement(this.I_SERVER_LIST, false);
         if (this.buttonsOrder[this.I_SERVER_LIST] || this.disabledButtonsStayCollapsed) {
           if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') {
             if (this.serverListButton)
@@ -3586,6 +3789,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Read stored user data to decide active state of Channel List button
       if (this.channelList) {
+        this.floatElement(this.I_CHANNEL_LIST, false);
         if (this.buttonsOrder[this.I_CHANNEL_LIST] || this.disabledButtonsStayCollapsed) {
           if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') {
             if (this.channelListButton)
@@ -3670,6 +3874,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Read stored user data to decide active state of Members List button
       if (this.membersList) {
+        this.floatElement(this.I_MEMBERS_LIST, false);
         if (this.buttonsOrder[this.I_MEMBERS_LIST] || this.disabledButtonsStayCollapsed) {
           if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') {
             if (this.membersListButton)
@@ -3716,6 +3921,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Read stored user data to decide active state of Profile Panel button
       if (this.profilePanel) {
+        this.floatElement(this.I_USER_PROFILE, false);
         if (this.buttonsOrder[this.I_USER_PROFILE] || this.disabledButtonsStayCollapsed) {
           if (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false') {
             if (this.profilePanelButton)
@@ -3723,16 +3929,25 @@ https://programmer2514.github.io/?l=cui-changelog`
             if (this.disableTransitions) {
               this.profilePanel.style.display = 'none';
             } else {
-              this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
-              this.profilePanel.style.minWidth = '0px';
+              this.profilePanel.style.transition = 'width ' + this.transitionSpeed
+                + 'ms, min-width ' + this.transitionSpeed + 'ms';
+              this.profilePanel.style.width = this.collapsedDistance + 'px';
             }
           } else if (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true') {
             if (this.profilePanelButton)
               this.profilePanelButton.classList.add(this.classSelected);
+            if (this.profilePanelWidth != 0)
+              this.profilePanel.style.width = this.profilePanelWidth + 'px';
+            else
+              this.profilePanel.style.width = 'var(--cui-profile-width)';
           } else {
             BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'true');
             if (this.profilePanelButton)
               this.profilePanelButton.classList.add(this.classSelected);
+            if (this.profilePanelWidth != 0)
+              this.profilePanel.style.width = this.profilePanelWidth + 'px';
+            else
+              this.profilePanel.style.width = 'var(--cui-profile-width)';
           }
         } else
           BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'true');
@@ -3797,6 +4012,8 @@ https://programmer2514.github.io/?l=cui-changelog`
         this.pluginStyle.appendChild(document.createTextNode(""));
         document.head.appendChild(this.pluginStyle);
         this.pluginStyle.sheet.insertRule(":root {--cui-members-width: 240px}", 0);
+        this.pluginStyle.sheet.insertRule(":root {--cui-profile-width: 340px}", 1);
+        this.pluginStyle.sheet.insertRule("::-webkit-scrollbar {width: 0px; background: transparent;}", 2);
 
         // Handle resizing channel list
         if (this.resizableChannelList) {
@@ -3804,7 +4021,7 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.channelList.style.maxWidth = '80vw';
 
           // Hide webkit resizer
-          this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 1);
+          this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 3);
 
           document.body.addEventListener('mousedown', function () {
             cui.channelList.style.transition = 'none';
@@ -3900,11 +4117,11 @@ https://programmer2514.github.io/?l=cui-changelog`
 
             // Hide webkit resizer
             if (!this.resizableChannelList) {
-              this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 1);
+              this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 3);
             }
 
             // DateViewer compatibility
-            this.pluginStyle.sheet.insertRule("#dv-mount {transform: scaleX(-1);}", 2);
+            this.pluginStyle.sheet.insertRule("#dv-mount {transform: scaleX(-1);}", 4);
 
             document.body.addEventListener('mousedown', function () {
               cui.membersList.style.transition = 'none';
@@ -3934,7 +4151,11 @@ https://programmer2514.github.io/?l=cui-changelog`
               cui.contentWindow.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
               cui.membersList.style.width = 'var(--cui-members-width)';
               cui.membersList.style.minWidth = 'var(--cui-members-width)';
-              cui.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+              if ((!cui.floatingDynamicUncollapse) || (BdApi.getData('CollapsibleUI',
+                'membersListButtonActive') === 'true'))
+                cui.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+              else
+                cui.contentWindow.style.maxWidth = '100%';
               try {
                 cui.membersListWidthObserver.observe(cui.membersList,
                   { attributeFilter: ['style'] });
@@ -3952,13 +4173,21 @@ https://programmer2514.github.io/?l=cui-changelog`
                   var oldMembersListWidth = cui.membersListWidth;
                   if (parseInt(cui.membersList.style.width)) {
                     cui.membersListWidth = parseInt(cui.membersList.style.width);
-                    cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+                    if ((!cui.floatingDynamicUncollapse) || (BdApi.getData('CollapsibleUI',
+                      'membersListButtonActive') === 'true'))
+                      cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+                    else
+                      cui.contentWindow.style.maxWidth = '100%';
                   } else if (cui.membersListWidth != 0) {
                     cui.membersList.style.transition = 'none';
                     cui.contentWindow.style.transition = 'none';
                     cui.membersList.style.width = cui.membersListWidth + 'px';
                     cui.membersList.style.minWidth = cui.membersListWidth + 'px';
-                    cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+                    if ((!cui.floatingDynamicUncollapse) || (BdApi.getData('CollapsibleUI',
+                      'membersListButtonActive') === 'true'))
+                      cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+                    else
+                      cui.contentWindow.style.maxWidth = '100%';
                     cui.membersList.style.transition = 'width ' + cui.transitionSpeed
                       + 'ms, min-width ' + cui.transitionSpeed + 'ms';
                     cui.contentWindow.style.transition = 'max-width ' + cui.transitionSpeed + 'ms';
@@ -3985,16 +4214,114 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.contentWindow.style.transition = 'none';
             this.membersList.style.width = this.membersListWidth + 'px';
             this.membersList.style.minWidth = this.membersListWidth + 'px';
-            this.contentWindow.style.maxWidth = 'calc(100% - ' + this.membersListWidth + 'px)';
+            if ((!this.floatingDynamicUncollapse) || (BdApi.getData('CollapsibleUI',
+              'membersListButtonActive') === 'true'))
+              this.contentWindow.style.maxWidth = 'calc(100% - ' + this.membersListWidth + 'px)';
+            else
+              this.contentWindow.style.maxWidth = '100%';
           }
 
           this.membersList.style.transition = 'none';
           this.contentWindow.style.transition = 'none';
         }
 
-        if (this.profilePanel)
-          this.profilePanel.style.transition = 'max-width '
-            + this.transitionSpeed + 'ms, min-width ' + this.transitionSpeed + 'ms';
+        if (this.profilePanel && this.profilePanelInner) {
+
+          // Handle resizing profile panel
+          if (this.resizableUserProfile) {
+            this.profilePanel.style.resize = 'horizontal';
+            this.profilePanel.style.maxWidth = '80vw';
+            this.profilePanel.style.minWidth = '0';
+            this.profilePanelInner.style.maxWidth = '80vw';
+            this.profilePanelInner.style.width = '100%';
+            this.profileBannerSVGWrapper.style.maxHeight =
+              this.profileBannerSVGWrapper.style.minHeight;
+            this.profileBannerSVGWrapper.style.minWidth = '100%';
+            this.profileBannerSVGWrapper.querySelector('mask rect')
+              .setAttribute('width', '500%')
+            this.profileBannerSVGWrapper.setAttribute('viewBox', '');
+
+            // Flip profile panel outer wrapper, then flip inner wrapper back
+            // This moves the webkit resize handle to the bottom left
+            // Without affecting the elements inside
+            this.profilePanel.style.transform = 'scaleX(-1)';
+            this.profilePanelInner.style.transform = 'scaleX(-1)';
+
+            // Hide webkit resizer
+            if (!this.resizableChannelList) {
+              this.pluginStyle.sheet.insertRule("::-webkit-resizer {display: none;}", 3);
+            }
+
+            document.body.addEventListener('mousedown', function () {
+              cui.profilePanel.style.transition = 'none';
+            }, { signal: this.eventListenerSignal });
+
+            if (this.fullscreenButton) {
+              this.fullscreenButton.addEventListener('click', function () {
+                if (document.fullscreen)
+                  cui.profilePanel.style.maxWidth = '80vw';
+                else
+                  cui.profilePanel.style.maxWidth = '0px';
+              }, { signal: this.eventListenerSignal });
+            }
+
+            this.profilePanel.addEventListener('contextmenu', function (event) {
+              if (event.target !== event.currentTarget)
+                return;
+              try { cui.profilePanelWidthObserver.disconnect(); } catch {}
+              cui.profilePanelWidth = 0;
+              BdApi.setData('CollapsibleUI', 'profilePanelWidth',
+                cui.profilePanelWidth.toString());
+              cui.profilePanel.style.transition = 'width ' + cui.transitionSpeed
+                + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+              cui.profilePanel.style.width = 'var(--cui-profile-width)';
+              try {
+                cui.profilePanelWidthObserver.observe(cui.profilePanel,
+                  { attributeFilter: ['style'] });
+              } catch {}
+              event.preventDefault();
+
+            }, { signal: this.eventListenerSignal });
+
+            this.profilePanelWidthObserver = new MutationObserver((mutationList) => {
+              try {
+                if (((!cui.isCollapsed[cui.I_USER_PROFILE])
+                  || (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true'))
+                  && !document.fullscreen) {
+
+                  var oldProfilePanelWidth = cui.profilePanelWidth;
+                  if (parseInt(cui.profilePanel.style.width)) {
+                    cui.profilePanelWidth = parseInt(cui.profilePanel.style.width);
+                  } else if (cui.profilePanelWidth != 0) {
+                    cui.profilePanel.style.transition = 'none';
+                    cui.profilePanel.style.width = cui.profilePanelWidth + 'px';
+                    cui.profilePanel.style.transition = 'width ' + cui.transitionSpeed
+                      + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+                  }
+                  if (oldProfilePanelWidth != cui.profilePanelWidth)
+                    BdApi.setData('CollapsibleUI', 'profilePanelWidth',
+                      cui.profilePanelWidth.toString());
+                }
+              } catch (e) {
+                console.warn('%c[CollapsibleUI] ' + '%cFailed to trigger \
+                  mutationObserver width update! (see below)',
+                  'color: #3a71c1; font-weight: 700;', '');
+                console.warn(e);
+              }
+            });
+            this.profilePanelWidthObserver.observe(this.profilePanel,
+              { attributeFilter: ['style'] });
+          }
+          if (((!this.isCollapsed[this.I_USER_PROFILE])
+            || (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true'))
+            && this.profilePanelWidth != 0) {
+
+            this.profilePanel.style.transition = 'none';
+            this.profilePanel.style.width = this.profilePanelWidth + 'px';
+          }
+
+          this.profilePanel.style.transition = 'none';
+        }
 
         if (this.msgBar)
           this.msgBar.style.transition = 'max-height ' + this.transitionSpeed + 'ms';
@@ -4085,6 +4412,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Server List
       if ((BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false') && this.serverList) {
+        this.floatElement(this.I_SERVER_LIST, true);
         if (this.dynamicUncollapseEnabled[this.I_SERVER_LIST]
           && this.isCollapsed[this.I_SERVER_LIST] && this.isNear(this.serverList,
           this.dynamicUncollapseDistance[this.I_SERVER_LIST], this.mouseX,
@@ -4129,6 +4457,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Channel List
       if ((BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false') && this.channelList) {
+        this.floatElement(this.I_CHANNEL_LIST, true);
         if (this.dynamicUncollapseEnabled[this.I_CHANNEL_LIST]
           && this.isCollapsed[this.I_CHANNEL_LIST] && this.isNear(this.channelList,
           this.dynamicUncollapseDistance[this.I_CHANNEL_LIST], this.mouseX, this.mouseY)
@@ -4139,6 +4468,8 @@ https://programmer2514.github.io/?l=cui-changelog`
             this.channelDUDelay = false;
           }
           this.channelDUDelay = setTimeout(() => {
+            cui.channelList.style.transition = 'width '
+              + cui.transitionSpeed + 'ms';
             cui.channelList.style.removeProperty('width');
             if (cui.isDarkMatterLoaded) {
               cui.settingsContainer.style.removeProperty('display');
@@ -4157,6 +4488,8 @@ https://programmer2514.github.io/?l=cui-changelog`
             clearTimeout(this.channelDUDelay);
             this.channelDUDelay = false;
           }
+          this.channelList.style.transition = 'width '
+            + this.transitionSpeed + 'ms';
           this.channelList.style.width = this.collapsedDistance + 'px';
           if (this.isDarkMatterLoaded) {
             this.settingsContainer.style.display = 'none';
@@ -4244,6 +4577,7 @@ https://programmer2514.github.io/?l=cui-changelog`
 
       // Members List
       if ((BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false') && this.membersList) {
+        this.floatElement(this.I_MEMBERS_LIST, true);
         if (this.dynamicUncollapseEnabled[this.I_MEMBERS_LIST]
           && this.isCollapsed[this.I_MEMBERS_LIST] && this.isNear(this.membersList,
           this.dynamicUncollapseDistance[this.I_MEMBERS_LIST], this.mouseX,
@@ -4260,11 +4594,17 @@ https://programmer2514.github.io/?l=cui-changelog`
             if (cui.membersListWidth != 0) {
               cui.membersList.style.width = cui.membersListWidth + 'px';
               cui.membersList.style.minWidth = cui.membersListWidth + 'px';
-              cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+              if (!cui.floatingDynamicUncollapse)
+                cui.contentWindow.style.maxWidth = 'calc(100% - ' + cui.membersListWidth + 'px)';
+              else
+                cui.contentWindow.style.maxWidth = '100%';
             } else {
               cui.membersList.style.width = 'var(--cui-members-width)';
               cui.membersList.style.minWidth = 'var(--cui-members-width)';
-              cui.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+              if (!cui.floatingDynamicUncollapse)
+                cui.contentWindow.style.maxWidth = 'calc(100% - var(--cui-members-width))';
+              else
+                cui.contentWindow.style.maxWidth = '100%';
             }
             cui.isCollapsed[cui.I_MEMBERS_LIST] = false;
             cui.membersDUDelay = false;
@@ -4284,26 +4624,33 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.contentWindow.style.transition = 'max-width ' + this.transitionSpeed + 'ms';
           this.membersList.style.width = this.collapsedDistance + 'px';
           this.membersList.style.minWidth = this.collapsedDistance + 'px';
-          this.contentWindow.style.maxWidth = 'calc(100% - ' + this.collapsedDistance + 'px)';
+          if (!this.floatingDynamicUncollapse)
+            this.contentWindow.style.maxWidth = 'calc(100% - ' + this.collapsedDistance + 'px)';
+          else
+            this.contentWindow.style.maxWidth = '100%';
           this.isCollapsed[this.I_MEMBERS_LIST] = true;
         }
       }
 
       // Profile Panel
       if ((BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false') && this.profilePanel) {
+        this.floatElement(this.I_USER_PROFILE, true);
         if (this.dynamicUncollapseEnabled[this.I_USER_PROFILE]
           && this.isCollapsed[this.I_USER_PROFILE] && this.isNear(this.profilePanel,
           this.dynamicUncollapseDistance[this.I_USER_PROFILE], this.mouseX,
-          this.mouseY) && !(this.isNear(this.msgBar, 0,
-          this.mouseX, this.mouseY))) {
+          this.mouseY) && !(this.isNear(this.msgBar, 0, this.mouseX, this.mouseY))) {
 
           if (this.panelDUDelay) {
             clearTimeout(this.panelDUDelay);
             this.panelDUDelay = false;
           }
           this.panelDUDelay = setTimeout(() => {
-            cui.profilePanel.style.maxWidth = cui.profilePanelMaxWidth + 'px';
-            cui.profilePanel.style.removeProperty('min-width');
+            cui.profilePanel.style.transition = 'width ' + cui.transitionSpeed
+              + 'ms, min-width ' + cui.transitionSpeed + 'ms';
+            if (cui.profilePanelWidth != 0)
+              cui.profilePanel.style.width = cui.profilePanelWidth + 'px';
+            else
+              cui.profilePanel.style.width = 'var(--cui-profile-width)';
             cui.isCollapsed[cui.I_USER_PROFILE] = false;
             cui.panelDUDelay = false;
           }, this.dynamicUncollapseDelay);
@@ -4317,8 +4664,9 @@ https://programmer2514.github.io/?l=cui-changelog`
             clearTimeout(this.panelDUDelay);
             this.panelDUDelay = false;
           }
-          this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
-          this.profilePanel.style.minWidth = '0px';
+          this.profilePanel.style.transition = 'width ' + this.transitionSpeed
+            + 'ms, min-width ' + this.transitionSpeed + 'ms';
+          this.profilePanel.style.width = this.collapsedDistance + 'px';
           this.isCollapsed[this.I_USER_PROFILE] = true;
         }
       }
@@ -4403,6 +4751,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     toggleButton = (index) => {
       switch (index) {
       case 0: // I_SERVER_LIST
+        this.floatElement(this.I_SERVER_LIST, false);
         if (BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true') {
           if (this.disableTransitions) {
             this.serverList.style.display = 'none';
@@ -4439,6 +4788,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         break;
 
       case 1: // I_CHANNEL_LIST
+        this.floatElement(this.I_CHANNEL_LIST, false);
         if (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true') {
           if (this.disableTransitions) {
             this.channelList.style.display = 'none';
@@ -4531,6 +4881,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         break;
 
       case 4: // I_MEMBERS_LIST
+        this.floatElement(this.I_MEMBERS_LIST, false);
         if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
           if (this.disableTransitions) {
             this.membersList.style.display = 'none';
@@ -4623,12 +4974,14 @@ https://programmer2514.github.io/?l=cui-changelog`
         break;
 
       case 7: // I_USER_PROFILE
+        this.floatElement(this.I_USER_PROFILE, false);
         if (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true') {
           if (this.disableTransitions) {
             this.profilePanel.style.display = 'none';
           } else {
-            this.profilePanel.style.maxWidth = this.collapsedDistance + 'px';
-            this.profilePanel.style.minWidth = '0px';
+            this.profilePanel.style.transition = 'width ' + this.transitionSpeed
+              + 'ms, min-width ' + this.transitionSpeed + 'ms';
+            this.profilePanel.style.width = this.collapsedDistance + 'px';
           }
           BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'false');
           this.profilePanelButton.classList.remove(this.classSelected);
@@ -4636,8 +4989,12 @@ https://programmer2514.github.io/?l=cui-changelog`
           if (this.disableTransitions) {
             this.profilePanel.style.removeProperty('display');
           } else {
-            this.profilePanel.style.maxWidth = this.profilePanelMaxWidth + 'px';
-            this.profilePanel.style.removeProperty('min-width');
+            this.profilePanel.style.transition = 'width ' + this.transitionSpeed
+              + 'ms, min-width ' + this.transitionSpeed + 'ms';
+            if (this.profilePanelWidth != 0)
+              this.profilePanel.style.width = this.profilePanelWidth + 'px';
+            else
+              this.profilePanel.style.width = 'var(--cui-profile-width)';
           }
           BdApi.setData('CollapsibleUI', 'profilePanelButtonActive', 'true');
           this.profilePanelButton.classList.add(this.classSelected);
@@ -4648,5 +5005,52 @@ https://programmer2514.github.io/?l=cui-changelog`
         break;
       }
     }
+
+    // Sends/clears a persistent notification for unread DMs
+    updateDMBadge = (clear) => {
+
+      // Clear old notification if it exists
+      document.querySelectorAll('.collapsible-ui-notif')
+        .forEach(e => e.remove());
+      this.wordMark.style.removeProperty('margin-left');
+
+      // Count DM notifications
+      var dmNotifs = 0;
+      document.querySelectorAll('.' + this.classUnreadDMBadge)
+        .forEach(e => dmNotifs += parseInt(e.innerHTML));
+
+      // Return if a new notification doesn't need to be created
+      if (clear || (dmNotifs == 0)) return;
+
+      // Create new notification
+      var dmBadge = document.createElement('div');
+      dmBadge.classList.add('collapsible-ui-element');
+      dmBadge.classList.add('collapsible-ui-notif');
+      dmBadge.classList.add(this.classUnreadDMBadge);
+      dmBadge.classList.add(this.classUnreadDmBadgeBase);
+      dmBadge.classList.add(this.classUnreadDmBadgeEyebrow);
+      dmBadge.classList.add(this.classUnreadDmBadgeShape);
+      dmBadge.style.backgroundColor = 'var(--status-danger)';
+      dmBadge.style.padding = '4px';
+      dmBadge.style.maxHeight = (this.wordMark.getBoundingClientRect().height
+        - 6) + 'px';
+      dmBadge.style.minHeight = '0px';
+      dmBadge.style.marginLeft = (parseInt(getComputedStyle(this.wordMark, null)
+        .getPropertyValue('padding-left')) * 2 / 3) + 'px';
+      dmBadge.style.marginTop = getComputedStyle(this.wordMark, null)
+        .getPropertyValue('padding-top');
+      dmBadge.style.position = 'fixed';
+      dmBadge.style.zIndex = '10000';
+      dmBadge.innerHTML = `${dmNotifs}`;
+
+      // Insert into document
+      document.body.appendChild(dmBadge);
+
+      // Display notification
+      dmBadge.style.left = this.wordMark.getBoundingClientRect().left + 'px';
+      dmBadge.style.top = this.wordMark.getBoundingClientRect().top + 'px';
+      this.wordMark.style.marginLeft = `${dmBadge.getBoundingClientRect().width}px`;
+    }
+
   };
 })();

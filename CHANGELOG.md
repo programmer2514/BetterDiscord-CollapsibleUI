@@ -1,5 +1,13 @@
 # CollapsibleUI Patch Notes
 
+### v8.0.0:
+* Fix for more Discord class/element changes
+* Fixed elements occasionally collapsing on scroll
+* Made User Profile panel resizable
+* Updated plugin icons to match Discord's new theme more closely
+* Made uncollapsed elements float instead of shifting other elements over
+* Added a persistent badge in the top-left showing a total of unread DMs
+
 ### v7.4.2: 
 * Fix for recent Discord sweeping classes/elements changes
 

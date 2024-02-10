@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.0.0
+ * @version 8.1.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,23 +22,22 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.0.0',
+      version: '8.1.0',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.0.0',
+        title: '8.1.0',
         items: [
-          'Fix for more Discord class/element changes',
-          'Fixed elements occasionally collapsing on scroll',
-          'Made User Profile panel resizable',
-          'Updated plugin icons to match Discord\'s new theme more closely',
-          'Made uncollapsed elements float instead of shifting other elements over (can be disabled in Settings > Dynamic Uncollapse)',
-          'Added a persistent badge in the top-left showing a total of unread DMs (can be disabled in Settings > Main)'
+          'Fix for even more Discord class/element changes',
+          'The persistent DM badge is now disabled by default',
+          'Fixed Members List offset issue when UI transitions are disabled',
+          'Improved load times and removed unnecessary resource utilization',
+          'Floating Dynamic Uncollapse will now be disabled if Collapsed Element Distance is not equal to 0'
         ]
       }, {
-        title: '1.0.0 - 7.4.2',
+        title: '1.0.0 - 8.0.0',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -99,6 +98,8 @@ https://programmer2514.github.io/?l=cui-changelog`
             or download it manually.`, { timeout: '0' });
       });
 
+      this.buildSettingsPanel();
+
       if (Library.DiscordModules.UserStore.getCurrentUser()) {
         console.log('%c[CollapsibleUI] ' + '%cAttempting pre-load...',
           'color: #3a71c1; font-weight: 700;', '');
@@ -115,6 +116,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     // Restore the default UI when the plugin is disabled
     stop = () => {
       this.terminate();
+      this.deleteFields();
       console.log('%c[CollapsibleUI] '
         + `%c(v${BdApi.Plugins.get('CollapsibleUI').version}) `
         + '%chas stopped.', 'color: #3a71c1; font-weight: 700;',
@@ -126,1184 +128,24 @@ https://programmer2514.github.io/?l=cui-changelog`
 
     // Add settings panel
     getSettingsPanel = () => {
-      var zps = Library.Settings;
-      var cui = this;
-
-      // Create root settings node
-      var settingsRoot = new zps.SettingPanel();
-
-      this.settingsHandle = settingsRoot.getElement();
-
-      // Create Main subgroup
-      var groupMain = new zps.SettingGroup('Main');
-
-      // Create main settings
-      var settingDisableTransitions =
-        new zps.Switch('Disable UI Transitions',
-          'Disables all UI animations, but also disables Dynamic Uncollapse',
-          BdApi.getData('CollapsibleUI', 'disableTransitions') === 'true');
-      var settingTransitionSpeed =
-        new zps.Textbox('UI Transition Speed (ms)',
-          'Sets the speed of UI animations',
-          BdApi.getData('CollapsibleUI', 'transitionSpeed'),
-          null, { placeholder: 'Default: 250' });
-      var settingDisableToolbarCollapse =
-        new zps.Switch('Disable Toolbar Auto-collapse',
-          'Disables the automatic collapsing of CollapsibleUI\'s toolbar icons',
-          BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'true');
-      var settingDisableSettingsCollapse =
-        new zps.Switch('Disable User Settings Auto-collapse',
-          'Disables the automatic collapsing of the mute/deafen and call buttons',
-          BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'true');
-      var settingDisableMsgBarBtnCollapse =
-        new zps.Switch('Disable Message Bar Button Auto-collapse',
-          'Disables the automatic collapsing of the GIF, sticker, emoji, and \
-            gift buttons',
-          BdApi.getData('CollapsibleUI', 'disableMsgBarBtnCollapse') === 'true');
-      var settingEnableFullToolbarCollapse =
-        new zps.Switch('Enable Full Toolbar Auto-collapse',
-          'Enables the automatic collapsing of the full vanilla Discord toolbar',
-          BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'true');
-      var settingResizableChannelList =
-        new zps.Switch('Resizable Channel List',
-          'Allows the channel list to be resized horizontally by \
-            clicking-and-dragging on its bottom-right corner',
-          BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
-      var settingResizableMembersList =
-        new zps.Switch('Resizable Members List',
-          'Allows the members list to be resized horizontally by \
-            clicking-and-dragging on its bottom-left corner',
-          BdApi.getData('CollapsibleUI', 'resizableMembersList') === 'true');
-      var settingResizableUserProfile =
-        new zps.Switch('Resizable User Profile',
-          'Allows the user profile to be resized horizontally by \
-            clicking-and-dragging on its bottom-left corner',
-          BdApi.getData('CollapsibleUI', 'resizableUserProfile') === 'true');
-      var settingPersistentUnreadBadge =
-        new zps.Switch('Persistent Unread DM Badge',
-          'Displays a badge next to the Discord wordmark showing the number of \
-            unread DMs',
-          BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'true');
-
-      // Append main settings to Main subgroup
-      groupMain.append(settingDisableTransitions);
-      groupMain.append(settingTransitionSpeed);
-      groupMain.append(settingDisableToolbarCollapse);
-      groupMain.append(settingDisableSettingsCollapse);
-      groupMain.append(settingDisableMsgBarBtnCollapse);
-      groupMain.append(settingEnableFullToolbarCollapse);
-      groupMain.append(settingResizableChannelList);
-      groupMain.append(settingResizableMembersList);
-      groupMain.append(settingResizableUserProfile);
-      groupMain.append(settingPersistentUnreadBadge);
-
-      // Create Keyboard Shortcuts subgroup
-      var groupKB = new zps.SettingGroup('Keyboard Shortcuts');
-
-      // Create keyboard shortcut settings
-      var settingKBEnabled = new zps.Switch('Keyboard Shortcuts Enabled',
-          'Enables shortcuts to collapse UI elements',
-          BdApi.getData('CollapsibleUI', 'keyBindsEnabled') === 'true');
-      var settingKBServerList = new zps.Textbox('Toggle Server List - Shortcut',
-          'Case-insensitive. Do not use spaces. Valid modifiers are Ctrl, Alt, \
-            and Shift. Ctrl+Alt cannot be combined in any order due to a \
-            JavaScript limitation',
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_SERVER_LIST],
-          null, { placeholder: 'Default: Alt+S' });
-      var settingKBChannelList =
-        new zps.Textbox('Toggle Channel List - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_CHANNEL_LIST],
-          null, { placeholder: 'Default: Alt+C' });
-      var settingKBUserArea = new zps.Textbox('Toggle User Area - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_USER_AREA],
-          null, { placeholder: 'Default: Alt+U' });
-      var settingKBMsgBar = new zps.Textbox('Toggle Message Bar - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_MSG_BAR],
-          null, { placeholder: 'Default: Alt+T' });
-      var settingKBCallContainer =
-        new zps.Textbox('Toggle Call Container - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_CALL_CONTAINER],
-          null, { placeholder: 'Default: Alt+P' });
-      var settingKBWindowBar = new zps.Textbox('Toggle Window Bar - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_WINDOW_BAR],
-          null, { placeholder: 'Default: Alt+W' });
-      var settingKBMembersList = new zps.Textbox('Toggle Members List - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_MEMBERS_LIST],
-          null, { placeholder: 'Default: Alt+M' });
-      var settingKBProfilePanel = new zps.Textbox('Toggle User Profile - Shortcut',
-          null,
-          BdApi.getData('CollapsibleUI', 'keyStringList')
-            .split(',')[this.I_USER_PROFILE],
-          null, { placeholder: 'Default: Alt+I' });
-
-      // Append keyboard shortcut settings to Keyboard Shortcuts subgroup
-      groupKB.append(settingKBEnabled);
-      groupKB.append(settingKBServerList);
-      groupKB.append(settingKBChannelList);
-      groupKB.append(settingKBUserArea);
-      groupKB.append(settingKBMsgBar);
-      groupKB.append(settingKBCallContainer);
-      groupKB.append(settingKBWindowBar);
-      groupKB.append(settingKBMembersList);
-      groupKB.append(settingKBProfilePanel);
-
-      // Create Dynamic Uncollapse subgroup
-      var groupDU = new zps.SettingGroup('Dynamic Uncollapse');
-
-      // Create dynamic uncollapse settings
-      var settingDynamicUncollapse = new zps.Switch('Dynamic Uncollapse',
-          'Makes collapsed UI elements expand when the mouse is near them. \
-            When disabled, autocollapse is also disabled. Does not work with \
-            transitions disabled',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true');
-      var settingFloatingDynamicUncollapse = new zps.Switch('Floating Dynamic Uncollapse',
-          'Makes dynamically uncollapsed UI elements float above other elements, \
-            instead of pushing them aside',
-          BdApi.getData('CollapsibleUI', 'floatingDynamicUncollapse') === 'true');
-      var settingCollapsedDistance = new zps.Textbox('Collapsed Element Distance',
-          'Sets the size (px) of UI elements when they are collapsed',
-          BdApi.getData('CollapsibleUI', 'collapsedDistance'),
-          null, { placeholder: 'Default: 0' });
-      var settingButtonCollapseFudgeFactor =
-        new zps.Textbox('Button Collapse Fudge Factor',
-          'Sets (in px) how far the mouse has to be from a set of collapsible \
-            buttons before they collapse',
-          BdApi.getData('CollapsibleUI', 'buttonCollapseFudgeFactor'),
-          null, { placeholder: 'Default: 10' });
-      var settingDynamicUncollapseDelay =
-        new zps.Textbox('Dynamic Uncollapse Delay (ms)',
-          'Sets the delay before a UI element uncollapses on hover',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay'),
-          null, { placeholder: 'Default: 15' });
-      var settingDUDistServerList =
-        new zps.Textbox('Server List - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_SERVER_LIST],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCServerList =
-        new zps.Textbox('Server List - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_SERVER_LIST],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistChannelList =
-        new zps.Textbox('Channel List - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_CHANNEL_LIST],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCChannelList =
-        new zps.Textbox('Channel List - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_CHANNEL_LIST],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistUserArea =
-        new zps.Textbox('User Area - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_USER_AREA],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCUserArea =
-        new zps.Textbox('User Area - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_USER_AREA],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistMsgBar =
-        new zps.Textbox('Message Bar - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_MSG_BAR],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCMsgBar =
-        new zps.Textbox('Message Bar - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_MSG_BAR],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCallContainer =
-        new zps.Textbox('Call Container - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_CALL_CONTAINER],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCCallContainer =
-        new zps.Textbox('Call Container - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_CALL_CONTAINER],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistWindowBar =
-        new zps.Textbox('Window Bar - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_WINDOW_BAR],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCWindowBar =
-        new zps.Textbox('Window Bar - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_WINDOW_BAR],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistMembersList =
-        new zps.Textbox('Members List - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_MEMBERS_LIST],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCMembersList =
-        new zps.Textbox('Members List - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_MEMBERS_LIST],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistProfilePanel =
-        new zps.Textbox('User Profile - Opening Distance (px)',
-          'Distance that mouse must be from element in order for it to expand',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
-            .split(',')[this.I_USER_PROFILE],
-          null, { placeholder: 'Default: 30' });
-      var settingDUDistCProfilePanel =
-        new zps.Textbox('User Profile - Closing Distance (px)',
-          'Distance that mouse must be from element in order for it to collapse',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
-            .split(',')[this.I_USER_PROFILE],
-          null, { placeholder: 'Default: 30' });
-
-      // Append autocollapse settings to Autocollapse subgroup
-      groupDU.append(settingDynamicUncollapse);
-      groupDU.append(settingFloatingDynamicUncollapse);
-      groupDU.append(settingCollapsedDistance);
-      groupDU.append(settingButtonCollapseFudgeFactor);
-      groupDU.append(settingDynamicUncollapseDelay);
-      groupDU.append(settingDUDistServerList);
-      groupDU.append(settingDUDistCServerList);
-      groupDU.append(settingDUDistChannelList);
-      groupDU.append(settingDUDistCChannelList);
-      groupDU.append(settingDUDistUserArea);
-      groupDU.append(settingDUDistCUserArea);
-      groupDU.append(settingDUDistMsgBar);
-      groupDU.append(settingDUDistCMsgBar);
-      groupDU.append(settingDUDistCallContainer);
-      groupDU.append(settingDUDistCCallContainer);
-      groupDU.append(settingDUDistWindowBar);
-      groupDU.append(settingDUDistCWindowBar);
-      groupDU.append(settingDUDistMembersList);
-      groupDU.append(settingDUDistCMembersList);
-      groupDU.append(settingDUDistProfilePanel);
-      groupDU.append(settingDUDistCProfilePanel);
-
-      // Create Selective Dynamic Uncollapse subgroup
-      var groupSDU = new zps.SettingGroup('Selective Dynamic Uncollapse');
-
-      // Create selective dynamic uncollapse settings
-      var settingDUServerList = new zps.Switch('Server List',
-          'Toggles Dynamic Uncollapse for the server list',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_SERVER_LIST] === 'true');
-      var settingDUChannelList = new zps.Switch('Channel List',
-          'Toggles Dynamic Uncollapse for the channel list',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_CHANNEL_LIST] === 'true');
-      var settingDUUserArea = new zps.Switch('User Area',
-          'Toggles Dynamic Uncollapse for the user area',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_USER_AREA] === 'true');
-      var settingDUMsgBar = new zps.Switch('Message Bar',
-          'Toggles Dynamic Uncollapse for the message bar',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_MSG_BAR] === 'true');
-      var settingDUCallContainer = new zps.Switch('Call Container',
-          'Toggles Dynamic Uncollapse for the call container',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_CALL_CONTAINER] === 'true');
-      var settingDUWindowBar = new zps.Switch('Window Bar',
-          'Toggles Dynamic Uncollapse for the window bar',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_WINDOW_BAR] === 'true');
-      var settingDUMembersList = new zps.Switch('Members List',
-          'Toggles Dynamic Uncollapse for the members list',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_MEMBERS_LIST] === 'true');
-      var settingDUProfilePanel = new zps.Switch('User Profile',
-          'Toggles Dynamic Uncollapse for the user profile',
-          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
-            .split(',')[this.I_USER_PROFILE] === 'true');
-
-      // Append selective dynamic uncollapse settings to
-      //   Selective Dynamic Uncollapse subgroup
-      groupSDU.append(settingDUServerList);
-      groupSDU.append(settingDUChannelList);
-      groupSDU.append(settingDUUserArea);
-      groupSDU.append(settingDUMsgBar);
-      groupSDU.append(settingDUCallContainer);
-      groupSDU.append(settingDUWindowBar);
-      groupSDU.append(settingDUMembersList);
-      groupSDU.append(settingDUProfilePanel);
-
-      // Create Autocollapse subgroup
-      var groupAC = new zps.SettingGroup('Autocollapse');
-
-      // Create autocollapse settings
-      var settingACEnabled = new zps.Switch('Autocollapse Enabled',
-          'Enables auto-collapse of UI elements based on window size. Does not \
-            work with dynamic uncollapse disabled',
-          BdApi.getData('CollapsibleUI', 'autoCollapse') === 'true');
-      var settingACServerList = new zps.Textbox('Server List - Threshold',
-          'Maximum width for element to remain uncollapsed. Specifies height \
-            if Horizontal Server List is enabled',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_SERVER_LIST],
-          null, { placeholder: 'Default: 500' });
-      var settingACChannelList = new zps.Textbox('Channel List - Threshold',
-          'Maximum width for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_CHANNEL_LIST],
-          null, { placeholder: 'Default: 600' });
-      var settingACUserArea = new zps.Textbox('User Area - Threshold',
-          'Maximum height for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_USER_AREA],
-          null, { placeholder: 'Default: 400' });
-      var settingACMsgBar = new zps.Textbox('Message Bar - Threshold',
-          'Maximum height for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_MSG_BAR],
-          null, { placeholder: 'Default: 400' });
-      var settingACCallContainer = new zps.Textbox('Call Container - Threshold',
-          'Maximum height for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_CALL_CONTAINER],
-          null, { placeholder: 'Default: 550' });
-      var settingACWindowBar = new zps.Textbox('Window Bar - Threshold',
-          'Maximum height for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_WINDOW_BAR],
-          null, { placeholder: 'Default: 200' });
-      var settingACMembersList = new zps.Textbox('Members List - Threshold',
-          'Maximum width for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_MEMBERS_LIST],
-          null, { placeholder: 'Default: 950' });
-      var settingACProfilePanel = new zps.Textbox('User Profile - Threshold',
-          'Maximum width for element to remain uncollapsed',
-          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
-            .split(',')[this.I_USER_PROFILE],
-          null, { placeholder: 'Default: 1000' });
-
-      // Append autocollapse settings to Autocollapse subgroup
-      groupAC.append(settingACEnabled);
-      groupAC.append(settingACServerList);
-      groupAC.append(settingACChannelList);
-      groupAC.append(settingACUserArea);
-      groupAC.append(settingACMsgBar);
-      groupAC.append(settingACCallContainer);
-      groupAC.append(settingACWindowBar);
-      groupAC.append(settingACMembersList);
-      groupAC.append(settingACProfilePanel);
-
-      // Create Conditional Autocollapse subgroup
-      var groupCA = new zps.SettingGroup('Conditional Autocollapse');
-
-      // Create conditional autocollapse settings
-      var settingCAEnabled = new zps.Switch('Conditional Autocollapse Enabled',
-          'Enables auto-collapse of UI elements based on custom conditionals',
-          BdApi.getData('CollapsibleUI', 'conditionalAutoCollapse') === 'true');
-      var settingCAServerList = new zps.Textbox('Server List',
-          'A conditional expression which, when evaluated, will cause the \
-            element to collapse if it is true. When set, overrides traditional \
-            autocollapse.',
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_SERVER_LIST],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCAChannelList = new zps.Textbox('Channel List',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_CHANNEL_LIST],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCAUserArea = new zps.Textbox('User Area',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_USER_AREA],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCAMsgBar = new zps.Textbox('Message Bar',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_MSG_BAR],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCACallContainer = new zps.Textbox('Call Container',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_CALL_CONTAINER],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCAWindowBar = new zps.Textbox('Window Bar',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_WINDOW_BAR],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCAMembersList = new zps.Textbox('Members List',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_MEMBERS_LIST],
-          null, { placeholder: 'Default: <blank>' });
-      var settingCAProfilePanel = new zps.Textbox('User Profile',
-          null,
-          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
-            .split(',')[this.I_USER_PROFILE],
-          null, { placeholder: 'Default: <blank>' });
-
-      // Append conditional autocollapse settings to Conditional AC subgroup
-      groupCA.append(settingCAEnabled);
-      groupCA.append(settingCAServerList);
-      groupCA.append(settingCAChannelList);
-      groupCA.append(settingCAUserArea);
-      groupCA.append(settingCAMsgBar);
-      groupCA.append(settingCACallContainer);
-      groupCA.append(settingCAWindowBar);
-      groupCA.append(settingCAMembersList);
-      groupCA.append(settingCAProfilePanel);
-
-      // Create Button Customization subgroup
-      var groupButtons = new zps.SettingGroup('Button Customization');
-
-      // Create button settings
-      var settingDisabledButtonsStayCollapsed =
-        new zps.Switch('Disabled Buttons Stay Collapsed?',
-          'When enabled, elements will remain collapsed when their \
-            corresponding buttons are disabled',
-          BdApi.getData('CollapsibleUI', 'disabledButtonsStayCollapsed') === 'true');
-      var settingServerList = new zps.Slider('Server List',
-          '[Default = 1, Disabled = 0] - Sets order index of the Server List \
-            button (far left panel)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_SERVER_LIST],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingChannelList = new zps.Slider('Channel List',
-          '[Default = 2, Disabled = 0] - Sets order index of the Channel List \
-            button (big left panel)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_CHANNEL_LIST],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingUserArea = new zps.Slider('User Area',
-          '[Default = 3, Disabled = 0] - Sets order index of the User Area \
-            button (username/handle, call controls)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_USER_AREA],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingMsgBar = new zps.Slider('Message Bar',
-          '[Default = 4, Disabled = 0] - Sets order index of the Message Bar \
-            button (typing area)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_MSG_BAR],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingCallContainer = new zps.Slider('Call Container',
-          '[Default = 5, Disabled = 0] - Sets order index of the Call \
-            Container button (video chat/call controls panel)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_CALL_CONTAINER],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingWindowBar = new zps.Slider('Window Bar',
-          '[Default = 6, Disabled = 0] - Sets order index of the Window bar \
-            button (maximize/minimize/close buttons)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_WINDOW_BAR],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingMembersList = new zps.Slider('Members List',
-          '[Default = 7, Disabled = 0] - Sets order index of the Members List \
-            button (right panel)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_MEMBERS_LIST],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-      var settingProfilePanel = new zps.Slider('User Profile',
-          '[Default = 8, Disabled = 0] - Sets order index of the User Profile \
-            button (right panel in DMs)',
-          0,
-          8,
-          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
-            .map(Number)[this.I_USER_PROFILE],
-          null, {
-          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-          stickToMarkers: true,
-          equidistant: true
-        });
-
-      // Append button settings to Button Customization subgroup
-      groupButtons.append(settingDisabledButtonsStayCollapsed);
-      groupButtons.append(settingServerList);
-      groupButtons.append(settingChannelList);
-      groupButtons.append(settingUserArea);
-      groupButtons.append(settingMsgBar);
-      groupButtons.append(settingCallContainer);
-      groupButtons.append(settingWindowBar);
-      groupButtons.append(settingMembersList);
-      groupButtons.append(settingProfilePanel);
-
-      // Create Advanced subgroup
-      var groupAdvanced = new zps.SettingGroup('Advanced');
-
-      // Create advanced settings
-      var settingSettingsButtonsMaxWidth =
-        new zps.Textbox('Settings Buttons - Max Width',
-          null,
-          BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'),
-          null, { placeholder: 'Default: 100' });
-      var settingMessageBarButtonsMaxWidth =
-        new zps.Textbox('Message Bar Buttons - Max Width',
-          null,
-          BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth'),
-          null, { placeholder: 'Default: 200' });
-      var settingMessageBarButtonsMinWidth =
-        new zps.Textbox('Message Bar Buttons - Collapsed Width',
-          null,
-          BdApi.getData('CollapsibleUI', 'messageBarButtonsMinWidth'),
-          null, { placeholder: 'Default: 40' });
-      var settingToolbarIconMaxWidth =
-        new zps.Textbox('Toolbar Icons - Max Width',
-          null,
-          BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'),
-          null, { placeholder: 'Default: 300' });
-      var settingToolbarMaxWidth = new zps.Textbox('Toolbar - Max Width',
-          null,
-          BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'),
-          null, { placeholder: 'Default: 800' });
-      var settingUserAreaMaxHeight = new zps.Textbox('User Area - Max Height',
-          null,
-          BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'),
-          null, { placeholder: 'Default: 300' });
-      var settingMsgBarMaxHeight = new zps.Textbox('Message Bar - Max Height',
-          null,
-          BdApi.getData('CollapsibleUI', 'msgBarMaxHeight'),
-          null, { placeholder: 'Default: 400' });
-      var settingWindowBarHeight = new zps.Textbox('Window Bar - Height',
-          null,
-          BdApi.getData('CollapsibleUI', 'windowBarHeight'),
-          null, { placeholder: 'Default: 18' });
-
-      // Append advanced settings to Advanced subgroup
-      groupAdvanced.append(settingSettingsButtonsMaxWidth);
-      groupAdvanced.append(settingMessageBarButtonsMaxWidth);
-      groupAdvanced.append(settingMessageBarButtonsMinWidth);
-      groupAdvanced.append(settingToolbarIconMaxWidth);
-      groupAdvanced.append(settingToolbarMaxWidth);
-      groupAdvanced.append(settingUserAreaMaxHeight);
-      groupAdvanced.append(settingMsgBarMaxHeight);
-      groupAdvanced.append(settingWindowBarHeight);
-
-      // Append subgroups to root node
-      settingsRoot.append(groupMain);
-      settingsRoot.append(groupAC);
-      settingsRoot.append(groupKB);
-      settingsRoot.append(groupDU);
-      settingsRoot.append(groupButtons);
-      settingsRoot.append(groupSDU);
-      settingsRoot.append(groupCA);
-      settingsRoot.append(groupAdvanced);
-
-      var cui = this;
-
-      // Register main settings onChange events
-      settingDisableTransitions.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'disableTransitions', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'disableTransitions', 'false');
-      };
-      settingTransitionSpeed.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'transitionSpeed', result);
-      };
-      settingDisableToolbarCollapse.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'false');
-      };
-      settingDisableSettingsCollapse.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
-      };
-      settingDisableMsgBarBtnCollapse.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'false');
-      };
-      settingEnableFullToolbarCollapse.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'false');
-      };
-      settingResizableChannelList.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'resizableChannelList', 'false');
-      };
-      settingResizableMembersList.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'resizableMembersList', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'resizableMembersList', 'false');
-      };
-      settingResizableUserProfile.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'false');
-      };
-      settingPersistentUnreadBadge.onChange = function (result) {
-        cui.updateDMBadge(!result);
-        if (result)
-          BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'false');
-      };
-
-      // Register button settings onChange events
-      settingDisabledButtonsStayCollapsed.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'false');
-      };
-      settingServerList.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingChannelList.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingUserArea.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingMsgBar.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingCallContainer.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingWindowBar.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingMembersList.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-      settingProfilePanel.onChange = function (result) {
-        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
-          .split(',').map(Number);
-        newButtonsOrder[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
-      };
-
-      // Register dynamic uncollapse settings onChange events
-      settingDynamicUncollapse.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'false');
-      };
-      settingFloatingDynamicUncollapse.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'false');
-      };
-      settingCollapsedDistance.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'collapsedDistance', result);
-      };
-      settingButtonCollapseFudgeFactor.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'buttonCollapseFudgeFactor', result);
-      };
-      settingDynamicUncollapseDelay.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDelay', result);
-      };
-      settingDUDistServerList.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCServerList.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistChannelList.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCChannelList.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistUserArea.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCUserArea.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistMsgBar.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCMsgBar.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistCallContainer.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCCallContainer.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistWindowBar.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCWindowBar.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistMembersList.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCMembersList.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-      settingDUDistProfilePanel.onChange = function (result) {
-        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseDistance').split(',');
-        cui.dynamicUncollapseDistance[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
-          cui.dynamicUncollapseDistance.toString());
-      };
-      settingDUDistCProfilePanel.onChange = function (result) {
-        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseCloseDistance').split(',');
-        cui.dynamicUncollapseCloseDistance[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
-          cui.dynamicUncollapseCloseDistance.toString());
-      };
-
-      // Register keyboard shortcut settings onChange events
-      settingKBEnabled.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'false');
-      };
-      settingKBServerList.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBChannelList.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBUserArea.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBMsgBar.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBCallContainer.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBWindowBar.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBMembersList.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-      settingKBProfilePanel.onChange = function (result) {
-        cui.keyStringList = BdApi.getData('CollapsibleUI',
-          'keyStringList').split(',');
-        cui.keyStringList[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'keyStringList',
-          cui.keyStringList.toString());
-      };
-
-      // Register conditional autocollapse settings onChange events
-      settingCAEnabled.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'conditionalAutoCollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'conditionalAutoCollapse', 'false');
-      };
-      settingCAServerList.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCAChannelList.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCAUserArea.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCAMsgBar.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCACallContainer.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCAWindowBar.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCAMembersList.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-      settingCAProfilePanel.onChange = function (result) {
-        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
-          'autoCollapseConditionals').split(',');
-        cui.autoCollapseConditionals[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
-          cui.autoCollapseConditionals.toString());
-      };
-
-      // Register selective dynamic uncollapse settings onChange events
-      settingDUServerList.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUChannelList.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUUserArea.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUMsgBar.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUCallContainer.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUWindowBar.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUMembersList.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-      settingDUProfilePanel.onChange = function (result) {
-        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
-          'dynamicUncollapseEnabled').split(',')
-          .map(x => (x == 'true') ? true : false);
-        cui.dynamicUncollapseEnabled[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
-          cui.dynamicUncollapseEnabled.toString());
-      };
-
-      // Register autocollapse settings onChange events
-      settingACEnabled.onChange = function (result) {
-        if (result)
-          BdApi.setData('CollapsibleUI', 'autoCollapse', 'true');
-        else
-          BdApi.setData('CollapsibleUI', 'autoCollapse', 'false');
-      };
-      settingACServerList.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_SERVER_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACChannelList.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_CHANNEL_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACUserArea.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_USER_AREA] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACMsgBar.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_MSG_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACCallContainer.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_CALL_CONTAINER] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACWindowBar.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_WINDOW_BAR] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACMembersList.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_MEMBERS_LIST] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-      settingACProfilePanel.onChange = function (result) {
-        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
-          'autoCollapseThreshold').split(',');
-        cui.autoCollapseThreshold[cui.I_USER_PROFILE] = result;
-        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
-          cui.autoCollapseThreshold.toString());
-      };
-
-      // Register advanced settings onChange events
-      settingSettingsButtonsMaxWidth.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
-      };
-      settingMessageBarButtonsMaxWidth.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'messageBarButtonsMaxWidth', result);
-      };
-      settingMessageBarButtonsMinWidth.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'messageBarButtonsMinWidth', result);
-      };
-      settingToolbarIconMaxWidth.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', result);
-      };
-      settingToolbarMaxWidth.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', result);
-      };
-      settingUserAreaMaxHeight.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', result);
-      };
-      settingMsgBarMaxHeight.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', result);
-      };
-      settingWindowBarHeight.onChange = function (result) {
-        BdApi.setData('CollapsibleUI', 'windowBarHeight', result);
-      };
-
-      // Return final settings page
-      return this.settingsHandle;
+      return this.buildSettingsPanel();
     }
 
     // Main plugin code
-    initialize = () => {
+    initialize = async() => {
       try {
+
+        // Use asynchronous initialization to prevent double reloading
+        //   and speed up plugin
+        if (this.isInit) delete(this.isInit)
+        await new Promise(r => setTimeout(r, 100));
+        if (this.isInit) return;
+        this.isInit = true;
+
         this.terminate(); // Clean up UI
 
         // Display reloading message (dev only)
-        // console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
+         console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
 
         // Constants
         this.MAX_ITER_MUTATIONS = 35;
@@ -1692,8 +534,9 @@ https://programmer2514.github.io/?l=cui-changelog`
         ?.parentElement.parentElement.parentElement;
       this.msgBarBtnContainer = document.querySelector('.buttons_ce5b56');
       this.membersListInner = document.querySelector('.members__9f47b');
+      this.membersListWrapper = document.querySelector('.container_b2ce9c');
       this.membersListNotices = document.querySelector('.membersListNotices_a4cb13');
-      this.contentWindow = document.querySelector('.container__93316');
+      this.contentWindow = document.querySelector('.chatContent__5dca8');
 
       this.callContainerExists = (document.querySelector('.'
         + this.classCallContainer));
@@ -2283,6 +1126,1176 @@ https://programmer2514.github.io/?l=cui-changelog`
       }
     }
 
+    // Builds the settings panel, to be used by getSettingsPanel()
+    buildSettingsPanel = () => {
+      var zps = Library.Settings;
+      var cui = this;
+
+      // Create root settings node
+      var settingsRoot = new zps.SettingPanel();
+
+      // Create Main subgroup
+      var groupMain = new zps.SettingGroup('Main');
+
+      // Create main settings
+      var settingDisableTransitions =
+        new zps.Switch('Disable UI Transitions',
+          'Disables all UI animations, but also disables Dynamic Uncollapse \
+            and resizable UI panels',
+          BdApi.getData('CollapsibleUI', 'disableTransitions') === 'true');
+      var settingTransitionSpeed =
+        new zps.Textbox('UI Transition Speed (ms)',
+          'Sets the speed of UI animations',
+          BdApi.getData('CollapsibleUI', 'transitionSpeed'),
+          null, { placeholder: 'Default: 250' });
+      var settingDisableToolbarCollapse =
+        new zps.Switch('Disable Toolbar Auto-collapse',
+          'Disables the automatic collapsing of CollapsibleUI\'s toolbar icons',
+          BdApi.getData('CollapsibleUI', 'disableToolbarCollapse') === 'true');
+      var settingDisableSettingsCollapse =
+        new zps.Switch('Disable User Settings Auto-collapse',
+          'Disables the automatic collapsing of the mute/deafen and call buttons',
+          BdApi.getData('CollapsibleUI', 'disableSettingsCollapse') === 'true');
+      var settingDisableMsgBarBtnCollapse =
+        new zps.Switch('Disable Message Bar Button Auto-collapse',
+          'Disables the automatic collapsing of the GIF, sticker, emoji, and \
+            gift buttons',
+          BdApi.getData('CollapsibleUI', 'disableMsgBarBtnCollapse') === 'true');
+      var settingEnableFullToolbarCollapse =
+        new zps.Switch('Enable Full Toolbar Auto-collapse',
+          'Enables the automatic collapsing of the full vanilla Discord toolbar',
+          BdApi.getData('CollapsibleUI', 'enableFullToolbarCollapse') === 'true');
+      var settingResizableChannelList =
+        new zps.Switch('Resizable Channel List',
+          'Allows the channel list to be resized horizontally by \
+            clicking-and-dragging on its bottom-right corner',
+          BdApi.getData('CollapsibleUI', 'resizableChannelList') === 'true');
+      var settingResizableMembersList =
+        new zps.Switch('Resizable Members List',
+          'Allows the members list to be resized horizontally by \
+            clicking-and-dragging on its bottom-left corner',
+          BdApi.getData('CollapsibleUI', 'resizableMembersList') === 'true');
+      var settingResizableUserProfile =
+        new zps.Switch('Resizable User Profile',
+          'Allows the user profile to be resized horizontally by \
+            clicking-and-dragging on its bottom-left corner',
+          BdApi.getData('CollapsibleUI', 'resizableUserProfile') === 'true');
+      var settingPersistentUnreadBadge =
+        new zps.Switch('Persistent Unread DM Badge',
+          'Displays a badge next to the Discord wordmark showing the number of \
+            unread DMs',
+          BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'true');
+
+      // Append main settings to Main subgroup
+      groupMain.append(settingDisableTransitions);
+      groupMain.append(settingTransitionSpeed);
+      groupMain.append(settingDisableToolbarCollapse);
+      groupMain.append(settingDisableSettingsCollapse);
+      groupMain.append(settingDisableMsgBarBtnCollapse);
+      groupMain.append(settingEnableFullToolbarCollapse);
+      groupMain.append(settingResizableChannelList);
+      groupMain.append(settingResizableMembersList);
+      groupMain.append(settingResizableUserProfile);
+      groupMain.append(settingPersistentUnreadBadge);
+
+      // Create Keyboard Shortcuts subgroup
+      var groupKB = new zps.SettingGroup('Keyboard Shortcuts');
+
+      // Create keyboard shortcut settings
+      var settingKBEnabled = new zps.Switch('Keyboard Shortcuts Enabled',
+          'Enables shortcuts to collapse UI elements',
+          BdApi.getData('CollapsibleUI', 'keyBindsEnabled') === 'true');
+      var settingKBServerList = new zps.Textbox('Toggle Server List - Shortcut',
+          'Case-insensitive. Do not use spaces. Valid modifiers are Ctrl, Alt, \
+            and Shift. Ctrl+Alt cannot be combined in any order due to a \
+            JavaScript limitation',
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_SERVER_LIST],
+          null, { placeholder: 'Default: Alt+S' });
+      var settingKBChannelList =
+        new zps.Textbox('Toggle Channel List - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_CHANNEL_LIST],
+          null, { placeholder: 'Default: Alt+C' });
+      var settingKBUserArea = new zps.Textbox('Toggle User Area - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_USER_AREA],
+          null, { placeholder: 'Default: Alt+U' });
+      var settingKBMsgBar = new zps.Textbox('Toggle Message Bar - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_MSG_BAR],
+          null, { placeholder: 'Default: Alt+T' });
+      var settingKBCallContainer =
+        new zps.Textbox('Toggle Call Container - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_CALL_CONTAINER],
+          null, { placeholder: 'Default: Alt+P' });
+      var settingKBWindowBar = new zps.Textbox('Toggle Window Bar - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_WINDOW_BAR],
+          null, { placeholder: 'Default: Alt+W' });
+      var settingKBMembersList = new zps.Textbox('Toggle Members List - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_MEMBERS_LIST],
+          null, { placeholder: 'Default: Alt+M' });
+      var settingKBProfilePanel = new zps.Textbox('Toggle User Profile - Shortcut',
+          null,
+          BdApi.getData('CollapsibleUI', 'keyStringList')
+            .split(',')[this.I_USER_PROFILE],
+          null, { placeholder: 'Default: Alt+I' });
+
+      // Append keyboard shortcut settings to Keyboard Shortcuts subgroup
+      groupKB.append(settingKBEnabled);
+      groupKB.append(settingKBServerList);
+      groupKB.append(settingKBChannelList);
+      groupKB.append(settingKBUserArea);
+      groupKB.append(settingKBMsgBar);
+      groupKB.append(settingKBCallContainer);
+      groupKB.append(settingKBWindowBar);
+      groupKB.append(settingKBMembersList);
+      groupKB.append(settingKBProfilePanel);
+
+      // Create Dynamic Uncollapse subgroup
+      var groupDU = new zps.SettingGroup('Dynamic Uncollapse');
+
+      // Create dynamic uncollapse settings
+      var settingDynamicUncollapse = new zps.Switch('Dynamic Uncollapse',
+          'Makes collapsed UI elements expand when the mouse is near them. \
+            When disabled, autocollapse is also disabled. Does not work with \
+            transitions disabled',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapse') === 'true');
+      var settingFloatingDynamicUncollapse = new zps.Switch('Floating Dynamic Uncollapse',
+          'Makes dynamically uncollapsed UI elements float above other elements, \
+            instead of pushing them aside. This will be disabled if Collapsed \
+            Element Distance is not equal to 0',
+          BdApi.getData('CollapsibleUI', 'floatingDynamicUncollapse') === 'true');
+      var settingCollapsedDistance = new zps.Textbox('Collapsed Element Distance',
+          'Sets the size (px) of UI elements when they are collapsed',
+          BdApi.getData('CollapsibleUI', 'collapsedDistance'),
+          null, { placeholder: 'Default: 0' });
+      var settingButtonCollapseFudgeFactor =
+        new zps.Textbox('Button Collapse Fudge Factor',
+          'Sets (in px) how far the mouse has to be from a set of collapsible \
+            buttons before they collapse',
+          BdApi.getData('CollapsibleUI', 'buttonCollapseFudgeFactor'),
+          null, { placeholder: 'Default: 10' });
+      var settingDynamicUncollapseDelay =
+        new zps.Textbox('Dynamic Uncollapse Delay (ms)',
+          'Sets the delay before a UI element uncollapses on hover',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDelay'),
+          null, { placeholder: 'Default: 15' });
+      var settingDUDistServerList =
+        new zps.Textbox('Server List - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_SERVER_LIST],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCServerList =
+        new zps.Textbox('Server List - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_SERVER_LIST],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistChannelList =
+        new zps.Textbox('Channel List - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_CHANNEL_LIST],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCChannelList =
+        new zps.Textbox('Channel List - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_CHANNEL_LIST],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistUserArea =
+        new zps.Textbox('User Area - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_USER_AREA],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCUserArea =
+        new zps.Textbox('User Area - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_USER_AREA],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistMsgBar =
+        new zps.Textbox('Message Bar - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_MSG_BAR],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCMsgBar =
+        new zps.Textbox('Message Bar - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_MSG_BAR],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCallContainer =
+        new zps.Textbox('Call Container - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_CALL_CONTAINER],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCCallContainer =
+        new zps.Textbox('Call Container - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_CALL_CONTAINER],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistWindowBar =
+        new zps.Textbox('Window Bar - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_WINDOW_BAR],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCWindowBar =
+        new zps.Textbox('Window Bar - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_WINDOW_BAR],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistMembersList =
+        new zps.Textbox('Members List - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_MEMBERS_LIST],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCMembersList =
+        new zps.Textbox('Members List - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_MEMBERS_LIST],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistProfilePanel =
+        new zps.Textbox('User Profile - Opening Distance (px)',
+          'Distance that mouse must be from element in order for it to expand',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseDistance')
+            .split(',')[this.I_USER_PROFILE],
+          null, { placeholder: 'Default: 30' });
+      var settingDUDistCProfilePanel =
+        new zps.Textbox('User Profile - Closing Distance (px)',
+          'Distance that mouse must be from element in order for it to collapse',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseCloseDistance')
+            .split(',')[this.I_USER_PROFILE],
+          null, { placeholder: 'Default: 30' });
+
+      // Append autocollapse settings to Autocollapse subgroup
+      groupDU.append(settingDynamicUncollapse);
+      groupDU.append(settingFloatingDynamicUncollapse);
+      groupDU.append(settingCollapsedDistance);
+      groupDU.append(settingButtonCollapseFudgeFactor);
+      groupDU.append(settingDynamicUncollapseDelay);
+      groupDU.append(settingDUDistServerList);
+      groupDU.append(settingDUDistCServerList);
+      groupDU.append(settingDUDistChannelList);
+      groupDU.append(settingDUDistCChannelList);
+      groupDU.append(settingDUDistUserArea);
+      groupDU.append(settingDUDistCUserArea);
+      groupDU.append(settingDUDistMsgBar);
+      groupDU.append(settingDUDistCMsgBar);
+      groupDU.append(settingDUDistCallContainer);
+      groupDU.append(settingDUDistCCallContainer);
+      groupDU.append(settingDUDistWindowBar);
+      groupDU.append(settingDUDistCWindowBar);
+      groupDU.append(settingDUDistMembersList);
+      groupDU.append(settingDUDistCMembersList);
+      groupDU.append(settingDUDistProfilePanel);
+      groupDU.append(settingDUDistCProfilePanel);
+
+      // Create Selective Dynamic Uncollapse subgroup
+      var groupSDU = new zps.SettingGroup('Selective Dynamic Uncollapse');
+
+      // Create selective dynamic uncollapse settings
+      var settingDUServerList = new zps.Switch('Server List',
+          'Toggles Dynamic Uncollapse for the server list',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_SERVER_LIST] === 'true');
+      var settingDUChannelList = new zps.Switch('Channel List',
+          'Toggles Dynamic Uncollapse for the channel list',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_CHANNEL_LIST] === 'true');
+      var settingDUUserArea = new zps.Switch('User Area',
+          'Toggles Dynamic Uncollapse for the user area',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_USER_AREA] === 'true');
+      var settingDUMsgBar = new zps.Switch('Message Bar',
+          'Toggles Dynamic Uncollapse for the message bar',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_MSG_BAR] === 'true');
+      var settingDUCallContainer = new zps.Switch('Call Container',
+          'Toggles Dynamic Uncollapse for the call container',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_CALL_CONTAINER] === 'true');
+      var settingDUWindowBar = new zps.Switch('Window Bar',
+          'Toggles Dynamic Uncollapse for the window bar',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_WINDOW_BAR] === 'true');
+      var settingDUMembersList = new zps.Switch('Members List',
+          'Toggles Dynamic Uncollapse for the members list',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_MEMBERS_LIST] === 'true');
+      var settingDUProfilePanel = new zps.Switch('User Profile',
+          'Toggles Dynamic Uncollapse for the user profile',
+          BdApi.getData('CollapsibleUI', 'dynamicUncollapseEnabled')
+            .split(',')[this.I_USER_PROFILE] === 'true');
+
+      // Append selective dynamic uncollapse settings to
+      //   Selective Dynamic Uncollapse subgroup
+      groupSDU.append(settingDUServerList);
+      groupSDU.append(settingDUChannelList);
+      groupSDU.append(settingDUUserArea);
+      groupSDU.append(settingDUMsgBar);
+      groupSDU.append(settingDUCallContainer);
+      groupSDU.append(settingDUWindowBar);
+      groupSDU.append(settingDUMembersList);
+      groupSDU.append(settingDUProfilePanel);
+
+      // Create Autocollapse subgroup
+      var groupAC = new zps.SettingGroup('Autocollapse');
+
+      // Create autocollapse settings
+      var settingACEnabled = new zps.Switch('Autocollapse Enabled',
+          'Enables auto-collapse of UI elements based on window size. Does not \
+            work with dynamic uncollapse disabled',
+          BdApi.getData('CollapsibleUI', 'autoCollapse') === 'true');
+      var settingACServerList = new zps.Textbox('Server List - Threshold',
+          'Maximum width for element to remain uncollapsed. Specifies height \
+            if Horizontal Server List is enabled',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_SERVER_LIST],
+          null, { placeholder: 'Default: 500' });
+      var settingACChannelList = new zps.Textbox('Channel List - Threshold',
+          'Maximum width for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_CHANNEL_LIST],
+          null, { placeholder: 'Default: 600' });
+      var settingACUserArea = new zps.Textbox('User Area - Threshold',
+          'Maximum height for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_USER_AREA],
+          null, { placeholder: 'Default: 400' });
+      var settingACMsgBar = new zps.Textbox('Message Bar - Threshold',
+          'Maximum height for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_MSG_BAR],
+          null, { placeholder: 'Default: 400' });
+      var settingACCallContainer = new zps.Textbox('Call Container - Threshold',
+          'Maximum height for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_CALL_CONTAINER],
+          null, { placeholder: 'Default: 550' });
+      var settingACWindowBar = new zps.Textbox('Window Bar - Threshold',
+          'Maximum height for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_WINDOW_BAR],
+          null, { placeholder: 'Default: 200' });
+      var settingACMembersList = new zps.Textbox('Members List - Threshold',
+          'Maximum width for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_MEMBERS_LIST],
+          null, { placeholder: 'Default: 950' });
+      var settingACProfilePanel = new zps.Textbox('User Profile - Threshold',
+          'Maximum width for element to remain uncollapsed',
+          BdApi.getData('CollapsibleUI', 'autoCollapseThreshold')
+            .split(',')[this.I_USER_PROFILE],
+          null, { placeholder: 'Default: 1000' });
+
+      // Append autocollapse settings to Autocollapse subgroup
+      groupAC.append(settingACEnabled);
+      groupAC.append(settingACServerList);
+      groupAC.append(settingACChannelList);
+      groupAC.append(settingACUserArea);
+      groupAC.append(settingACMsgBar);
+      groupAC.append(settingACCallContainer);
+      groupAC.append(settingACWindowBar);
+      groupAC.append(settingACMembersList);
+      groupAC.append(settingACProfilePanel);
+
+      // Create Conditional Autocollapse subgroup
+      var groupCA = new zps.SettingGroup('Conditional Autocollapse');
+
+      // Create conditional autocollapse settings
+      var settingCAEnabled = new zps.Switch('Conditional Autocollapse Enabled',
+          'Enables auto-collapse of UI elements based on custom conditionals',
+          BdApi.getData('CollapsibleUI', 'conditionalAutoCollapse') === 'true');
+      var settingCAServerList = new zps.Textbox('Server List',
+          'A conditional expression which, when evaluated, will cause the \
+            element to collapse if it is true. When set, overrides traditional \
+            autocollapse.',
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_SERVER_LIST],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCAChannelList = new zps.Textbox('Channel List',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_CHANNEL_LIST],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCAUserArea = new zps.Textbox('User Area',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_USER_AREA],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCAMsgBar = new zps.Textbox('Message Bar',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_MSG_BAR],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCACallContainer = new zps.Textbox('Call Container',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_CALL_CONTAINER],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCAWindowBar = new zps.Textbox('Window Bar',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_WINDOW_BAR],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCAMembersList = new zps.Textbox('Members List',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_MEMBERS_LIST],
+          null, { placeholder: 'Default: <blank>' });
+      var settingCAProfilePanel = new zps.Textbox('User Profile',
+          null,
+          BdApi.getData('CollapsibleUI', 'autoCollapseConditionals')
+            .split(',')[this.I_USER_PROFILE],
+          null, { placeholder: 'Default: <blank>' });
+
+      // Append conditional autocollapse settings to Conditional AC subgroup
+      groupCA.append(settingCAEnabled);
+      groupCA.append(settingCAServerList);
+      groupCA.append(settingCAChannelList);
+      groupCA.append(settingCAUserArea);
+      groupCA.append(settingCAMsgBar);
+      groupCA.append(settingCACallContainer);
+      groupCA.append(settingCAWindowBar);
+      groupCA.append(settingCAMembersList);
+      groupCA.append(settingCAProfilePanel);
+
+      // Create Button Customization subgroup
+      var groupButtons = new zps.SettingGroup('Button Customization');
+
+      // Create button settings
+      var settingDisabledButtonsStayCollapsed =
+        new zps.Switch('Disabled Buttons Stay Collapsed?',
+          'When enabled, elements will remain collapsed when their \
+            corresponding buttons are disabled',
+          BdApi.getData('CollapsibleUI', 'disabledButtonsStayCollapsed') === 'true');
+      var settingServerList = new zps.Slider('Server List',
+          '[Default = 1, Disabled = 0] - Sets order index of the Server List \
+            button (far left panel)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_SERVER_LIST],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingChannelList = new zps.Slider('Channel List',
+          '[Default = 2, Disabled = 0] - Sets order index of the Channel List \
+            button (big left panel)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_CHANNEL_LIST],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingUserArea = new zps.Slider('User Area',
+          '[Default = 3, Disabled = 0] - Sets order index of the User Area \
+            button (username/handle, call controls)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_USER_AREA],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingMsgBar = new zps.Slider('Message Bar',
+          '[Default = 4, Disabled = 0] - Sets order index of the Message Bar \
+            button (typing area)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_MSG_BAR],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingCallContainer = new zps.Slider('Call Container',
+          '[Default = 5, Disabled = 0] - Sets order index of the Call \
+            Container button (video chat/call controls panel)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_CALL_CONTAINER],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingWindowBar = new zps.Slider('Window Bar',
+          '[Default = 6, Disabled = 0] - Sets order index of the Window bar \
+            button (maximize/minimize/close buttons)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_WINDOW_BAR],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingMembersList = new zps.Slider('Members List',
+          '[Default = 7, Disabled = 0] - Sets order index of the Members List \
+            button (right panel)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_MEMBERS_LIST],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+      var settingProfilePanel = new zps.Slider('User Profile',
+          '[Default = 8, Disabled = 0] - Sets order index of the User Profile \
+            button (right panel in DMs)',
+          0,
+          8,
+          BdApi.getData('CollapsibleUI', 'buttonsOrder').split(',')
+            .map(Number)[this.I_USER_PROFILE],
+          null, {
+          markers: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+          stickToMarkers: true,
+          equidistant: true
+        });
+
+      // Append button settings to Button Customization subgroup
+      groupButtons.append(settingDisabledButtonsStayCollapsed);
+      groupButtons.append(settingServerList);
+      groupButtons.append(settingChannelList);
+      groupButtons.append(settingUserArea);
+      groupButtons.append(settingMsgBar);
+      groupButtons.append(settingCallContainer);
+      groupButtons.append(settingWindowBar);
+      groupButtons.append(settingMembersList);
+      groupButtons.append(settingProfilePanel);
+
+      // Create Advanced subgroup
+      var groupAdvanced = new zps.SettingGroup('Advanced');
+
+      // Create advanced settings
+      var settingSettingsButtonsMaxWidth =
+        new zps.Textbox('Settings Buttons - Max Width',
+          null,
+          BdApi.getData('CollapsibleUI', 'settingsButtonsMaxWidth'),
+          null, { placeholder: 'Default: 100' });
+      var settingMessageBarButtonsMaxWidth =
+        new zps.Textbox('Message Bar Buttons - Max Width',
+          null,
+          BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth'),
+          null, { placeholder: 'Default: 200' });
+      var settingMessageBarButtonsMinWidth =
+        new zps.Textbox('Message Bar Buttons - Collapsed Width',
+          null,
+          BdApi.getData('CollapsibleUI', 'messageBarButtonsMinWidth'),
+          null, { placeholder: 'Default: 40' });
+      var settingToolbarIconMaxWidth =
+        new zps.Textbox('Toolbar Icons - Max Width',
+          null,
+          BdApi.getData('CollapsibleUI', 'toolbarIconMaxWidth'),
+          null, { placeholder: 'Default: 300' });
+      var settingToolbarMaxWidth = new zps.Textbox('Toolbar - Max Width',
+          null,
+          BdApi.getData('CollapsibleUI', 'toolbarMaxWidth'),
+          null, { placeholder: 'Default: 800' });
+      var settingUserAreaMaxHeight = new zps.Textbox('User Area - Max Height',
+          null,
+          BdApi.getData('CollapsibleUI', 'userAreaMaxHeight'),
+          null, { placeholder: 'Default: 300' });
+      var settingMsgBarMaxHeight = new zps.Textbox('Message Bar - Max Height',
+          null,
+          BdApi.getData('CollapsibleUI', 'msgBarMaxHeight'),
+          null, { placeholder: 'Default: 400' });
+      var settingWindowBarHeight = new zps.Textbox('Window Bar - Height',
+          null,
+          BdApi.getData('CollapsibleUI', 'windowBarHeight'),
+          null, { placeholder: 'Default: 18' });
+
+      // Append advanced settings to Advanced subgroup
+      groupAdvanced.append(settingSettingsButtonsMaxWidth);
+      groupAdvanced.append(settingMessageBarButtonsMaxWidth);
+      groupAdvanced.append(settingMessageBarButtonsMinWidth);
+      groupAdvanced.append(settingToolbarIconMaxWidth);
+      groupAdvanced.append(settingToolbarMaxWidth);
+      groupAdvanced.append(settingUserAreaMaxHeight);
+      groupAdvanced.append(settingMsgBarMaxHeight);
+      groupAdvanced.append(settingWindowBarHeight);
+
+      // Append subgroups to root node
+      settingsRoot.append(groupMain);
+      settingsRoot.append(groupAC);
+      settingsRoot.append(groupKB);
+      settingsRoot.append(groupDU);
+      settingsRoot.append(groupButtons);
+      settingsRoot.append(groupSDU);
+      settingsRoot.append(groupCA);
+      settingsRoot.append(groupAdvanced);
+
+      // Register main settings onChange events
+      settingDisableTransitions.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'disableTransitions', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'disableTransitions', 'false');
+      };
+      settingTransitionSpeed.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'transitionSpeed', result);
+      };
+      settingDisableToolbarCollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'disableToolbarCollapse', 'false');
+      };
+      settingDisableSettingsCollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'disableSettingsCollapse', 'false');
+      };
+      settingDisableMsgBarBtnCollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'disableMsgBarBtnCollapse', 'false');
+      };
+      settingEnableFullToolbarCollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'enableFullToolbarCollapse', 'false');
+      };
+      settingResizableChannelList.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'resizableChannelList', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'resizableChannelList', 'false');
+      };
+      settingResizableMembersList.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'resizableMembersList', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'resizableMembersList', 'false');
+      };
+      settingResizableUserProfile.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'resizableUserProfile', 'false');
+      };
+      settingPersistentUnreadBadge.onChange = function (result) {
+        cui.updateDMBadge(!result);
+        if (result)
+          BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'false');
+      };
+
+      // Register button settings onChange events
+      settingDisabledButtonsStayCollapsed.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'disabledButtonsStayCollapsed', 'false');
+      };
+      settingServerList.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingChannelList.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingUserArea.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingMsgBar.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingCallContainer.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingWindowBar.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingMembersList.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+      settingProfilePanel.onChange = function (result) {
+        var newButtonsOrder = BdApi.getData('CollapsibleUI', 'buttonsOrder')
+          .split(',').map(Number);
+        newButtonsOrder[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'buttonsOrder', newButtonsOrder.toString());
+      };
+
+      // Register dynamic uncollapse settings onChange events
+      settingDynamicUncollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'dynamicUncollapse', 'false');
+      };
+      settingFloatingDynamicUncollapse.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'floatingDynamicUncollapse', 'false');
+      };
+      settingCollapsedDistance.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'collapsedDistance', result);
+      };
+      settingButtonCollapseFudgeFactor.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'buttonCollapseFudgeFactor', result);
+      };
+      settingDynamicUncollapseDelay.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDelay', result);
+      };
+      settingDUDistServerList.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCServerList.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistChannelList.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCChannelList.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistUserArea.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCUserArea.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistMsgBar.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCMsgBar.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistCallContainer.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCCallContainer.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistWindowBar.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCWindowBar.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistMembersList.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCMembersList.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+      settingDUDistProfilePanel.onChange = function (result) {
+        cui.dynamicUncollapseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseDistance').split(',');
+        cui.dynamicUncollapseDistance[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseDistance',
+          cui.dynamicUncollapseDistance.toString());
+      };
+      settingDUDistCProfilePanel.onChange = function (result) {
+        cui.dynamicUncollapseCloseDistance = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseCloseDistance').split(',');
+        cui.dynamicUncollapseCloseDistance[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseCloseDistance',
+          cui.dynamicUncollapseCloseDistance.toString());
+      };
+
+      // Register keyboard shortcut settings onChange events
+      settingKBEnabled.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'keyBindsEnabled', 'false');
+      };
+      settingKBServerList.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBChannelList.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBUserArea.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBMsgBar.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBCallContainer.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBWindowBar.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBMembersList.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+      settingKBProfilePanel.onChange = function (result) {
+        cui.keyStringList = BdApi.getData('CollapsibleUI',
+          'keyStringList').split(',');
+        cui.keyStringList[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'keyStringList',
+          cui.keyStringList.toString());
+      };
+
+      // Register conditional autocollapse settings onChange events
+      settingCAEnabled.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'conditionalAutoCollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'conditionalAutoCollapse', 'false');
+      };
+      settingCAServerList.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCAChannelList.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCAUserArea.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCAMsgBar.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCACallContainer.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCAWindowBar.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCAMembersList.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+      settingCAProfilePanel.onChange = function (result) {
+        cui.autoCollapseConditionals = BdApi.getData('CollapsibleUI',
+          'autoCollapseConditionals').split(',');
+        cui.autoCollapseConditionals[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseConditionals',
+          cui.autoCollapseConditionals.toString());
+      };
+
+      // Register selective dynamic uncollapse settings onChange events
+      settingDUServerList.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUChannelList.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUUserArea.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUMsgBar.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUCallContainer.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUWindowBar.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUMembersList.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+      settingDUProfilePanel.onChange = function (result) {
+        cui.dynamicUncollapseEnabled = BdApi.getData('CollapsibleUI',
+          'dynamicUncollapseEnabled').split(',')
+          .map(x => (x == 'true') ? true : false);
+        cui.dynamicUncollapseEnabled[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'dynamicUncollapseEnabled',
+          cui.dynamicUncollapseEnabled.toString());
+      };
+
+      // Register autocollapse settings onChange events
+      settingACEnabled.onChange = function (result) {
+        if (result)
+          BdApi.setData('CollapsibleUI', 'autoCollapse', 'true');
+        else
+          BdApi.setData('CollapsibleUI', 'autoCollapse', 'false');
+      };
+      settingACServerList.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_SERVER_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACChannelList.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_CHANNEL_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACUserArea.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_USER_AREA] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACMsgBar.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_MSG_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACCallContainer.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_CALL_CONTAINER] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACWindowBar.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_WINDOW_BAR] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACMembersList.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_MEMBERS_LIST] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+      settingACProfilePanel.onChange = function (result) {
+        cui.autoCollapseThreshold = BdApi.getData('CollapsibleUI',
+          'autoCollapseThreshold').split(',');
+        cui.autoCollapseThreshold[cui.I_USER_PROFILE] = result;
+        BdApi.setData('CollapsibleUI', 'autoCollapseThreshold',
+          cui.autoCollapseThreshold.toString());
+      };
+
+      // Register advanced settings onChange events
+      settingSettingsButtonsMaxWidth.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth', result);
+      };
+      settingMessageBarButtonsMaxWidth.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'messageBarButtonsMaxWidth', result);
+      };
+      settingMessageBarButtonsMinWidth.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'messageBarButtonsMinWidth', result);
+      };
+      settingToolbarIconMaxWidth.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'toolbarIconMaxWidth', result);
+      };
+      settingToolbarMaxWidth.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'toolbarMaxWidth', result);
+      };
+      settingUserAreaMaxHeight.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'userAreaMaxHeight', result);
+      };
+      settingMsgBarMaxHeight.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'msgBarMaxHeight', result);
+      };
+      settingWindowBarHeight.onChange = function (result) {
+        BdApi.setData('CollapsibleUI', 'windowBarHeight', result);
+      };
+
+      return settingsRoot.getElement()
+    }
+
     // Collapses toolbar icons
     collapseToolbarIcons = (buttonsActive) => {
       if (this.serverListButton) {
@@ -2428,8 +2441,155 @@ https://programmer2514.github.io/?l=cui-changelog`
       return newTooltip;
     }
 
+    // Deletes all fields defined during plugin initialization
+    deleteFields = () => {
+      delete(this.I_CALL_CONTAINER)
+      delete(this.I_CHANNEL_LIST)
+      delete(this.I_MEMBERS_LIST)
+      delete(this.I_MSG_BAR)
+      delete(this.I_SERVER_LIST)
+      delete(this.I_USER_AREA)
+      delete(this.I_USER_PROFILE)
+      delete(this.I_WINDOW_BAR)
+      delete(this.MAX_ITER_MUTATIONS)
+      delete(this.TOOLTIP_OFFSET_PX)
+      delete(this.appObserver)
+      delete(this.appWrapper)
+      delete(this.autoCollapse)
+      delete(this.autoCollapseConditionals)
+      delete(this.autoCollapseThreshold)
+      delete(this.avatarWrapper)
+      delete(this.baseLayer)
+      delete(this.buttonCollapseFudgeFactor)
+      delete(this.buttonsOrder)
+      delete(this.callContainerButton)
+      delete(this.callContainerExists)
+      delete(this.callDUDelay)
+      delete(this.channelDUDelay)
+      delete(this.channelList)
+      delete(this.channelListButton)
+      delete(this.channelListWidth)
+      delete(this.channelListWidthObserver)
+      delete(this.classAppWrapper)
+      delete(this.classCallContainer)
+      delete(this.classCallUserWrapper)
+      delete(this.classChannelList)
+      delete(this.classClickable)
+      delete(this.classDMElement)
+      delete(this.classEphemeralContent)
+      delete(this.classIconWrapper)
+      delete(this.classLayers)
+      delete(this.classMembersList)
+      delete(this.classMembersListMember)
+      delete(this.classMembersListWrapper)
+      delete(this.classMsgButtons)
+      delete(this.classNoChat)
+      delete(this.classProfilePanelWrapper)
+      delete(this.classSelected)
+      delete(this.classServerList)
+      delete(this.classTextInput)
+      delete(this.classTooltip)
+      delete(this.classTooltipBottom)
+      delete(this.classTooltipContent)
+      delete(this.classTooltipDPE)
+      delete(this.classTooltipPointer)
+      delete(this.classTooltipPrimary)
+      delete(this.classTooltipWrapper)
+      delete(this.classTooltipWrapperDPE)
+      delete(this.classUnreadDMBadge)
+      delete(this.classUnreadDmBadgeBase)
+      delete(this.classUnreadDmBadgeEyebrow)
+      delete(this.classUnreadDmBadgeLocation)
+      delete(this.classUnreadDmBadgeShape)
+      delete(this.classUserPopout)
+      delete(this.collapsedDistance)
+      delete(this.conditionalAutoCollapse)
+      delete(this.contentWindow)
+      delete(this.disableMsgBarBtnCollapse)
+      delete(this.disableSettingsCollapse)
+      delete(this.disableToolbarCollapse)
+      delete(this.disableTransitions)
+      delete(this.disabledButtonsStayCollapsed)
+      delete(this.dynamicUncollapse)
+      delete(this.dynamicUncollapseCloseDistance)
+      delete(this.dynamicUncollapseDelay)
+      delete(this.dynamicUncollapseDistance)
+      delete(this.dynamicUncollapseEnabled)
+      delete(this.enableFullToolbarCollapse)
+      delete(this.eventListenerController)
+      delete(this.eventListenerSignal)
+      delete(this.floatingDynamicUncollapse)
+      delete(this.fullscreenButton)
+      delete(this.inviteToolbar)
+      delete(this.isCollapsed)
+      delete(this.isDarkMatterLoaded)
+      delete(this.isHSLLoaded)
+      delete(this.isInit)
+      delete(this.keyBindsEnabled)
+      delete(this.keyStringList)
+      delete(this.localeLabels)
+      delete(this.membersDUDelay)
+      delete(this.membersList)
+      delete(this.membersListButton)
+      delete(this.membersListInner)
+      delete(this.membersListNotices)
+      delete(this.membersListWidth)
+      delete(this.membersListWidthObserver)
+      delete(this.membersListWrapper)
+      delete(this.messageBarButtonsMaxWidth)
+      delete(this.messageBarButtonsMinWidth)
+      delete(this.messageDUDelay)
+      delete(this.moreButton)
+      delete(this.mouseX)
+      delete(this.mouseY)
+      delete(this.msgBar)
+      delete(this.msgBarBtnContainer)
+      delete(this.msgBarButton)
+      delete(this.msgBarMaxHeight)
+      delete(this.panelDUDelay)
+      delete(this.persistentUnreadBadge)
+      delete(this.pluginStyle)
+      delete(this.profileBannerSVGWrapper)
+      delete(this.profilePanel)
+      delete(this.profilePanelButton)
+      delete(this.profilePanelInner)
+      delete(this.profilePanelWidth)
+      delete(this.profilePanelWrapper)
+      delete(this.resizableChannelList)
+      delete(this.resizableMembersList)
+      delete(this.resizableUserProfile)
+      delete(this.searchBar)
+      delete(this.serverDUDelay)
+      delete(this.serverList)
+      delete(this.serverListButton)
+      delete(this.settingsButtonsMaxWidth)
+      delete(this.settingsContainer)
+      delete(this.settingsContainerBase)
+      delete(this.settingsObserver)
+      delete(this.spotifyContainer)
+      delete(this.toolBar)
+      delete(this.toolbarContainer)
+      delete(this.toolbarIconMaxWidth)
+      delete(this.toolbarMaxWidth)
+      delete(this.transitionSpeed)
+      delete(this.userArea)
+      delete(this.userAreaButton)
+      delete(this.userAreaMaxHeight)
+      delete(this.userDUDelay)
+      delete(this.windowBar)
+      delete(this.windowBarButton)
+      delete(this.windowBarHeight)
+      delete(this.windowBase)
+      delete(this.windowDUDelay)
+      delete(this.wordMark)
+    }
+
     // Sets the floating status of an element by index
     floatElement = (index, floating) => {
+
+      // Disable floating if elements should remain partially uncollapsed
+      if (this.collapsedDistance > 0) floating = false;
+
       switch (index) {
       case 0: // I_SERVER_LIST
         if (floating && this.floatingDynamicUncollapse) {
@@ -3029,7 +3189,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.collapsedDistance = 0;
       this.buttonCollapseFudgeFactor = 10;
 
-      this.persistentUnreadBadge = true;
+      this.persistentUnreadBadge = false;
 
       // Make sure settings version is set
       if (!BdApi.getData('CollapsibleUI', 'cuiSettingsVersion'))
@@ -3120,9 +3280,13 @@ https://programmer2514.github.io/?l=cui-changelog`
       if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 11) {
         // Clean up (v11)
         BdApi.deleteData('CollapsibleUI', 'profilePanelMaxWidth');
+      }
+      if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 12) {
+        // Clean up (v12)
+        BdApi.deleteData('CollapsibleUI', 'persistentUnreadBadge');
 
         // Set new settings version
-        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '11');
+        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '12');
       }
 
       // disableTransitions [Default: false]
@@ -3455,13 +3619,13 @@ https://programmer2514.github.io/?l=cui-changelog`
         BdApi.setData('CollapsibleUI', 'buttonCollapseFudgeFactor',
           this.buttonCollapseFudgeFactor.toString());
 
-      // persistentUnreadBadge [Default: true]
+      // persistentUnreadBadge [Default: false]
       if (BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'false')
         this.persistentUnreadBadge = false;
       else if (BdApi.getData('CollapsibleUI', 'persistentUnreadBadge') === 'true')
         this.persistentUnreadBadge = true;
       else
-        BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'true');
+        BdApi.setData('CollapsibleUI', 'persistentUnreadBadge', 'false');
     }
 
     // Initializes integration with various themes
@@ -3881,6 +4045,8 @@ https://programmer2514.github.io/?l=cui-changelog`
               this.membersListButton.classList.remove(this.classSelected);
             if (this.disableTransitions) {
               this.membersList.style.display = 'none';
+              if (this.membersListWrapper)
+                this.membersListWrapper.style.display = 'none';
             } else {
               this.membersList.style.transition = 'width ' + this.transitionSpeed
                 + 'ms, min-width ' + this.transitionSpeed + 'ms';
@@ -4443,6 +4609,7 @@ https://programmer2514.github.io/?l=cui-changelog`
             clearTimeout(this.serverDUDelay);
             this.serverDUDelay = false;
           }
+
           this.serverList.style.width = this.collapsedDistance + 'px';
           if (this.isHSLLoaded)
             this.windowBase.style.setProperty('top', '0px', 'important');
@@ -4885,6 +5052,8 @@ https://programmer2514.github.io/?l=cui-changelog`
         if (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true') {
           if (this.disableTransitions) {
             this.membersList.style.display = 'none';
+            if (this.membersListWrapper)
+              this.membersListWrapper.style.display = 'none';
           } else {
             this.membersList.style.transition = 'width ' + this.transitionSpeed
               + 'ms, min-width ' + this.transitionSpeed + 'ms';
@@ -4898,6 +5067,8 @@ https://programmer2514.github.io/?l=cui-changelog`
         } else {
           if (this.disableTransitions) {
             this.membersList.style.removeProperty('display');
+            if (this.membersListWrapper)
+              this.membersListWrapper.style.removeProperty('display');
           } else {
             this.membersList.style.transition = 'width ' + this.transitionSpeed
               + 'ms, min-width ' + this.transitionSpeed + 'ms';

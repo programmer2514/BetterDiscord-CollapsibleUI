@@ -1,5 +1,12 @@
 # CollapsibleUI Patch Notes
 
+### v8.1.0:
+* Fix for even more Discord class/element changes
+* The persistent DM badge is now disabled by default
+* Fixed Members List offset issue when UI transitions are disabled
+* Improved load times and removed unnecessary resource utilization
+* Floating Dynamic Uncollapse will now be disabled if Collapsed Element Distance is not equal to 0
+
 ### v8.0.0:
 * Fix for more Discord class/element changes
 * Fixed elements occasionally collapsing on scroll

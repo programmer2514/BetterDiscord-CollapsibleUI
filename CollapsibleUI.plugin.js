@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.1.0
+ * @version 8.1.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,22 +22,18 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.1.0',
+      version: '8.1.1',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.1.0',
+        title: '8.1.1',
         items: [
-          'Fix for even more Discord class/element changes',
-          'The persistent DM badge is now disabled by default',
-          'Fixed Members List offset issue when UI transitions are disabled',
-          'Improved load times and removed unnecessary resource utilization',
-          'Floating Dynamic Uncollapse will now be disabled if Collapsed Element Distance is not equal to 0'
+          'Fixed floating Server List not properly filling vertical space'
         ]
       }, {
-        title: '1.0.0 - 8.0.0',
+        title: '1.0.0 - 8.1.0',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -2596,11 +2592,13 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.serverList.style.position = 'absolute';
           this.serverList.style.zIndex = '191';
           this.serverList.style.maxHeight = '100%';
+          this.serverList.style.minHeight = '100%';
           this.serverList.style.overflowY = 'scroll';
         } else {
           this.serverList.style.removeProperty('position');
           this.serverList.style.removeProperty('z-index');
           this.serverList.style.removeProperty('max-height');
+          this.serverList.style.removeProperty('min-height');
           this.serverList.style.removeProperty('overflow-y');
         }
         break;

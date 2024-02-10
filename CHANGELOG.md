@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.1.1:
+* Fixed floating Server List not properly filling vertical space
+
 ### v8.1.0:
 * Fix for even more Discord class/element changes
 * The persistent DM badge is now disabled by default

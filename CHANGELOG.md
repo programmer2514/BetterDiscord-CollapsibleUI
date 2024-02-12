@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v8.1.2:
+* Hopefully fixed (or at least improved) Members List briefly jumping open on channel switch
+* More performance improvements
+
 ### v8.1.1:
 * Fixed floating Server List not properly filling vertical space
 

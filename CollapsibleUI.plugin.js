@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.1.1
+ * @version 8.1.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,18 +22,19 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.1.1',
+      version: '8.1.2',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.1.1',
+        title: '8.1.2',
         items: [
-          'Fixed floating Server List not properly filling vertical space'
+          'Hopefully fixed (or at least improved) Members List briefly jumping open on channel switch',
+          'More performance improvements'
         ]
       }, {
-        title: '1.0.0 - 8.1.0',
+        title: '1.0.0 - 8.1.1',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -83,7 +84,7 @@ https://programmer2514.github.io/?l=cui-changelog`
   return class CollapsibleUI extends Plugin {
 
     // Initialize the plugin when it is enabled
-    start = () => {
+    start = async() => {
       this.getJSON('https://api.github.com/repos/programmer2514/BetterDiscord-CollapsibleUI/releases')
       .then((data) => {
         if (data[0].tag_name.substring(1) != BdApi.Plugins.get('CollapsibleUI').version)
@@ -93,8 +94,6 @@ https://programmer2514.github.io/?l=cui-changelog`
             either wait for v${data[0].tag_name.substring(1)} to be approved, \
             or download it manually.`, { timeout: '0' });
       });
-
-      this.buildSettingsPanel();
 
       if (Library.DiscordModules.UserStore.getCurrentUser()) {
         console.log('%c[CollapsibleUI] ' + '%cAttempting pre-load...',
@@ -110,7 +109,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     }
 
     // Restore the default UI when the plugin is disabled
-    stop = () => {
+    stop = async() => {
       this.terminate();
       this.deleteFields();
       console.log('%c[CollapsibleUI] '
@@ -120,7 +119,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     }
 
     // Re-initialize the plugin on switch
-    onSwitch = () => { this.initialize(); }
+    onSwitch = async() => { this.initialize(); }
 
     // Add settings panel
     getSettingsPanel = () => {
@@ -131,30 +130,25 @@ https://programmer2514.github.io/?l=cui-changelog`
     initialize = async() => {
       try {
 
-        // Use asynchronous initialization to prevent double reloading
-        //   and speed up plugin
-        if (this.isInit) delete(this.isInit)
-        await new Promise(r => setTimeout(r, 100));
-        if (this.isInit) return;
-        this.isInit = true;
-
         this.terminate(); // Clean up UI
 
         // Display reloading message (dev only)
-         console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
+        // console.log('%c[CollapsibleUI] ' + '%cReloading...', 'color: #3a71c1; font-weight: 700;', '');
 
         // Constants
-        this.MAX_ITER_MUTATIONS = 35;
-        this.TOOLTIP_OFFSET_PX = 8;
+        if (this.MAX_ITER_MUTATIONS === undefined) {
+          this.MAX_ITER_MUTATIONS = 35;
+          this.TOOLTIP_OFFSET_PX = 8;
 
-        this.I_SERVER_LIST = 0;
-        this.I_CHANNEL_LIST = 1;
-        this.I_MSG_BAR = 2;
-        this.I_WINDOW_BAR = 3;
-        this.I_MEMBERS_LIST = 4;
-        this.I_USER_AREA = 5;
-        this.I_CALL_CONTAINER = 6;
-        this.I_USER_PROFILE = 7;
+          this.I_SERVER_LIST = 0;
+          this.I_CHANNEL_LIST = 1;
+          this.I_MSG_BAR = 2;
+          this.I_WINDOW_BAR = 3;
+          this.I_MEMBERS_LIST = 4;
+          this.I_USER_AREA = 5;
+          this.I_CALL_CONTAINER = 6;
+          this.I_USER_PROFILE = 7;
+        }
 
         // Volatile variables
         this.mouseX = 0;
@@ -245,7 +239,7 @@ https://programmer2514.github.io/?l=cui-changelog`
     }
 
     // Terminate the plugin and undo its effects
-    terminate = () => {
+    terminate = async() => {
       try {
 
         // Remove CollapsibleUI icons
@@ -440,37 +434,39 @@ https://programmer2514.github.io/?l=cui-changelog`
     // Abstracts Discord's confusing class structure
     abstractClassesAndElements = () => {
       // Classes
-      this.classSelected = 'selected_be2668';
-      this.classIconWrapper = 'iconWrapper_af9215';
-      this.classClickable = 'clickable_d23a1a';
-      this.classCallContainer = 'wrapper_bd2abe';
-      this.classCallUserWrapper = 'voiceCallWrapper_a36a80';
-      this.classDMElement = 'channel_c21703';
-      this.classTooltipWrapper = 'layer_ec16dd';
-      this.classTooltipWrapperDPE = 'disabledPointerEvents_bb5546';
-      this.classTooltip = 'tooltip__01384';
-      this.classTooltipBottom = 'tooltipBottom_ba4564';
-      this.classTooltipPrimary = 'tooltipPrimary_e5c00d';
-      this.classTooltipDPE = 'tooltipDisablePointerEvents__14727';
-      this.classTooltipPointer = 'tooltipPointer_a79354';
-      this.classTooltipContent = 'tooltipContent__79a2d';
-      this.classAppWrapper = 'app_de4237';
-      this.classLayers = 'layers_a23c37';
-      this.classChannelList = 'sidebar_ded4b5';
-      this.classServerList = 'wrapper_a7e7a8';
-      this.classUserPopout = 'userPopoutOuter_d739b2';
-      this.classMembersListWrapper = 'container_b2ce9c';
-      this.classMembersListMember = 'member_aa4760';
-      this.classProfilePanelWrapper = 'profilePanel__12596';
-      this.classTextInput = '[data-slate-string="true"]';
-      this.classNoChat = 'noChat_ce920d';
-      this.classMsgButtons = 'wrapper_c727b6';
-      this.classEphemeralContent = 'content__23cab';
-      this.classUnreadDMBadge = 'numberBadge__50328';
-      this.classUnreadDmBadgeBase = 'base__92a12';
-      this.classUnreadDmBadgeEyebrow = 'eyebrow__60985';
-      this.classUnreadDmBadgeShape = 'baseShapeRound__95d0f';
-      this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop_ada847';
+      if (this.classSelected === undefined) {
+        this.classSelected = 'selected_be2668';
+        this.classIconWrapper = 'iconWrapper_af9215';
+        this.classClickable = 'clickable_d23a1a';
+        this.classCallContainer = 'wrapper_bd2abe';
+        this.classCallUserWrapper = 'voiceCallWrapper_a36a80';
+        this.classDMElement = 'channel_c21703';
+        this.classTooltipWrapper = 'layer_ec16dd';
+        this.classTooltipWrapperDPE = 'disabledPointerEvents_bb5546';
+        this.classTooltip = 'tooltip__01384';
+        this.classTooltipBottom = 'tooltipBottom_ba4564';
+        this.classTooltipPrimary = 'tooltipPrimary_e5c00d';
+        this.classTooltipDPE = 'tooltipDisablePointerEvents__14727';
+        this.classTooltipPointer = 'tooltipPointer_a79354';
+        this.classTooltipContent = 'tooltipContent__79a2d';
+        this.classAppWrapper = 'app_de4237';
+        this.classLayers = 'layers_a23c37';
+        this.classChannelList = 'sidebar_ded4b5';
+        this.classServerList = 'wrapper_a7e7a8';
+        this.classUserPopout = 'userPopoutOuter_d739b2';
+        this.classMembersListWrapper = 'container_b2ce9c';
+        this.classMembersListMember = 'member_aa4760';
+        this.classProfilePanelWrapper = 'profilePanel__12596';
+        this.classTextInput = '[data-slate-string="true"]';
+        this.classNoChat = 'noChat_ce920d';
+        this.classMsgButtons = 'wrapper_c727b6';
+        this.classEphemeralContent = 'content__23cab';
+        this.classUnreadDMBadge = 'numberBadge__50328';
+        this.classUnreadDmBadgeBase = 'base__92a12';
+        this.classUnreadDmBadgeEyebrow = 'eyebrow__60985';
+        this.classUnreadDmBadgeShape = 'baseShapeRound__95d0f';
+        this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop_ada847';
+      }
 
 
       if (BdApi.Plugins.isEnabled('ChannelDms')
@@ -2520,7 +2516,6 @@ https://programmer2514.github.io/?l=cui-changelog`
       delete(this.isCollapsed)
       delete(this.isDarkMatterLoaded)
       delete(this.isHSLLoaded)
-      delete(this.isInit)
       delete(this.keyBindsEnabled)
       delete(this.keyStringList)
       delete(this.localeLabels)
@@ -2678,354 +2673,356 @@ https://programmer2514.github.io/?l=cui-changelog`
 
     // Returns the correct language strings for each locale
     getLabels = () => {
-      switch (document.documentElement.getAttribute("lang")) {
-      case "da":
-        this.localeLabels = {
-          serverList: 'Serverliste',
-          channelList: 'Kanalliste',
-          msgBar: 'Meddelelsesbjælke',
-          windowBar: 'Vinduesbjælke',
-          membersList: 'Medlemmerliste',
-          userArea: 'Brugerområdet',
-          callContainer: 'Opkaldsbeholder',
-          profilePanel: 'Brugerprofil'
-        };
-        break;
-      case "de":
-        this.localeLabels = {
-          serverList: 'Server-Liste',
-          channelList: 'Kanal-Liste',
-          msgBar: 'Nachrichten-Bar',
-          windowBar: 'Fenster-Bar',
-          membersList: 'Mitglieder-Liste',
-          userArea: 'Benutzer-Bereich',
-          callContainer: 'Anruf-Container',
-          profilePanel: 'Benutzerprofil'
-        };
-        break;
-      case "es-ES":
-        this.localeLabels = {
-          serverList: 'Lista de Servidores',
-          channelList: 'Lista de Canales',
-          msgBar: 'Barra de Mensajes',
-          windowBar: 'Barra de Ventana',
-          membersList: 'Lista de Miembros',
-          userArea: 'Área de Usuario',
-          callContainer: 'Contenedor Llamadas',
-          profilePanel: 'Perfil del Usuario'
-        };
-        break;
-      case "fr":
-        this.localeLabels = {
-          serverList: 'Liste des Serveurs',
-          channelList: 'Liste des Chaînes',
-          msgBar: 'Barre de Messages',
-          windowBar: 'Barre de Fenêtre',
-          membersList: 'Liste des Membres',
-          userArea: 'Espace Utilisateur',
-          callContainer: 'Conteneur D&apos;appel',
-          profilePanel: 'Profil de L&apos;utilisateur'
-        };
-        break;
-      case "hr":
-        this.localeLabels = {
-          serverList: 'Popis Poslužitelja',
-          channelList: 'Popis Kanala',
-          msgBar: 'Traka Poruke',
-          windowBar: 'Traka Prozora',
-          membersList: 'Popis Članova',
-          userArea: 'Korisničko Područje',
-          callContainer: 'Spremnik Poziva',
-          profilePanel: 'Korisnički Profil'
-        };
-        break;
-      case "it":
-        this.localeLabels = {
-          serverList: 'Elenco Server',
-          channelList: 'Elenco Canali',
-          msgBar: 'Barra Messaggi',
-          windowBar: 'Barra Finestra',
-          membersList: 'Elenco Membri',
-          userArea: 'Area Utente',
-          callContainer: 'Chiama Contenitore',
-          profilePanel: 'Profilo Utente'
-        };
-        break;
-      case "lt":
-        this.localeLabels = {
-          serverList: 'Serverių Sąrašas',
-          channelList: 'Kanalų Sąrašas',
-          msgBar: 'Žinučių Juosta',
-          windowBar: 'Langų Juosta',
-          membersList: 'Narių Sąrašas',
-          userArea: 'Naudotojo Sritis',
-          callContainer: 'Skambučių Konteineris',
-          profilePanel: 'Naudotojo Profilis'
-        };
-        break;
-      case "hu":
-        this.localeLabels = {
-          serverList: 'Szerver Lista',
-          channelList: 'Csatorna Lista',
-          msgBar: 'Üzenetsáv',
-          windowBar: 'Ablaksáv',
-          membersList: 'Tagok Lista',
-          userArea: 'Felhasználói Rész',
-          callContainer: 'Hívás Konténer',
-          profilePanel: 'Felhasználói Profil'
-        };
-        break;
-      case "nl":
-        this.localeLabels = {
-          serverList: 'Serverlijst',
-          channelList: 'Kanaallijst',
-          msgBar: 'Berichtbar',
-          windowBar: 'Vensterbar',
-          membersList: 'Ledenlijst',
-          userArea: 'Gebruikersgebied',
-          callContainer: 'Bel Container',
-          profilePanel: 'Gebruikersprofiel'
-        };
-        break;
-      case "no":
-        this.localeLabels = {
-          serverList: 'Liste over Servere',
-          channelList: 'Liste over Kanaler',
-          msgBar: 'Meldingsfelt',
-          windowBar: 'Vinduslinje',
-          membersList: 'Liste over Medlemmer',
-          userArea: 'Bruker-Området',
-          callContainer: 'Kall Beholder',
-          profilePanel: 'Brukerprofil'
-        };
-        break;
-      case "pl":
-        this.localeLabels = {
-          serverList: 'Lista Serwerów',
-          channelList: 'Lista Kanałów',
-          msgBar: 'Pasek Komunikatów',
-          windowBar: 'Pasek Okna',
-          membersList: 'Lista Członków',
-          userArea: 'Obszar Użytkownika',
-          callContainer: 'Pojemnik na Telefony',
-          profilePanel: 'Profil Użytkownika'
-        };
-        break;
-      case "pt-BR":
-        this.localeLabels = {
-          serverList: 'Lista de Servidores',
-          channelList: 'Lista de Canais',
-          msgBar: 'Barra de Mensagens',
-          windowBar: 'Barra de Janela',
-          membersList: 'Lista de Membros',
-          userArea: 'Área do Usuário',
-          callContainer: 'Container de Chamadas',
-          profilePanel: 'Perfil do Usuário'
-        };
-        break;
-      case "ro":
-        this.localeLabels = {
-          serverList: 'Lista de Servere',
-          channelList: 'Lista de Canale',
-          msgBar: 'Bara de Mesaje',
-          windowBar: 'Bara de Fereastră',
-          membersList: 'Lista Membrilor',
-          userArea: 'Zona de Utilizator',
-          callContainer: 'Apelare Container',
-          profilePanel: 'Profil de Utilizator'
-        };
-        break;
-      case "fi":
-        this.localeLabels = {
-          serverList: 'Palvelinluettelo',
-          channelList: 'Kanavaluettelo',
-          msgBar: 'Viestipalkki',
-          windowBar: 'Ikkunapalkki',
-          membersList: 'Jäsenluettelo',
-          userArea: 'Käyttäjäalue',
-          callContainer: 'Kutsukontti',
-          profilePanel: 'Käyttäjäprofiili'
-        };
-        break;
-      case "sv-SE":
-        this.localeLabels = {
-          serverList: 'Serverlista',
-          channelList: 'Kanallista',
-          msgBar: 'Meddelandefält',
-          windowBar: 'Fönsterfält',
-          membersList: 'Medlemslista',
-          userArea: 'Användarområde',
-          callContainer: 'Samtalsbehållare',
-          profilePanel: 'Användarprofil'
-        };
-        break;
-      case "vi":
-        this.localeLabels = {
-          serverList: 'Danh sách Máy Chủ',
-          channelList: 'Danh sách Kênh',
-          msgBar: 'Thanh Thông Báo',
-          windowBar: 'Thanh Cửa Sổ',
-          membersList: 'Danh sách Thành Viên',
-          userArea: 'Vùng Người Dùng',
-          callContainer: 'Container Cuộc Gọi',
-          profilePanel: 'Thông tin người dùng'
-        };
-        break;
-      case "tr":
-        this.localeLabels = {
-          serverList: 'Sunucu Listesi',
-          channelList: 'Kanal Listesi',
-          msgBar: 'İleti Çubuğu',
-          windowBar: 'Pencere Çubuğu',
-          membersList: 'Üye Listesi',
-          userArea: 'Kullanıcı Alanı',
-          callContainer: 'Arama Kapsayıcısı',
-          profilePanel: 'Kullanıcı Profili'
-        };
-        break;
-      case "cs":
-        this.localeLabels = {
-          serverList: 'Seznam Serverů',
-          channelList: 'Seznam Kanálů',
-          msgBar: 'Panel Zpráv',
-          windowBar: 'Panel Oken',
-          membersList: 'Seznam Členů',
-          userArea: 'Uživatelská Oblast',
-          callContainer: 'Kontejner Volání',
-          profilePanel: 'Uživatelský Profil'
-        };
-        break;
-      case "el":
-        this.localeLabels = {
-          serverList: 'Λίστα Διακομιστών',
-          channelList: 'Λίστα Καναλιών',
-          msgBar: 'Γραμμή Μηνυμάτων',
-          windowBar: 'Γραμμή Παραθύρων',
-          membersList: 'Λίστα Μελών',
-          userArea: 'Περιοχή Χρήστη',
-          callContainer: 'Δοχείο Κλήσεων',
-          profilePanel: 'Προφίλ Χρήστη'
-        };
-        break;
-      case "bg":
-        this.localeLabels = {
-          serverList: 'Списък на Сървърите',
-          channelList: 'Списък на Каналите',
-          msgBar: 'Лента за Съобщения',
-          windowBar: 'Лента на Прозореца',
-          membersList: 'Списък на Членовете',
-          userArea: 'Потребителска Зона',
-          callContainer: 'Контейнер за Повиквания',
-          profilePanel: 'Потребителски Профил'
-        };
-        break;
-      case "ru":
-        this.localeLabels = {
-          serverList: 'Список Серверов',
-          channelList: 'Список Каналов',
-          msgBar: 'Панель Сообщений',
-          windowBar: 'Панель Окон',
-          membersList: 'Список Участников',
-          userArea: 'Область Пользователя',
-          callContainer: 'Контейнер Вызовов',
-          profilePanel: 'Профиль Пользователя'
-        };
-        break;
-      case "uk":
-        this.localeLabels = {
-          serverList: 'Список Серверів',
-          channelList: 'Список Каналів',
-          msgBar: 'Рядок Повідомлень',
-          windowBar: 'Рядок Вікна',
-          membersList: 'Список Учасників',
-          userArea: 'Область Користувача',
-          callContainer: 'Контейнер Викликів',
-          profilePanel: 'Профіль Користувача'
-        };
-        break;
-      case "hi":
-        this.localeLabels = {
-          serverList: 'सर्वर सूची',
-          channelList: 'चैनल सूची',
-          msgBar: 'संदेश पट्टी',
-          windowBar: 'विंडो पट्टी',
-          membersList: 'सदस्यों की सूची',
-          userArea: 'उपयोगकर्ता क्षेत्र',
-          callContainer: 'कॉल कंटेनर',
-          profilePanel: 'उपयोगकर्ता प्रोफ़ाइल'
-        };
-        break;
-      case "th":
-        this.localeLabels = {
-          serverList: 'รายการเซิร์ฟเวอร์',
-          channelList: 'รายการแชนเนล',
-          msgBar: 'แถบข้อความ',
-          windowBar: 'แถบหน้าต่าง',
-          membersList: 'รายชื่อสมาชิก',
-          userArea: 'พื้นที่ผู้ใช้',
-          callContainer: 'คอนเทนเนอร์การโทร',
-          profilePanel: 'โปรไฟล์ผู้ใช้'
-        };
-        break;
-      case "zh-CN":
-        this.localeLabels = {
-          serverList: '服务器列表',
-          channelList: '频道列表',
-          msgBar: '信息栏',
-          windowBar: '窗口栏',
-          membersList: '成员列表',
-          userArea: '用户区',
-          callContainer: '呼叫容器',
-          profilePanel: '用户资料'
-        };
-        break;
-      case "ja":
-        this.localeLabels = {
-          serverList: 'サーバー一覧',
-          channelList: 'チャンネル一覧',
-          msgBar: 'メッセージバー',
-          windowBar: 'ウィンドウズ・バー',
-          membersList: 'メンバーリスト',
-          userArea: 'ユーザーエリア',
-          callContainer: 'コールコンテナ',
-          profilePanel: 'ユーザープロフィール'
-        };
-        break;
-      case "zh-TW":
-        this.localeLabels = {
-          serverList: '伺服器清單',
-          channelList: '通道清單',
-          msgBar: '消息列',
-          windowBar: '視窗列',
-          membersList: '成員清單',
-          userArea: '用戶區',
-          callContainer: '呼叫容器',
-          profilePanel: '用戶資料'
-        };
-        break;
-      case "ko":
-        this.localeLabels = {
-          serverList: '서버 목록',
-          channelList: '채널 목록',
-          msgBar: '메시지 표시줄',
-          windowBar: '창 바',
-          membersList: '멤버 목록',
-          userArea: '사용자 영역',
-          callContainer: '통화 컨테이너',
-          profilePanel: '사용자 프로필'
-        };
-        break;
-      default:
-        this.localeLabels = {
-          serverList: 'Server List',
-          channelList: 'Channel List',
-          msgBar: 'Message Bar',
-          windowBar: 'Window Bar',
-          membersList: 'Members List',
-          userArea: 'User Area',
-          callContainer: 'Call Container',
-          profilePanel: 'User Profile'
-        };
+      if (this.localeLabels === undefined) {
+        switch (document.documentElement.getAttribute("lang")) {
+        case "da":
+          this.localeLabels = {
+            serverList: 'Serverliste',
+            channelList: 'Kanalliste',
+            msgBar: 'Meddelelsesbjælke',
+            windowBar: 'Vinduesbjælke',
+            membersList: 'Medlemmerliste',
+            userArea: 'Brugerområdet',
+            callContainer: 'Opkaldsbeholder',
+            profilePanel: 'Brugerprofil'
+          };
+          break;
+        case "de":
+          this.localeLabels = {
+            serverList: 'Server-Liste',
+            channelList: 'Kanal-Liste',
+            msgBar: 'Nachrichten-Bar',
+            windowBar: 'Fenster-Bar',
+            membersList: 'Mitglieder-Liste',
+            userArea: 'Benutzer-Bereich',
+            callContainer: 'Anruf-Container',
+            profilePanel: 'Benutzerprofil'
+          };
+          break;
+        case "es-ES":
+          this.localeLabels = {
+            serverList: 'Lista de Servidores',
+            channelList: 'Lista de Canales',
+            msgBar: 'Barra de Mensajes',
+            windowBar: 'Barra de Ventana',
+            membersList: 'Lista de Miembros',
+            userArea: 'Área de Usuario',
+            callContainer: 'Contenedor Llamadas',
+            profilePanel: 'Perfil del Usuario'
+          };
+          break;
+        case "fr":
+          this.localeLabels = {
+            serverList: 'Liste des Serveurs',
+            channelList: 'Liste des Chaînes',
+            msgBar: 'Barre de Messages',
+            windowBar: 'Barre de Fenêtre',
+            membersList: 'Liste des Membres',
+            userArea: 'Espace Utilisateur',
+            callContainer: 'Conteneur D&apos;appel',
+            profilePanel: 'Profil de L&apos;utilisateur'
+          };
+          break;
+        case "hr":
+          this.localeLabels = {
+            serverList: 'Popis Poslužitelja',
+            channelList: 'Popis Kanala',
+            msgBar: 'Traka Poruke',
+            windowBar: 'Traka Prozora',
+            membersList: 'Popis Članova',
+            userArea: 'Korisničko Područje',
+            callContainer: 'Spremnik Poziva',
+            profilePanel: 'Korisnički Profil'
+          };
+          break;
+        case "it":
+          this.localeLabels = {
+            serverList: 'Elenco Server',
+            channelList: 'Elenco Canali',
+            msgBar: 'Barra Messaggi',
+            windowBar: 'Barra Finestra',
+            membersList: 'Elenco Membri',
+            userArea: 'Area Utente',
+            callContainer: 'Chiama Contenitore',
+            profilePanel: 'Profilo Utente'
+          };
+          break;
+        case "lt":
+          this.localeLabels = {
+            serverList: 'Serverių Sąrašas',
+            channelList: 'Kanalų Sąrašas',
+            msgBar: 'Žinučių Juosta',
+            windowBar: 'Langų Juosta',
+            membersList: 'Narių Sąrašas',
+            userArea: 'Naudotojo Sritis',
+            callContainer: 'Skambučių Konteineris',
+            profilePanel: 'Naudotojo Profilis'
+          };
+          break;
+        case "hu":
+          this.localeLabels = {
+            serverList: 'Szerver Lista',
+            channelList: 'Csatorna Lista',
+            msgBar: 'Üzenetsáv',
+            windowBar: 'Ablaksáv',
+            membersList: 'Tagok Lista',
+            userArea: 'Felhasználói Rész',
+            callContainer: 'Hívás Konténer',
+            profilePanel: 'Felhasználói Profil'
+          };
+          break;
+        case "nl":
+          this.localeLabels = {
+            serverList: 'Serverlijst',
+            channelList: 'Kanaallijst',
+            msgBar: 'Berichtbar',
+            windowBar: 'Vensterbar',
+            membersList: 'Ledenlijst',
+            userArea: 'Gebruikersgebied',
+            callContainer: 'Bel Container',
+            profilePanel: 'Gebruikersprofiel'
+          };
+          break;
+        case "no":
+          this.localeLabels = {
+            serverList: 'Liste over Servere',
+            channelList: 'Liste over Kanaler',
+            msgBar: 'Meldingsfelt',
+            windowBar: 'Vinduslinje',
+            membersList: 'Liste over Medlemmer',
+            userArea: 'Bruker-Området',
+            callContainer: 'Kall Beholder',
+            profilePanel: 'Brukerprofil'
+          };
+          break;
+        case "pl":
+          this.localeLabels = {
+            serverList: 'Lista Serwerów',
+            channelList: 'Lista Kanałów',
+            msgBar: 'Pasek Komunikatów',
+            windowBar: 'Pasek Okna',
+            membersList: 'Lista Członków',
+            userArea: 'Obszar Użytkownika',
+            callContainer: 'Pojemnik na Telefony',
+            profilePanel: 'Profil Użytkownika'
+          };
+          break;
+        case "pt-BR":
+          this.localeLabels = {
+            serverList: 'Lista de Servidores',
+            channelList: 'Lista de Canais',
+            msgBar: 'Barra de Mensagens',
+            windowBar: 'Barra de Janela',
+            membersList: 'Lista de Membros',
+            userArea: 'Área do Usuário',
+            callContainer: 'Container de Chamadas',
+            profilePanel: 'Perfil do Usuário'
+          };
+          break;
+        case "ro":
+          this.localeLabels = {
+            serverList: 'Lista de Servere',
+            channelList: 'Lista de Canale',
+            msgBar: 'Bara de Mesaje',
+            windowBar: 'Bara de Fereastră',
+            membersList: 'Lista Membrilor',
+            userArea: 'Zona de Utilizator',
+            callContainer: 'Apelare Container',
+            profilePanel: 'Profil de Utilizator'
+          };
+          break;
+        case "fi":
+          this.localeLabels = {
+            serverList: 'Palvelinluettelo',
+            channelList: 'Kanavaluettelo',
+            msgBar: 'Viestipalkki',
+            windowBar: 'Ikkunapalkki',
+            membersList: 'Jäsenluettelo',
+            userArea: 'Käyttäjäalue',
+            callContainer: 'Kutsukontti',
+            profilePanel: 'Käyttäjäprofiili'
+          };
+          break;
+        case "sv-SE":
+          this.localeLabels = {
+            serverList: 'Serverlista',
+            channelList: 'Kanallista',
+            msgBar: 'Meddelandefält',
+            windowBar: 'Fönsterfält',
+            membersList: 'Medlemslista',
+            userArea: 'Användarområde',
+            callContainer: 'Samtalsbehållare',
+            profilePanel: 'Användarprofil'
+          };
+          break;
+        case "vi":
+          this.localeLabels = {
+            serverList: 'Danh sách Máy Chủ',
+            channelList: 'Danh sách Kênh',
+            msgBar: 'Thanh Thông Báo',
+            windowBar: 'Thanh Cửa Sổ',
+            membersList: 'Danh sách Thành Viên',
+            userArea: 'Vùng Người Dùng',
+            callContainer: 'Container Cuộc Gọi',
+            profilePanel: 'Thông tin người dùng'
+          };
+          break;
+        case "tr":
+          this.localeLabels = {
+            serverList: 'Sunucu Listesi',
+            channelList: 'Kanal Listesi',
+            msgBar: 'İleti Çubuğu',
+            windowBar: 'Pencere Çubuğu',
+            membersList: 'Üye Listesi',
+            userArea: 'Kullanıcı Alanı',
+            callContainer: 'Arama Kapsayıcısı',
+            profilePanel: 'Kullanıcı Profili'
+          };
+          break;
+        case "cs":
+          this.localeLabels = {
+            serverList: 'Seznam Serverů',
+            channelList: 'Seznam Kanálů',
+            msgBar: 'Panel Zpráv',
+            windowBar: 'Panel Oken',
+            membersList: 'Seznam Členů',
+            userArea: 'Uživatelská Oblast',
+            callContainer: 'Kontejner Volání',
+            profilePanel: 'Uživatelský Profil'
+          };
+          break;
+        case "el":
+          this.localeLabels = {
+            serverList: 'Λίστα Διακομιστών',
+            channelList: 'Λίστα Καναλιών',
+            msgBar: 'Γραμμή Μηνυμάτων',
+            windowBar: 'Γραμμή Παραθύρων',
+            membersList: 'Λίστα Μελών',
+            userArea: 'Περιοχή Χρήστη',
+            callContainer: 'Δοχείο Κλήσεων',
+            profilePanel: 'Προφίλ Χρήστη'
+          };
+          break;
+        case "bg":
+          this.localeLabels = {
+            serverList: 'Списък на Сървърите',
+            channelList: 'Списък на Каналите',
+            msgBar: 'Лента за Съобщения',
+            windowBar: 'Лента на Прозореца',
+            membersList: 'Списък на Членовете',
+            userArea: 'Потребителска Зона',
+            callContainer: 'Контейнер за Повиквания',
+            profilePanel: 'Потребителски Профил'
+          };
+          break;
+        case "ru":
+          this.localeLabels = {
+            serverList: 'Список Серверов',
+            channelList: 'Список Каналов',
+            msgBar: 'Панель Сообщений',
+            windowBar: 'Панель Окон',
+            membersList: 'Список Участников',
+            userArea: 'Область Пользователя',
+            callContainer: 'Контейнер Вызовов',
+            profilePanel: 'Профиль Пользователя'
+          };
+          break;
+        case "uk":
+          this.localeLabels = {
+            serverList: 'Список Серверів',
+            channelList: 'Список Каналів',
+            msgBar: 'Рядок Повідомлень',
+            windowBar: 'Рядок Вікна',
+            membersList: 'Список Учасників',
+            userArea: 'Область Користувача',
+            callContainer: 'Контейнер Викликів',
+            profilePanel: 'Профіль Користувача'
+          };
+          break;
+        case "hi":
+          this.localeLabels = {
+            serverList: 'सर्वर सूची',
+            channelList: 'चैनल सूची',
+            msgBar: 'संदेश पट्टी',
+            windowBar: 'विंडो पट्टी',
+            membersList: 'सदस्यों की सूची',
+            userArea: 'उपयोगकर्ता क्षेत्र',
+            callContainer: 'कॉल कंटेनर',
+            profilePanel: 'उपयोगकर्ता प्रोफ़ाइल'
+          };
+          break;
+        case "th":
+          this.localeLabels = {
+            serverList: 'รายการเซิร์ฟเวอร์',
+            channelList: 'รายการแชนเนล',
+            msgBar: 'แถบข้อความ',
+            windowBar: 'แถบหน้าต่าง',
+            membersList: 'รายชื่อสมาชิก',
+            userArea: 'พื้นที่ผู้ใช้',
+            callContainer: 'คอนเทนเนอร์การโทร',
+            profilePanel: 'โปรไฟล์ผู้ใช้'
+          };
+          break;
+        case "zh-CN":
+          this.localeLabels = {
+            serverList: '服务器列表',
+            channelList: '频道列表',
+            msgBar: '信息栏',
+            windowBar: '窗口栏',
+            membersList: '成员列表',
+            userArea: '用户区',
+            callContainer: '呼叫容器',
+            profilePanel: '用户资料'
+          };
+          break;
+        case "ja":
+          this.localeLabels = {
+            serverList: 'サーバー一覧',
+            channelList: 'チャンネル一覧',
+            msgBar: 'メッセージバー',
+            windowBar: 'ウィンドウズ・バー',
+            membersList: 'メンバーリスト',
+            userArea: 'ユーザーエリア',
+            callContainer: 'コールコンテナ',
+            profilePanel: 'ユーザープロフィール'
+          };
+          break;
+        case "zh-TW":
+          this.localeLabels = {
+            serverList: '伺服器清單',
+            channelList: '通道清單',
+            msgBar: '消息列',
+            windowBar: '視窗列',
+            membersList: '成員清單',
+            userArea: '用戶區',
+            callContainer: '呼叫容器',
+            profilePanel: '用戶資料'
+          };
+          break;
+        case "ko":
+          this.localeLabels = {
+            serverList: '서버 목록',
+            channelList: '채널 목록',
+            msgBar: '메시지 표시줄',
+            windowBar: '창 바',
+            membersList: '멤버 목록',
+            userArea: '사용자 영역',
+            callContainer: '통화 컨테이너',
+            profilePanel: '사용자 프로필'
+          };
+          break;
+        default:
+          this.localeLabels = {
+            serverList: 'Server List',
+            channelList: 'Channel List',
+            msgBar: 'Message Bar',
+            windowBar: 'Window Bar',
+            membersList: 'Members List',
+            userArea: 'User Area',
+            callContainer: 'Call Container',
+            profilePanel: 'User Profile'
+          };
+        }
       }
     }
 
@@ -3143,51 +3140,53 @@ https://programmer2514.github.io/?l=cui-changelog`
     // Initializes all global plugin settings
     initPluginSettings = () => {
       // Initialize settings variables
-      this.disableTransitions = false;
-      this.transitionSpeed = 250;
+      if (this.disableTransitions === undefined) {
+        this.disableTransitions = false;
+        this.transitionSpeed = 250;
 
-      this.disableToolbarCollapse = false;
-      this.disableSettingsCollapse = false;
-      this.disableMsgBarBtnCollapse = false;
-      this.enableFullToolbarCollapse = false;
+        this.disableToolbarCollapse = false;
+        this.disableSettingsCollapse = false;
+        this.disableMsgBarBtnCollapse = false;
+        this.enableFullToolbarCollapse = false;
 
-      this.dynamicUncollapse = true;
-      this.floatingDynamicUncollapse = true;
-      this.dynamicUncollapseDistance = [30, 30, 30, 30, 30, 30, 30, 30];
-      this.dynamicUncollapseCloseDistance = [30, 30, 30, 30, 30, 30, 30, 30];
-      this.dynamicUncollapseDelay = 15;
+        this.dynamicUncollapse = true;
+        this.floatingDynamicUncollapse = true;
+        this.dynamicUncollapseDistance = [30, 30, 30, 30, 30, 30, 30, 30];
+        this.dynamicUncollapseCloseDistance = [30, 30, 30, 30, 30, 30, 30, 30];
+        this.dynamicUncollapseDelay = 15;
 
-      this.autoCollapse = false;
-      this.autoCollapseThreshold = [500, 600, 400, 200, 950, 400, 550, 1000];
-      this.conditionalAutoCollapse = false;
-      this.autoCollapseConditionals = ['', '', '', '', '', '', '', ''];
+        this.autoCollapse = false;
+        this.autoCollapseThreshold = [500, 600, 400, 200, 950, 400, 550, 1000];
+        this.conditionalAutoCollapse = false;
+        this.autoCollapseConditionals = ['', '', '', '', '', '', '', ''];
 
-      this.resizableChannelList = true;
-      this.resizableMembersList = true;
-      this.resizableUserProfile = true;
-      this.channelListWidth = 0;
-      this.membersListWidth = 0;
-      this.profilePanelWidth = 0;
+        this.resizableChannelList = true;
+        this.resizableMembersList = true;
+        this.resizableUserProfile = true;
+        this.channelListWidth = 0;
+        this.membersListWidth = 0;
+        this.profilePanelWidth = 0;
 
-      this.buttonsOrder = [1, 2, 4, 6, 7, 3, 5, 8];
-      this.dynamicUncollapseEnabled = [true, true, true, true, true, true, true, true];
-      this.disabledButtonsStayCollapsed = false;
+        this.buttonsOrder = [1, 2, 4, 6, 7, 3, 5, 8];
+        this.dynamicUncollapseEnabled = [true, true, true, true, true, true, true, true];
+        this.disabledButtonsStayCollapsed = false;
 
-      this.keyBindsEnabled = true;
-      this.keyStringList = ["Alt+S", "Alt+C", "Alt+T", "Alt+W", "Alt+M", "Alt+U", "Alt+P", "Alt+I"];
+        this.keyBindsEnabled = true;
+        this.keyStringList = ["Alt+S", "Alt+C", "Alt+T", "Alt+W", "Alt+M", "Alt+U", "Alt+P", "Alt+I"];
 
-      this.settingsButtonsMaxWidth = 100;
-      this.messageBarButtonsMaxWidth = 200;
-      this.messageBarButtonsMinWidth = 40;
-      this.toolbarIconMaxWidth = 300;
-      this.toolbarMaxWidth = 800;
-      this.userAreaMaxHeight = 300;
-      this.msgBarMaxHeight = 400;
-      this.windowBarHeight = 18;
-      this.collapsedDistance = 0;
-      this.buttonCollapseFudgeFactor = 10;
+        this.settingsButtonsMaxWidth = 100;
+        this.messageBarButtonsMaxWidth = 200;
+        this.messageBarButtonsMinWidth = 40;
+        this.toolbarIconMaxWidth = 300;
+        this.toolbarMaxWidth = 800;
+        this.userAreaMaxHeight = 300;
+        this.msgBarMaxHeight = 400;
+        this.windowBarHeight = 18;
+        this.collapsedDistance = 0;
+        this.buttonCollapseFudgeFactor = 10;
 
-      this.persistentUnreadBadge = false;
+        this.persistentUnreadBadge = false;
+      }
 
       // Make sure settings version is set
       if (!BdApi.getData('CollapsibleUI', 'cuiSettingsVersion'))

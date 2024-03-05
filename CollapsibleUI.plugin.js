@@ -2917,14 +2917,14 @@ https://programmer2514.github.io/?l=cui-changelog`
           break;
         case "ru":
           this.localeLabels = {
-            serverList: 'Список Серверов',
-            channelList: 'Список Каналов',
-            msgBar: 'Панель Сообщений',
-            windowBar: 'Панель Окон',
-            membersList: 'Список Участников',
-            userArea: 'Область Пользователя',
-            callContainer: 'Контейнер Вызовов',
-            profilePanel: 'Профиль Пользователя'
+            serverList: 'Список серверов',
+            channelList: 'Список каналов',
+            msgBar: 'Панель ввода сообщения',
+            windowBar: 'Заголовок окна',
+            membersList: 'Список участников',
+            userArea: 'Панель пользователя',
+            callContainer: 'Панель вызова',
+            profilePanel: 'Профиль пользователя'
           };
           break;
         case "uk":

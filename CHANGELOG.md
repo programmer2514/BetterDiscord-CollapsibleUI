@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v8.2.0
+* Updated Russian translation - Thank you @vanja-san
+* Fixed plugin not working in forum channels
+* Patched a Discord bug with forum channels being cut off by Members List
+* Minor code changes
+
 ### v8.1.2:
 * Hopefully fixed (or at least improved) Members List briefly jumping open on channel switch
 * More performance improvements

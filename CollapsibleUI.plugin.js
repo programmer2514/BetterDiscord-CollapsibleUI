@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.1.2
+ * @version 8.2.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,19 +22,22 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.1.2',
+      version: '8.2.0',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.1.2',
+        title: '8.2.0',
         items: [
-          'Hopefully fixed (or at least improved) Members List briefly jumping open on channel switch',
-          'More performance improvements'
+          'Updated Russian translation - Thank you @vanja-san',
+          'Fixed plugin not working in forum channels',
+          'Patched a Discord bug with forum channels being cut off by Members List',
+          'Minor code changes'
+
         ]
       }, {
-        title: '1.0.0 - 8.1.1',
+        title: '1.0.0 - 8.1.2',
         items: [
           `See the full changelog here:
 https://programmer2514.github.io/?l=cui-changelog`
@@ -83,13 +86,19 @@ https://programmer2514.github.io/?l=cui-changelog`
   // Define plugin class
   return class CollapsibleUI extends Plugin {
 
+    // Get plugin metadata
+    constructor(meta) {
+      super();
+      this.meta = meta;
+    }
+
     // Initialize the plugin when it is enabled
     start = async() => {
       this.getJSON('https://api.github.com/repos/programmer2514/BetterDiscord-CollapsibleUI/releases')
       .then((data) => {
-        if (data[0].tag_name.substring(1) != BdApi.Plugins.get('CollapsibleUI').version)
+        if (data[0].tag_name.substring(1) != this.meta.version)
           BdApi.UI.showNotice(`Your version \
-            (v${BdApi.Plugins.get('CollapsibleUI').version}) \
+            (v${this.meta.version}) \
             of CollapsibleUI is outdated and may be missing features! You can \
             either wait for v${data[0].tag_name.substring(1)} to be approved, \
             or download it manually.`, { timeout: '0' });
@@ -103,7 +112,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       Library.DiscordModules.Dispatcher.subscribe('POST_CONNECTION_OPEN',
         this.initialize);
       console.log('%c[CollapsibleUI] '
-        + `%c(v${BdApi.Plugins.get('CollapsibleUI').version}) `
+        + `%c(v${this.meta.version}) `
         + '%chas started.', 'color: #3a71c1; font-weight: 700;',
         'color: #666; font-weight: 600;', '');
     }
@@ -113,7 +122,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.terminate();
       this.deleteFields();
       console.log('%c[CollapsibleUI] '
-        + `%c(v${BdApi.Plugins.get('CollapsibleUI').version}) `
+        + `%c(v${this.meta.version}) `
         + '%chas stopped.', 'color: #3a71c1; font-weight: 700;',
         'color: #666; font-weight: 600;', '');
     }
@@ -529,6 +538,8 @@ https://programmer2514.github.io/?l=cui-changelog`
       this.membersListWrapper = document.querySelector('.container_b2ce9c');
       this.membersListNotices = document.querySelector('.membersListNotices_a4cb13');
       this.contentWindow = document.querySelector('.chatContent__5dca8');
+      if (!this.contentWindow)
+        this.contentWindow = document.querySelector('.container_b181b6');
 
       this.callContainerExists = (document.querySelector('.'
         + this.classCallContainer));
@@ -2435,144 +2446,145 @@ https://programmer2514.github.io/?l=cui-changelog`
 
     // Deletes all fields defined during plugin initialization
     deleteFields = () => {
-      delete(this.I_CALL_CONTAINER)
-      delete(this.I_CHANNEL_LIST)
-      delete(this.I_MEMBERS_LIST)
-      delete(this.I_MSG_BAR)
-      delete(this.I_SERVER_LIST)
-      delete(this.I_USER_AREA)
-      delete(this.I_USER_PROFILE)
-      delete(this.I_WINDOW_BAR)
-      delete(this.MAX_ITER_MUTATIONS)
-      delete(this.TOOLTIP_OFFSET_PX)
-      delete(this.appObserver)
-      delete(this.appWrapper)
-      delete(this.autoCollapse)
-      delete(this.autoCollapseConditionals)
-      delete(this.autoCollapseThreshold)
-      delete(this.avatarWrapper)
-      delete(this.baseLayer)
-      delete(this.buttonCollapseFudgeFactor)
-      delete(this.buttonsOrder)
-      delete(this.callContainerButton)
-      delete(this.callContainerExists)
-      delete(this.callDUDelay)
-      delete(this.channelDUDelay)
-      delete(this.channelList)
-      delete(this.channelListButton)
-      delete(this.channelListWidth)
-      delete(this.channelListWidthObserver)
-      delete(this.classAppWrapper)
-      delete(this.classCallContainer)
-      delete(this.classCallUserWrapper)
-      delete(this.classChannelList)
-      delete(this.classClickable)
-      delete(this.classDMElement)
-      delete(this.classEphemeralContent)
-      delete(this.classIconWrapper)
-      delete(this.classLayers)
-      delete(this.classMembersList)
-      delete(this.classMembersListMember)
-      delete(this.classMembersListWrapper)
-      delete(this.classMsgButtons)
-      delete(this.classNoChat)
-      delete(this.classProfilePanelWrapper)
-      delete(this.classSelected)
-      delete(this.classServerList)
-      delete(this.classTextInput)
-      delete(this.classTooltip)
-      delete(this.classTooltipBottom)
-      delete(this.classTooltipContent)
-      delete(this.classTooltipDPE)
-      delete(this.classTooltipPointer)
-      delete(this.classTooltipPrimary)
-      delete(this.classTooltipWrapper)
-      delete(this.classTooltipWrapperDPE)
-      delete(this.classUnreadDMBadge)
-      delete(this.classUnreadDmBadgeBase)
-      delete(this.classUnreadDmBadgeEyebrow)
-      delete(this.classUnreadDmBadgeLocation)
-      delete(this.classUnreadDmBadgeShape)
-      delete(this.classUserPopout)
-      delete(this.collapsedDistance)
-      delete(this.conditionalAutoCollapse)
-      delete(this.contentWindow)
-      delete(this.disableMsgBarBtnCollapse)
-      delete(this.disableSettingsCollapse)
-      delete(this.disableToolbarCollapse)
-      delete(this.disableTransitions)
-      delete(this.disabledButtonsStayCollapsed)
-      delete(this.dynamicUncollapse)
-      delete(this.dynamicUncollapseCloseDistance)
-      delete(this.dynamicUncollapseDelay)
-      delete(this.dynamicUncollapseDistance)
-      delete(this.dynamicUncollapseEnabled)
-      delete(this.enableFullToolbarCollapse)
-      delete(this.eventListenerController)
-      delete(this.eventListenerSignal)
-      delete(this.floatingDynamicUncollapse)
-      delete(this.fullscreenButton)
-      delete(this.inviteToolbar)
-      delete(this.isCollapsed)
-      delete(this.isDarkMatterLoaded)
-      delete(this.isHSLLoaded)
-      delete(this.keyBindsEnabled)
-      delete(this.keyStringList)
-      delete(this.localeLabels)
-      delete(this.membersDUDelay)
-      delete(this.membersList)
-      delete(this.membersListButton)
-      delete(this.membersListInner)
-      delete(this.membersListNotices)
-      delete(this.membersListWidth)
-      delete(this.membersListWidthObserver)
-      delete(this.membersListWrapper)
-      delete(this.messageBarButtonsMaxWidth)
-      delete(this.messageBarButtonsMinWidth)
-      delete(this.messageDUDelay)
-      delete(this.moreButton)
-      delete(this.mouseX)
-      delete(this.mouseY)
-      delete(this.msgBar)
-      delete(this.msgBarBtnContainer)
-      delete(this.msgBarButton)
-      delete(this.msgBarMaxHeight)
-      delete(this.panelDUDelay)
-      delete(this.persistentUnreadBadge)
-      delete(this.pluginStyle)
-      delete(this.profileBannerSVGWrapper)
-      delete(this.profilePanel)
-      delete(this.profilePanelButton)
-      delete(this.profilePanelInner)
-      delete(this.profilePanelWidth)
-      delete(this.profilePanelWrapper)
-      delete(this.resizableChannelList)
-      delete(this.resizableMembersList)
-      delete(this.resizableUserProfile)
-      delete(this.searchBar)
-      delete(this.serverDUDelay)
-      delete(this.serverList)
-      delete(this.serverListButton)
-      delete(this.settingsButtonsMaxWidth)
-      delete(this.settingsContainer)
-      delete(this.settingsContainerBase)
-      delete(this.settingsObserver)
-      delete(this.spotifyContainer)
-      delete(this.toolBar)
-      delete(this.toolbarContainer)
-      delete(this.toolbarIconMaxWidth)
-      delete(this.toolbarMaxWidth)
-      delete(this.transitionSpeed)
-      delete(this.userArea)
-      delete(this.userAreaButton)
-      delete(this.userAreaMaxHeight)
-      delete(this.userDUDelay)
-      delete(this.windowBar)
-      delete(this.windowBarButton)
-      delete(this.windowBarHeight)
-      delete(this.windowBase)
-      delete(this.windowDUDelay)
-      delete(this.wordMark)
+      delete(this.I_CALL_CONTAINER);
+      delete(this.I_CHANNEL_LIST);
+      delete(this.I_MEMBERS_LIST);
+      delete(this.I_MSG_BAR);
+      delete(this.I_SERVER_LIST);
+      delete(this.I_USER_AREA);
+      delete(this.I_USER_PROFILE);
+      delete(this.I_WINDOW_BAR);
+      delete(this.MAX_ITER_MUTATIONS);
+      delete(this.TOOLTIP_OFFSET_PX);
+      delete(this.appObserver);
+      delete(this.appWrapper);
+      delete(this.autoCollapse);
+      delete(this.autoCollapseConditionals);
+      delete(this.autoCollapseThreshold);
+      delete(this.avatarWrapper);
+      delete(this.baseLayer);
+      delete(this.buttonCollapseFudgeFactor);
+      delete(this.buttonsOrder);
+      delete(this.callContainerButton);
+      delete(this.callContainerExists);
+      delete(this.callDUDelay);
+      delete(this.channelDUDelay);
+      delete(this.channelList);
+      delete(this.channelListButton);
+      delete(this.channelListWidth);
+      delete(this.channelListWidthObserver);
+      delete(this.classAppWrapper);
+      delete(this.classCallContainer);
+      delete(this.classCallUserWrapper);
+      delete(this.classChannelList);
+      delete(this.classClickable);
+      delete(this.classDMElement);
+      delete(this.classEphemeralContent);
+      delete(this.classIconWrapper);
+      delete(this.classLayers);
+      delete(this.classMembersList);
+      delete(this.classMembersListMember);
+      delete(this.classMembersListWrapper);
+      delete(this.classMsgButtons);
+      delete(this.classNoChat);
+      delete(this.classProfilePanelWrapper);
+      delete(this.classSelected);
+      delete(this.classServerList);
+      delete(this.classTextInput);
+      delete(this.classTooltip);
+      delete(this.classTooltipBottom);
+      delete(this.classTooltipContent);
+      delete(this.classTooltipDPE);
+      delete(this.classTooltipPointer);
+      delete(this.classTooltipPrimary);
+      delete(this.classTooltipWrapper);
+      delete(this.classTooltipWrapperDPE);
+      delete(this.classUnreadDMBadge);
+      delete(this.classUnreadDmBadgeBase);
+      delete(this.classUnreadDmBadgeEyebrow);
+      delete(this.classUnreadDmBadgeLocation);
+      delete(this.classUnreadDmBadgeShape);
+      delete(this.classUserPopout);
+      delete(this.collapsedDistance);
+      delete(this.conditionalAutoCollapse);
+      delete(this.contentWindow);
+      delete(this.disableMsgBarBtnCollapse);
+      delete(this.disableSettingsCollapse);
+      delete(this.disableToolbarCollapse);
+      delete(this.disableTransitions);
+      delete(this.disabledButtonsStayCollapsed);
+      delete(this.dynamicUncollapse);
+      delete(this.dynamicUncollapseCloseDistance);
+      delete(this.dynamicUncollapseDelay);
+      delete(this.dynamicUncollapseDistance);
+      delete(this.dynamicUncollapseEnabled);
+      delete(this.enableFullToolbarCollapse);
+      delete(this.eventListenerController);
+      delete(this.eventListenerSignal);
+      delete(this.floatingDynamicUncollapse);
+      delete(this.fullscreenButton);
+      delete(this.inviteToolbar);
+      delete(this.isCollapsed);
+      delete(this.isDarkMatterLoaded);
+      delete(this.isHSLLoaded);
+      delete(this.keyBindsEnabled);
+      delete(this.keyStringList);
+      delete(this.localeLabels);
+      delete(this.membersDUDelay);
+      delete(this.membersList);
+      delete(this.membersListButton);
+      delete(this.membersListInner);
+      delete(this.membersListNotices);
+      delete(this.membersListWidth);
+      delete(this.membersListWidthObserver);
+      delete(this.membersListWrapper);
+      delete(this.messageBarButtonsMaxWidth);
+      delete(this.messageBarButtonsMinWidth);
+      delete(this.messageDUDelay);
+      delete(this.meta);
+      delete(this.moreButton);
+      delete(this.mouseX);
+      delete(this.mouseY);
+      delete(this.msgBar);
+      delete(this.msgBarBtnContainer);
+      delete(this.msgBarButton);
+      delete(this.msgBarMaxHeight);
+      delete(this.panelDUDelay);
+      delete(this.persistentUnreadBadge);
+      delete(this.pluginStyle);
+      delete(this.profileBannerSVGWrapper);
+      delete(this.profilePanel);
+      delete(this.profilePanelButton);
+      delete(this.profilePanelInner);
+      delete(this.profilePanelWidth);
+      delete(this.profilePanelWrapper);
+      delete(this.resizableChannelList);
+      delete(this.resizableMembersList);
+      delete(this.resizableUserProfile);
+      delete(this.searchBar);
+      delete(this.serverDUDelay);
+      delete(this.serverList);
+      delete(this.serverListButton);
+      delete(this.settingsButtonsMaxWidth);
+      delete(this.settingsContainer);
+      delete(this.settingsContainerBase);
+      delete(this.settingsObserver);
+      delete(this.spotifyContainer);
+      delete(this.toolBar);
+      delete(this.toolbarContainer);
+      delete(this.toolbarIconMaxWidth);
+      delete(this.toolbarMaxWidth);
+      delete(this.transitionSpeed);
+      delete(this.userArea);
+      delete(this.userAreaButton);
+      delete(this.userAreaMaxHeight);
+      delete(this.userDUDelay);
+      delete(this.windowBar);
+      delete(this.windowBarButton);
+      delete(this.windowBarHeight);
+      delete(this.windowBase);
+      delete(this.windowDUDelay);
+      delete(this.wordMark);
     }
 
     // Sets the floating status of an element by index
@@ -4177,6 +4189,7 @@ https://programmer2514.github.io/?l=cui-changelog`
         this.pluginStyle.sheet.insertRule(":root {--cui-members-width: 240px}", 0);
         this.pluginStyle.sheet.insertRule(":root {--cui-profile-width: 340px}", 1);
         this.pluginStyle.sheet.insertRule("::-webkit-scrollbar {width: 0px; background: transparent;}", 2);
+        this.pluginStyle.sheet.insertRule(".content__23cab, .headerRow__16d8e {min-width: 0px !important;}", 3);
 
         // Handle resizing channel list
         if (this.resizableChannelList) {

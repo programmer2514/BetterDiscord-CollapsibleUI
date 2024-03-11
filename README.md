@@ -1,7 +1,7 @@
 # CollapsibleUI for BetterDiscord
 A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular.
 
-![Plugin Preview](https://user-images.githubusercontent.com/43104632/149331593-927b0987-69bc-4254-b709-963c4c38aa60.gif)
+![Plugin Preview](https://github.com/programmer2514/BetterDiscord-CollapsibleUI/assets/43104632/d7a9849e-13d4-41fe-9e34-0b8655bac670)
 
 
 ### Features
@@ -10,7 +10,7 @@ A feature-rich BetterDiscord plugin that reworks the Discord UI to be significan
 * Autocollapse for parts of the Discord UI based on window size
 * Out-of-the-box compatibility with most themes and plugins
 * Keyboard shortcuts for most actions
-* Resizable channel/DMs list
+* Resizable members and channel/DMs lists
 * Smooth transition effects
 * And most importantly, ___everything___ is customizable
 

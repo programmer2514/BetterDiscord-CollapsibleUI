@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.2.0
+ * @version 8.3.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,25 +22,21 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.2.0',
+      version: '8.3.0',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.2.0',
+        title: '8.3.0',
         items: [
-          'Updated Russian translation - Thank you @vanja-san',
-          'Fixed plugin not working in forum channels',
-          'Patched a Discord bug with forum channels being cut off by Members List',
-          'Minor code changes'
-
+          'Hotfix for newest Discord release (breaks plugin on Discord versions <279687)'
         ]
       }, {
-        title: '1.0.0 - 8.1.2',
+        title: '1.0.0 - 8.2.0',
         items: [
           `See the full changelog here:
-https://programmer2514.github.io/?l=cui-changelog`
+           https://programmer2514.github.io/?l=cui-changelog`
         ]
       }
     ]
@@ -444,70 +440,70 @@ https://programmer2514.github.io/?l=cui-changelog`
     abstractClassesAndElements = () => {
       // Classes
       if (this.classSelected === undefined) {
-        this.classSelected = 'selected_be2668';
-        this.classIconWrapper = 'iconWrapper_af9215';
-        this.classClickable = 'clickable_d23a1a';
-        this.classCallContainer = 'wrapper_bd2abe';
-        this.classCallUserWrapper = 'voiceCallWrapper_a36a80';
-        this.classDMElement = 'channel_c21703';
-        this.classTooltipWrapper = 'layer_ec16dd';
-        this.classTooltipWrapperDPE = 'disabledPointerEvents_bb5546';
-        this.classTooltip = 'tooltip__01384';
-        this.classTooltipBottom = 'tooltipBottom_ba4564';
-        this.classTooltipPrimary = 'tooltipPrimary_e5c00d';
-        this.classTooltipDPE = 'tooltipDisablePointerEvents__14727';
-        this.classTooltipPointer = 'tooltipPointer_a79354';
-        this.classTooltipContent = 'tooltipContent__79a2d';
-        this.classAppWrapper = 'app_de4237';
+        this.classSelected = 'selected__1fc53';
+        this.classIconWrapper = 'iconWrapper_de6cd1';
+        this.classClickable = 'clickable_ce0925';
+        this.classIcon = 'icon_ae0b42';
+        this.classCallContainer = 'wrapper__6bf2d';
+        this.classCallUserWrapper = 'voiceCallWrapper__6ca32';
+        this.classDMElement = 'channel__0aef5';
+        this.classTooltipWrapper = 'layer__6b5c3';
+        this.classTooltipWrapperDPE = 'disabledPointerEvents__214b3';
+        this.classTooltip = 'tooltip__7b090';
+        this.classTooltipBottom = 'tooltipBottom__39dfe';
+        this.classTooltipPrimary = 'tooltipPrimary__51b23';
+        this.classTooltipDPE = 'tooltipDisablePointerEvents__2978d';
+        this.classTooltipPointer = 'tooltipPointer_f7411c';
+        this.classTooltipContent = 'tooltipContent_adb6d5';
+        this.classAppWrapperInner = 'app_de4237';
         this.classLayers = 'layers_a23c37';
-        this.classChannelList = 'sidebar_ded4b5';
-        this.classServerList = 'wrapper_a7e7a8';
-        this.classUserPopout = 'userPopoutOuter_d739b2';
-        this.classMembersListWrapper = 'container_b2ce9c';
+        this.classChannelList = 'sidebar_e031be';
+        this.classServerList = 'wrapper__216eb';
+        this.classUserPopout = 'userPopoutOuter__3884e';
+        this.classMembersListWrapper = 'container_f79ab4';
         this.classMembersListMember = 'member_aa4760';
-        this.classProfilePanelWrapper = 'profilePanel__12596';
+        this.classProfilePanelWrapper = 'profilePanel_e2cafe';
         this.classTextInput = '[data-slate-string="true"]';
-        this.classNoChat = 'noChat_ce920d';
-        this.classMsgButtons = 'wrapper_c727b6';
-        this.classEphemeralContent = 'content__23cab';
-        this.classUnreadDMBadge = 'numberBadge__50328';
-        this.classUnreadDmBadgeBase = 'base__92a12';
-        this.classUnreadDmBadgeEyebrow = 'eyebrow__60985';
-        this.classUnreadDmBadgeShape = 'baseShapeRound__95d0f';
-        this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop_ada847';
+        this.classNoChat = 'noChat_fed339';
+        this.classMsgButtons = 'wrapper__4e6b6';
+        this.classEphemeralContent = 'content__690c5';
+        this.classUnreadDMBadge = 'numberBadge__40d6f';
+        this.classUnreadDmBadgeBase = 'base__5ed84';
+        this.classUnreadDmBadgeEyebrow = 'eyebrow_c15ff6';
+        this.classUnreadDmBadgeShape = 'baseShapeRound_c1de89';
+        this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop__153ad';
       }
-
 
       if (BdApi.Plugins.isEnabled('ChannelDms')
         && document.querySelector('.ChannelDms-channelmembers-wrap')) {
         this.classMembersList = 'ChannelDms-channelmembers-wrap';
-      } else this.classMembersList = 'membersWrap__90226';
+      } else this.classMembersList = 'membersWrap__5ca6b';
 
       // Elements
-      this.windowBase = document.querySelector('.base__3e6af');
-      this.baseLayer = document.querySelector('.baseLayer__8fda3');
-      this.toolBar = document.querySelector('.toolbar__88c63');
+      this.windowBase = document.querySelector('.base_c0676e');
+      this.baseLayer = document.querySelector('.baseLayer__2b890');
+      this.toolBar = document.querySelector('.toolbar__62fb5');
       this.searchBar = document.querySelector('.search__07df0');
-      this.inviteToolbar = document.querySelector('.inviteToolbar_e74dc0');
-      this.windowBar = document.querySelector('.typeWindows__5fa63');
-      this.wordMark = document.querySelector('.wordmark__0d178');
-      this.msgBar = document.querySelector('.form__13a2c');
+      this.inviteToolbar = document.querySelector('.inviteToolbar__7cc96');
+      this.windowBar = document.querySelector('.typeWindows_e41dab');
+      this.wordMark = document.querySelector('.wordmark__5b8c9');
+      this.msgBar = document.querySelector('.form_d8a4a1');
       this.userArea = document.querySelector('.panels__58331');
-      this.profilePanel = document.querySelector('.userPanelOuter__880e5');
-      this.profilePanelInner = document.querySelector('.userPanelInner_eddf4c')
+      this.profilePanel = document.querySelector('.userPanelOuter_eb00b1');
+      this.profilePanelInner = document.querySelector('.userPanelInner_f9edb8')
         ?.firstElementChild;
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);
-      this.profileBannerSVGWrapper = document.querySelector('.bannerSVGWrapper__3e7b0');
+      this.profileBannerSVGWrapper = document.querySelector('.bannerSVGWrapper__8a38c');
       this.membersList = document.querySelector('.' + this.classMembersList);
       this.serverList = document.querySelector('.' + this.classServerList);
       this.channelList = document.querySelector('.' + this.classChannelList);
-      this.settingsContainerBase = document.querySelector('.container_ca50b9');
+      this.settingsContainerBase = document.querySelector('.container_debb33');
       this.settingsContainer = this.settingsContainerBase
-        .querySelector('.flex_f5fbb7');
+        .querySelector('.flex_f18b02');
       this.spotifyContainer = document.querySelector('.container_6sXIoE');
-      this.appWrapper = document.querySelector('.app_b1f720');
-      this.avatarWrapper = document.querySelector('.avatarWrapper_ba5175');
+      this.appWrapperOuter = document.querySelector('.app_b1f720');
+      this.avatarWrapper = document.querySelector('.avatarWrapper__500a6');
       this.moreButton = this.toolBar.querySelector('[d="M4 14a2 2 0 1 0 0-4 2 2'
         + ' 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 '
         + '0 0 1 4 0Z"]');
@@ -533,13 +529,12 @@ https://programmer2514.github.io/?l=cui-changelog`
         + ' 2v3a1 1 0 1 0 2 0V6a4 4 0 0 0-4-4h-3a1 1 0 1 0 0 2h3ZM20 18a2 2 0 0'
         + ' 1-2 2h-3a1 1 0 1 0 0 2h3a4 4 0 0 0 4-4v-3a1 1 0 1 0-2 0v3Z"]')
         ?.parentElement.parentElement.parentElement;
-      this.msgBarBtnContainer = document.querySelector('.buttons_ce5b56');
-      this.membersListInner = document.querySelector('.members__9f47b');
-      this.membersListWrapper = document.querySelector('.container_b2ce9c');
-      this.membersListNotices = document.querySelector('.membersListNotices_a4cb13');
-      this.contentWindow = document.querySelector('.chatContent__5dca8');
+      this.msgBarBtnContainer = document.querySelector('.buttons__7ecff');
+      this.membersListInner = document.querySelector('.members__573eb');
+      this.membersListWrapper = document.querySelector('.container_f79ab4');
+      this.contentWindow = document.querySelector('.chatContent_f087cb');
       if (!this.contentWindow)
-        this.contentWindow = document.querySelector('.container_b181b6');
+        this.contentWindow = document.querySelector('.container_b92032');
 
       this.callContainerExists = (document.querySelector('.'
         + this.classCallContainer));
@@ -1056,9 +1051,9 @@ https://programmer2514.github.io/?l=cui-changelog`
       newToolbarIcon.setAttribute('tabindex', '0');
       newToolbarIcon.style.display = 'inline-block';
       newToolbarIcon.style.overflow = 'hidden';
-      newToolbarIcon.innerHTML = '<svg x="0" y="0" class="icon__4cb88" '
-        + 'aria-hidden="false" width="24" height="24" viewBox="'
-        + viewBox + '">' + rawSVGData + '</svg>';
+      newToolbarIcon.innerHTML = `<svg x="0" y="0" class="${this.classIcon}" `
+        + `aria-hidden="false" width="24" height="24" viewBox="${viewBox}">`
+        + `${rawSVGData}</svg>`;
 
       // Insert icon to the left of the search bar
       document.getElementById('cui-toolbar-container').insertBefore(newToolbarIcon,
@@ -2457,7 +2452,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       delete(this.MAX_ITER_MUTATIONS);
       delete(this.TOOLTIP_OFFSET_PX);
       delete(this.appObserver);
-      delete(this.appWrapper);
+      delete(this.appWrapperOuter);
       delete(this.autoCollapse);
       delete(this.autoCollapseConditionals);
       delete(this.autoCollapseThreshold);
@@ -2473,7 +2468,7 @@ https://programmer2514.github.io/?l=cui-changelog`
       delete(this.channelListButton);
       delete(this.channelListWidth);
       delete(this.channelListWidthObserver);
-      delete(this.classAppWrapper);
+      delete(this.classAppWrapperInner);
       delete(this.classCallContainer);
       delete(this.classCallUserWrapper);
       delete(this.classChannelList);
@@ -2534,7 +2529,6 @@ https://programmer2514.github.io/?l=cui-changelog`
       delete(this.membersList);
       delete(this.membersListButton);
       delete(this.membersListInner);
-      delete(this.membersListNotices);
       delete(this.membersListWidth);
       delete(this.membersListWidthObserver);
       delete(this.membersListWrapper);
@@ -3110,7 +3104,7 @@ https://programmer2514.github.io/?l=cui-changelog`
           // Checks for a variety of small mutations and reloads if necessary
           // This is required for BDFDB compatibility
           for (var i = 0; i < mutationList.length; i++) {
-            if (mutationList[i].addedNodes[0]?.classList?.contains(cui.classAppWrapper)
+            if (mutationList[i].addedNodes[0]?.classList?.contains(cui.classAppWrapperInner)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classLayers)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classChannelList)
                || mutationList[i].addedNodes[0]?.classList?.contains(cui.classServerList)
@@ -3142,7 +3136,7 @@ https://programmer2514.github.io/?l=cui-changelog`
           console.warn(e);
         }
       });
-      this.appObserver.observe(this.appWrapper, {
+      this.appObserver.observe(this.appWrapperOuter, {
         childList: true,
         subtree: true,
         attributes: false
@@ -3900,10 +3894,6 @@ https://programmer2514.github.io/?l=cui-changelog`
           this.membersList.style.minWidth = 'var(--cui-members-width)';
           this.membersList.style.minHeight = '100%';
           this.membersList.style.flexBasis = 'auto';
-        }
-        if (this.membersListNotices) {
-          this.membersListNotices.style.width = '0px';
-          this.membersListNotices.style.overflow = 'visible';
         }
         if (this.profilePanel) {
           this.profilePanel.style.overflow = 'hidden';

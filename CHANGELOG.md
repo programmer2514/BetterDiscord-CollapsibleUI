@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.3.0
+* Hotfix for newest Discord release (breaks plugin on Discord versions <279687)
+
 ### v8.2.0
 * Updated Russian translation - Thank you @vanja-san
 * Fixed plugin not working in forum channels

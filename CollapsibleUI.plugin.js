@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.3.0
+ * @version 8.3.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,18 +22,18 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.3.0',
+      version: '8.3.1',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.3.0',
+        title: '8.3.1',
         items: [
-          'Hotfix for newest Discord release (breaks plugin on Discord versions <279687)'
+          'Fixed broken user profile button in latest Discord update'
         ]
       }, {
-        title: '1.0.0 - 8.2.0',
+        title: '1.0.0 - 8.3.0',
         items: [
           `See the full changelog here:
            https://programmer2514.github.io/?l=cui-changelog`
@@ -459,7 +459,7 @@ module.exports = (() => {
         this.classLayers = 'layers_a23c37';
         this.classChannelList = 'sidebar_e031be';
         this.classServerList = 'wrapper__216eb';
-        this.classUserPopout = 'userPopoutOuter__3884e';
+        this.classUserPopout = 'userPopoutOuter_d67f56';
         this.classMembersListWrapper = 'container_f79ab4';
         this.classMembersListMember = 'member_aa4760';
         this.classProfilePanelWrapper = 'profilePanel_e2cafe';
@@ -489,8 +489,8 @@ module.exports = (() => {
       this.wordMark = document.querySelector('.wordmark__5b8c9');
       this.msgBar = document.querySelector('.form_d8a4a1');
       this.userArea = document.querySelector('.panels__58331');
-      this.profilePanel = document.querySelector('.userPanelOuter_eb00b1');
-      this.profilePanelInner = document.querySelector('.userPanelInner_f9edb8')
+      this.profilePanel = document.querySelector('.userPanelOuter_df01a5');
+      this.profilePanelInner = document.querySelector('.userPanelInner__3184c')
         ?.firstElementChild;
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);

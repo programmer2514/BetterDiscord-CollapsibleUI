@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.3.1:
+* Fixed broken user profile button in latest Discord update
+
 ### v8.3.0:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <279687)
 

@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.3.1
+ * @version 8.3.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -22,18 +22,18 @@ module.exports = (() => {
           github_username: 'programmer2514'
         }
       ],
-      version: '8.3.1',
+      version: '8.3.2',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js'
     },
     changelog: [{
-        title: '8.3.1',
+        title: '8.3.2',
         items: [
-          'Fixed broken user profile button in latest Discord update'
+          'Fixed cut-off message bar buttons in discord PTB and Canary'
         ]
       }, {
-        title: '1.0.0 - 8.3.0',
+        title: '1.0.0 - 8.3.1',
         items: [
           `See the full changelog here:
            https://programmer2514.github.io/?l=cui-changelog`
@@ -1708,7 +1708,7 @@ module.exports = (() => {
         new zps.Textbox('Message Bar Buttons - Max Width',
           null,
           BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth'),
-          null, { placeholder: 'Default: 200' });
+          null, { placeholder: 'Default: 300' });
       var settingMessageBarButtonsMinWidth =
         new zps.Textbox('Message Bar Buttons - Collapsed Width',
           null,
@@ -3181,7 +3181,7 @@ module.exports = (() => {
         this.keyStringList = ["Alt+S", "Alt+C", "Alt+T", "Alt+W", "Alt+M", "Alt+U", "Alt+P", "Alt+I"];
 
         this.settingsButtonsMaxWidth = 100;
-        this.messageBarButtonsMaxWidth = 200;
+        this.messageBarButtonsMaxWidth = 300;
         this.messageBarButtonsMinWidth = 40;
         this.toolbarIconMaxWidth = 300;
         this.toolbarMaxWidth = 800;
@@ -3287,9 +3287,13 @@ module.exports = (() => {
       if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 12) {
         // Clean up (v12)
         BdApi.deleteData('CollapsibleUI', 'persistentUnreadBadge');
+      }
+      if (parseInt(BdApi.getData('CollapsibleUI', 'cuiSettingsVersion')) < 13) {
+        // Clean up (v13)
+        BdApi.deleteData('CollapsibleUI', 'messageBarButtonsMaxWidth');
 
         // Set new settings version
-        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '12');
+        BdApi.setData('CollapsibleUI', 'cuiSettingsVersion', '13');
       }
 
       // disableTransitions [Default: false]
@@ -3550,7 +3554,7 @@ module.exports = (() => {
         BdApi.setData('CollapsibleUI', 'settingsButtonsMaxWidth',
           this.settingsButtonsMaxWidth.toString());
 
-      // messageBarButtonsMaxWidth [Default: 200]
+      // messageBarButtonsMaxWidth [Default: 300]
       if (typeof(BdApi.getData('CollapsibleUI', 'messageBarButtonsMaxWidth')) === 'string')
         this.messageBarButtonsMaxWidth = parseInt(BdApi.getData('CollapsibleUI',
           'messageBarButtonsMaxWidth'));

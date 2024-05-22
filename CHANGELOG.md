@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.3.2:
+* Fixed cut-off message bar buttons in discord PTB and Canary
+
 ### v8.3.1:
 * Fixed broken user profile button in latest Discord update
 

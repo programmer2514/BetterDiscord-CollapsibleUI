@@ -496,7 +496,6 @@ module.exports = (() => {
 
     // Abstracts Discord's confusing class structure
     abstractClassesAndElements = () => {
-      // fix these styles for the most recent Discord update
       // Classes
       if (this.classSelected === undefined) {
         // assumed the icon bar to the left of search
@@ -518,25 +517,38 @@ module.exports = (() => {
         this.classTooltipWrapper = "tooltipWrapper_b6c360";
         // the only matching class
         this.classTooltipWrapperDPE = "disabledPointerEvents_cd0de5";
-
+        // not sure if this is the correct tooltip...
         this.classTooltip = "tooltip_b6c360";
         this.classTooltipBottom = "tooltipBottom_b6c360";
         this.classTooltipPrimary = "tooltipPrimary_b6c360";
         this.classTooltipDPE = "tooltipDisablePointerEvents_b6c360";
         this.classTooltipPointer = "tooltipPointer_b6c360";
         this.classTooltipContent = "tooltipContent_b6c360";
+        // so many wrappers
+        // assumed the closest to the content containers
         this.classAppWrapperInner = "app_bd26cc";
+        // which layers?
         this.classLayers = "layers_d4b6c5";
         this.classChannelList = "sidebar_a4d4d9";
+        // some weird behavior with this one when opening threads
         this.classServerList = "guilds_a4d4d9";
+        // assumed outer
         this.classUserPopout = "userPopoutOuter_c69a7b";
+        // there are 2 wrappers
         this.classMembersListWrapper = "members_cbd271";
         this.classMembersListMember = "member_cbd271";
+        // assumed similar name is correct
         this.classProfilePanelWrapper = "profilePanel_b433b4";
+        // assumed [data-slate-*] because it's the only one there
+        // that fits the previous attribute
         this.classTextInput = '[data-slate-editor="true"]';
+        // huh?
         this.classNoChat = "noChat_a7d72e";
+        // assumed the msg toolbar
         this.classMsgButtons = "buttons_d0696b";
+        // not sure if correct ephemeral
         this.classEphemeralContent = "ephemeral_d5deea";
+        // not sure about any of these Unreads
         this.classUnreadDMBadge = "numberBadge_d8bfb3";
         this.classUnreadDmBadgeBase = "wrapper_d8bfb3";
         this.classUnreadDmBadgeEyebrow = "eyebrow_f9d828";
@@ -544,6 +556,7 @@ module.exports = (() => {
         this.classUnreadDmBadgeLocation = "unreadMentionsIndicatorTop_fea3ef";
       }
 
+      // dunno what this if statement is for
       if (
         BdApi.Plugins.isEnabled("ChannelDms") &&
         document.querySelector(".ChannelDms-channelmembers-wrap")
@@ -552,16 +565,26 @@ module.exports = (() => {
       } else this.classMembersList = "membersWrap_cbd271";
 
       // Elements
+      // assumed the outermost element
       this.windowBase = document.querySelector(".appMount_ea7e65");
+      // assumed the closest matching element
       this.baseLayer = document.querySelector(".baseLayer_d4b6c5");
+      // the split of toolBar into toolBarMsg and toolBarTop
       this.toolBarMsg = document.querySelector(".buttons_d5deea");
       this.toolBarTop = document.querySelector(".toolbar_e44302");
+      // assumed wrapper
       this.searchBar = document.querySelector(".search_a46bef");
+      // what?
       this.inviteToolbar = document.querySelector(".inviteToolbar_c2739c");
+      // who?
       this.windowBar = document.querySelector(".typeWindows_a934d8");
+      // this one has issues, can never find it, dunno what wordMark even is
       this.wordMark = document.querySelector(".wordMark_b12c98");
+      // assumed wrapper
       this.msgBar = document.querySelector(".channelTextAreaContainer_d0696b");
+      // seems to be the one, not sure
       this.userArea = document.querySelector(".panels_a4d4d9");
+      // matches the prop name
       this.profilePanel = document.querySelector(".userPanelOuter_c69a7b");
       this.profilePanelInner = document.querySelector(
         ".userPanelInner_c69a7b",
@@ -580,10 +603,11 @@ module.exports = (() => {
       );
       this.settingsContainer =
         this.settingsContainerBase.querySelector(".container_e44302");
-      // ?
+      // huh?
       this.spotifyContainer = document.querySelector(".container_6sXIoE");
       this.appWrapperOuter = document.querySelector(".app_bd26cc");
       this.avatarWrapper = document.querySelector(".wrapper_c59b4e");
+      // supposed to be this.topBarMsg but somehow doesn't find it there
       this.moreButton = document.querySelector(
         '[d="M4 14a2 2 0 1 0 0-4 2 2' +
           " 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 " +
@@ -1277,6 +1301,7 @@ module.exports = (() => {
 
         // Add event listeners to the Toolbar to update on hover
         if (this.enableFullToolbarCollapse) {
+          // changed every mention of toolBar to toolBarTop
           this.toolBarTop.addEventListener(
             "mouseenter",
             function () {

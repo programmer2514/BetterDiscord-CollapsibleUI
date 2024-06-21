@@ -508,13 +508,13 @@ module.exports = (() => {
         // assumed the most often used class for icons
         this.classIcon = "icon_e44302";
         // there's also container?
-        this.classCallContainer = "wrapper_adcaac";
+        this.classCallContainer = "wrapper_d880dc";
         // assumed the most relevant to the name
-        this.classCallUserWrapper = "voiceUser_cdc675";
+        this.classCallUserWrapper = "voiceCallWrapper_bae578";
         // assumed the wrapper for the DM clickable
         this.classDMElement = "channel_c91bad";
         // assumed the element that corresponds to disabledPointerEvents_cd0de5
-        this.classTooltipWrapper = "tooltipWrapper_b6c360";
+        this.classTooltipWrapper = "layer_cd0de5";
         // the only matching class
         this.classTooltipWrapperDPE = "disabledPointerEvents_cd0de5";
         // not sure if this is the correct tooltip...
@@ -526,33 +526,37 @@ module.exports = (() => {
         this.classTooltipContent = "tooltipContent_b6c360";
         // so many wrappers
         // assumed the closest to the content containers
-        this.classAppWrapperInner = "app_bd26cc";
+        this.classAppWrapperInner = "app_a01fb1";
         // which layers?
-        this.classLayers = "layers_d4b6c5";
+        this.classLayers = "layers_a01fb1";
         this.classChannelList = "sidebar_a4d4d9";
         // some weird behavior with this one when opening threads
-        this.classServerList = "guilds_a4d4d9";
+        this.classServerList = "wrapper_fea3ef";
         // assumed outer
         this.classUserPopout = "userPopoutOuter_c69a7b";
         // there are 2 wrappers
-        this.classMembersListWrapper = "members_cbd271";
+        this.classMembersListWrapper = "container_cbd271";
+        // the tool suggests the same class as on the this.classServerList
         this.classMembersListMember = "member_cbd271";
         // assumed similar name is correct
         this.classProfilePanelWrapper = "profilePanel_b433b4";
         // assumed [data-slate-*] because it's the only one there
         // that fits the previous attribute
+        // the tool suggests [data-slate-string="true"]
         this.classTextInput = '[data-slate-editor="true"]';
         // huh?
         this.classNoChat = "noChat_a7d72e";
         // assumed the msg toolbar
-        this.classMsgButtons = "buttons_d0696b";
+        this.classMsgButtons = "wrapper_ef319f";
         // not sure if correct ephemeral
-        this.classEphemeralContent = "ephemeral_d5deea";
+        this.classEphemeralContent = "content_eed6a8";
         // not sure about any of these Unreads
+        // the tool didn't manage to get these properly
         this.classUnreadDMBadge = "numberBadge_d8bfb3";
         this.classUnreadDmBadgeBase = "wrapper_d8bfb3";
-        this.classUnreadDmBadgeEyebrow = "eyebrow_f9d828";
-        this.classUnreadDmBadgeShape = "statusBubbleShape_d0a252";
+        // ==
+        this.classUnreadDmBadgeEyebrow = "eyebrow_c15ff6";
+        this.classUnreadDmBadgeShape = "baseShapeRound_df8943";
         this.classUnreadDmBadgeLocation = "unreadMentionsIndicatorTop_fea3ef";
       }
 
@@ -566,6 +570,7 @@ module.exports = (() => {
 
       // Elements
       // assumed the outermost element
+      // the tool suggested base_a4d4d9 which is the base wrapper for the center section
       this.windowBase = document.querySelector(".appMount_ea7e65");
       // assumed the closest matching element
       this.baseLayer = document.querySelector(".baseLayer_d4b6c5");
@@ -573,15 +578,15 @@ module.exports = (() => {
       this.toolBarMsg = document.querySelector(".buttons_d5deea");
       this.toolBarTop = document.querySelector(".toolbar_e44302");
       // assumed wrapper
-      this.searchBar = document.querySelector(".search_a46bef");
+      this.searchBar = document.querySelector(".search_ff5f90");
       // what?
       this.inviteToolbar = document.querySelector(".inviteToolbar_c2739c");
       // who?
       this.windowBar = document.querySelector(".typeWindows_a934d8");
       // this one has issues, can never find it, dunno what wordMark even is
-      this.wordMark = document.querySelector(".wordMark_b12c98");
+      this.wordMark = document.querySelector(".wordmark_a934d8");
       // assumed wrapper
-      this.msgBar = document.querySelector(".channelTextAreaContainer_d0696b");
+      this.msgBar = document.querySelector(".form_a7d72e");
       // seems to be the one, not sure
       this.userArea = document.querySelector(".panels_a4d4d9");
       // matches the prop name
@@ -598,15 +603,13 @@ module.exports = (() => {
       this.membersList = document.querySelector("." + this.classMembersList);
       this.serverList = document.querySelector("." + this.classServerList);
       this.channelList = document.querySelector("." + this.classChannelList);
-      this.settingsContainerBase = document.querySelector(
-        ".subtitleContainer_a7d72e",
-      );
+      this.settingsContainerBase = document.querySelector(".container_b2ca13");
       this.settingsContainer =
-        this.settingsContainerBase.querySelector(".container_e44302");
+        this.settingsContainerBase.querySelector(".flex_bba380");
       // huh?
       this.spotifyContainer = document.querySelector(".container_6sXIoE");
       this.appWrapperOuter = document.querySelector(".app_bd26cc");
-      this.avatarWrapper = document.querySelector(".wrapper_c59b4e");
+      this.avatarWrapper = document.querySelector(".avatarWrapper_b2ca13");
       // supposed to be this.topBarMsg but somehow doesn't find it there
       this.moreButton = document.querySelector(
         '[d="M4 14a2 2 0 1 0 0-4 2 2' +
@@ -640,12 +643,12 @@ module.exports = (() => {
           " 2v3a1 1 0 1 0 2 0V6a4 4 0 0 0-4-4h-3a1 1 0 1 0 0 2h3ZM20 18a2 2 0 0" +
           ' 1-2 2h-3a1 1 0 1 0 0 2h3a4 4 0 0 0 4-4v-3a1 1 0 1 0-2 0v3Z"]',
       )?.parentElement.parentElement.parentElement;
-      this.msgBarBtnContainer = document.querySelector(".buttons_d5deea");
+      this.msgBarBtnContainer = document.querySelector(".buttons_d0696b");
       this.membersListInner = document.querySelector(".members_cbd271");
-      this.membersListWrapper = document.querySelector(".membersWrap_cbd271");
-      this.contentWindow = document.querySelector(".scrollerContent_e2e187");
+      this.membersListWrapper = document.querySelector(".container_cbd271");
+      this.contentWindow = document.querySelector(".chatContent_a7d72e");
       if (!this.contentWindow)
-        this.contentWindow = document.querySelector(".messagesWrapper_e2e187");
+        this.contentWindow = document.querySelector(".container_a6d69a");
 
       this.callContainerExists = document.querySelector(
         "." + this.classCallContainer,

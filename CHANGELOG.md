@@ -1,5 +1,12 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.0:
+* Hotfix for newest Discord release (breaks plugin on Discord versions <304187)
+* Fixed some elements of new profiles being shown reversed
+* Fixed call container not filling available space while in fullscreen
+* Standardized code formatting using ESLint + Stylistic
+* Updated deprecated code
+
 ### v8.3.2:
 * Fixed cut-off message bar buttons in discord PTB and Canary
 

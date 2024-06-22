@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.3.2
+ * @version 8.4.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,18 +21,22 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.3.2',
+      version: '8.4.0',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.3.2',
+      title: '8.4.0',
       items: [
-        'Fixed cut-off message bar buttons in discord PTB and Canary',
+        'Hotfix for newest Discord release (breaks plugin on Discord versions <304187)',
+        'Fixed some elements of new profiles being shown reversed',
+        'Fixed call container not filling available space while in fullscreen',
+        'Standardized code formatting using ESLint + Stylistic',
+        'Updated deprecated code',
       ],
     }, {
-      title: '1.0.0 - 8.3.1',
+      title: '1.0.0 - 8.4.0',
       items: [
         `See the full changelog here:
            https://programmer2514.github.io/?l=cui-changelog`,
@@ -392,10 +396,10 @@ module.exports = (() => {
         if (document.querySelector('.' + this.classCallContainer)) {
           if (document.querySelector('.' + this.classNoChat))
             document.querySelector('.' + this.classCallContainer)
-              .style.maxHeight = BdApi.DOM.screenHeight + 'px';
+              .style.maxHeight = window.outerHeight + 'px';
           else
             document.querySelector('.' + this.classCallContainer)
-              .style.maxHeight = (BdApi.DOM.screenHeight - 222) + 'px';
+              .style.maxHeight = (window.outerHeight - 222) + 'px';
           document.querySelector('.' + this.classCallContainer)
             .style.removeProperty('transition');
           document.querySelector('.' + this.classCallContainer)
@@ -455,71 +459,72 @@ module.exports = (() => {
     abstractClassesAndElements = () => {
       // Classes
       if (this.classSelected === undefined) {
-        this.classSelected = 'selected__1fc53';
-        this.classIconWrapper = 'iconWrapper_de6cd1';
-        this.classClickable = 'clickable_ce0925';
-        this.classIcon = 'icon_ae0b42';
-        this.classCallContainer = 'wrapper__6bf2d';
-        this.classCallUserWrapper = 'voiceCallWrapper__6ca32';
-        this.classDMElement = 'channel__0aef5';
-        this.classTooltipWrapper = 'layer__6b5c3';
-        this.classTooltipWrapperDPE = 'disabledPointerEvents__214b3';
-        this.classTooltip = 'tooltip__7b090';
-        this.classTooltipBottom = 'tooltipBottom__39dfe';
-        this.classTooltipPrimary = 'tooltipPrimary__51b23';
-        this.classTooltipDPE = 'tooltipDisablePointerEvents__2978d';
-        this.classTooltipPointer = 'tooltipPointer_f7411c';
-        this.classTooltipContent = 'tooltipContent_adb6d5';
-        this.classAppWrapperInner = 'app_de4237';
-        this.classLayers = 'layers_a23c37';
-        this.classChannelList = 'sidebar_e031be';
-        this.classServerList = 'wrapper__216eb';
-        this.classUserPopout = 'userPopoutOuter_d67f56';
-        this.classMembersListWrapper = 'container_f79ab4';
-        this.classMembersListMember = 'member_aa4760';
-        this.classProfilePanelWrapper = 'profilePanel_e2cafe';
+        this.classSelected = 'selected_e44302';
+        this.classIconWrapper = 'iconWrapper_e44302';
+        this.classClickable = 'clickable_e44302';
+        this.classIcon = 'icon_e44302';
+        this.classCallContainer = 'wrapper_d880dc';
+        this.classCallUserWrapper = 'voiceCallWrapper_bae578';
+        this.classDMElement = 'channel_c91bad';
+        this.classTooltipWrapper = 'layer_cd0de5';
+        this.classTooltipWrapperDPE = 'disabledPointerEvents_cd0de5';
+        this.classTooltip = 'tooltip_b6c360';
+        this.classTooltipBottom = 'tooltipBottom_b6c360';
+        this.classTooltipPrimary = 'tooltipPrimary_b6c360';
+        this.classTooltipDPE = 'tooltipDisablePointerEvents_b6c360';
+        this.classTooltipPointer = 'tooltipPointer_b6c360';
+        this.classTooltipContent = 'tooltipContent_b6c360';
+        this.classAppWrapperInner = 'app_a01fb1';
+        this.classLayers = 'layers_a01fb1';
+        this.classChannelList = 'sidebar_a4d4d9';
+        this.classServerList = 'wrapper_fea3ef';
+        this.classUserPopout = 'userPopoutOuter_c69a7b';
+        this.classMembersListWrapper = 'container_cbd271';
+        this.classMembersListMember = 'member_a31c43';
+        this.classProfilePanelWrapper = 'profilePanel_b433b4';
         this.classTextInput = '[data-slate-string="true"]';
-        this.classNoChat = 'noChat_fed339';
-        this.classMsgButtons = 'wrapper__4e6b6';
-        this.classEphemeralContent = 'content__690c5';
-        this.classUnreadDMBadge = 'numberBadge__40d6f';
-        this.classUnreadDmBadgeBase = 'base__5ed84';
-        this.classUnreadDmBadgeEyebrow = 'eyebrow_c15ff6';
-        this.classUnreadDmBadgeShape = 'baseShapeRound_c1de89';
-        this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop__153ad';
+        this.classNoChat = 'noChat_a7d72e';
+        this.classMsgButtons = 'wrapper_ef319f';
+        this.classEphemeralContent = 'content_eed6a8';
+        this.classUnreadDMBadge = 'numberBadge_df8943';
+        this.classUnreadDmBadgeBase = 'base_df8943';
+        this.classUnreadDmBadgeEyebrow = 'eyebrow_df8943';
+        this.classUnreadDmBadgeShape = 'baseShapeRound_df8943';
+        this.classUnreadDmBadgeLocation = 'unreadMentionsIndicatorTop_fea3ef';
       }
 
       if (BdApi.Plugins.isEnabled('ChannelDms')
         && document.querySelector('.ChannelDms-channelmembers-wrap')) {
         this.classMembersList = 'ChannelDms-channelmembers-wrap';
       }
-      else this.classMembersList = 'membersWrap__5ca6b';
+      else this.classMembersList = 'membersWrap_cbd271';
 
       // Elements
-      this.windowBase = document.querySelector('.base_c0676e');
-      this.baseLayer = document.querySelector('.baseLayer__2b890');
-      this.toolBar = document.querySelector('.toolbar__62fb5');
-      this.searchBar = document.querySelector('.search__07df0');
-      this.inviteToolbar = document.querySelector('.inviteToolbar__7cc96');
-      this.windowBar = document.querySelector('.typeWindows_e41dab');
-      this.wordMark = document.querySelector('.wordmark__5b8c9');
-      this.msgBar = document.querySelector('.form_d8a4a1');
-      this.userArea = document.querySelector('.panels__58331');
-      this.profilePanel = document.querySelector('.userPanelOuter_df01a5');
-      this.profilePanelInner = document.querySelector('.userPanelInner__3184c')
+      this.windowBase = document.querySelector('.base_a4d4d9');
+      this.baseLayer = document.querySelector('.baseLayer_d4b6c5');
+      this.toolBar = document.querySelector('.toolbar_e44302');
+      this.searchBar = document.querySelector('.search_ff5f90');
+      this.inviteToolbar = document.querySelector('.inviteToolbar_c2739c');
+      this.windowBar = document.querySelector('.typeWindows_a934d8');
+      this.wordMark = document.querySelector('.wordmark_a934d8');
+      this.msgBar = document.querySelector('.form_a7d72e');
+      this.userArea = document.querySelector('.panels_a4d4d9');
+      this.profilePanel = document.querySelector('.userPanelOuter_c69a7b');
+      this.profilePanelInner = document.querySelector('.userPanelInner_c69a7b')
         ?.firstElementChild;
+      this.profilePanelFooter = document.querySelector('.footer_be6801');
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);
-      this.profileBannerSVGWrapper = document.querySelector('.bannerSVGWrapper__8a38c');
+      this.profileBannerSVGWrapper = document.querySelector('.bannerSVGWrapper_b32cc2');
       this.membersList = document.querySelector('.' + this.classMembersList);
       this.serverList = document.querySelector('.' + this.classServerList);
       this.channelList = document.querySelector('.' + this.classChannelList);
-      this.settingsContainerBase = document.querySelector('.container_debb33');
+      this.settingsContainerBase = document.querySelector('.container_b2ca13');
       this.settingsContainer = this.settingsContainerBase
-        .querySelector('.flex_f18b02');
+        .querySelector('.flex_bba380');
       this.spotifyContainer = document.querySelector('.container_6sXIoE');
-      this.appWrapperOuter = document.querySelector('.app_b1f720');
-      this.avatarWrapper = document.querySelector('.avatarWrapper__500a6');
+      this.appWrapperOuter = document.querySelector('.app_bd26cc');
+      this.avatarWrapper = document.querySelector('.avatarWrapper_b2ca13');
       this.moreButton = this.toolBar.querySelector('[d="M4 14a2 2 0 1 0 0-4 2 2'
         + ' 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 '
         + '0 0 1 4 0Z"]');
@@ -545,12 +550,12 @@ module.exports = (() => {
         + ' 2v3a1 1 0 1 0 2 0V6a4 4 0 0 0-4-4h-3a1 1 0 1 0 0 2h3ZM20 18a2 2 0 0'
         + ' 1-2 2h-3a1 1 0 1 0 0 2h3a4 4 0 0 0 4-4v-3a1 1 0 1 0-2 0v3Z"]')
         ?.parentElement.parentElement.parentElement;
-      this.msgBarBtnContainer = document.querySelector('.buttons__7ecff');
-      this.membersListInner = document.querySelector('.members__573eb');
-      this.membersListWrapper = document.querySelector('.container_f79ab4');
-      this.contentWindow = document.querySelector('.chatContent_f087cb');
+      this.msgBarBtnContainer = document.querySelector('.buttons_d0696b');
+      this.membersListInner = document.querySelector('.members_cbd271');
+      this.membersListWrapper = document.querySelector('.container_cbd271');
+      this.contentWindow = document.querySelector('.chatContent_a7d72e');
       if (!this.contentWindow)
-        this.contentWindow = document.querySelector('.container_b92032');
+        this.contentWindow = document.querySelector('.container_a6d69a');
 
       this.callContainerExists = (document.querySelector('.'
         + this.classCallContainer));
@@ -713,10 +718,10 @@ module.exports = (() => {
             if (cui.serverListButton
               && ((cui.autoCollapseConditionals[cui.I_SERVER_LIST] === '')
               || !(cui.conditionalAutoCollapse))
-              && (((cui.isHSLLoaded ? BdApi.DOM.screenHeight : BdApi.DOM.screenWidth)
+              && (((cui.isHSLLoaded ? window.outerHeight : window.outerWidth)
               < cui.autoCollapseThreshold[cui.I_SERVER_LIST]
               && BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'true')
-              || ((cui.isHSLLoaded ? BdApi.DOM.screenHeight : BdApi.DOM.screenWidth)
+              || ((cui.isHSLLoaded ? window.outerHeight : window.outerWidth)
               > cui.autoCollapseThreshold[cui.I_SERVER_LIST]
               && BdApi.getData('CollapsibleUI', 'serverListButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_SERVER_LIST);
@@ -724,63 +729,63 @@ module.exports = (() => {
             if (cui.channelListButton
               && ((cui.autoCollapseConditionals[cui.I_CHANNEL_LIST] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[cui.I_CHANNEL_LIST]
+              && ((window.outerWidth < cui.autoCollapseThreshold[cui.I_CHANNEL_LIST]
               && BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true')
-              || (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[cui.I_CHANNEL_LIST]
+              || (window.outerWidth > cui.autoCollapseThreshold[cui.I_CHANNEL_LIST]
               && BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_CHANNEL_LIST);
             }
             if (cui.msgBarButton
               && ((cui.autoCollapseConditionals[cui.I_MSG_BAR] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[cui.I_MSG_BAR]
+              && ((window.outerHeight < cui.autoCollapseThreshold[cui.I_MSG_BAR]
               && BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'true')
-              || (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[cui.I_MSG_BAR]
+              || (window.outerHeight > cui.autoCollapseThreshold[cui.I_MSG_BAR]
               && BdApi.getData('CollapsibleUI', 'msgBarButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_MSG_BAR);
             }
             if (cui.windowBarButton
               && ((cui.autoCollapseConditionals[cui.I_WINDOW_BAR] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[cui.I_WINDOW_BAR]
+              && ((window.outerHeight < cui.autoCollapseThreshold[cui.I_WINDOW_BAR]
               && BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'true')
-              || (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[cui.I_WINDOW_BAR]
+              || (window.outerHeight > cui.autoCollapseThreshold[cui.I_WINDOW_BAR]
               && BdApi.getData('CollapsibleUI', 'windowBarButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_WINDOW_BAR);
             }
             if (cui.membersListButton
               && ((cui.autoCollapseConditionals[cui.I_MEMBERS_LIST] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[cui.I_MEMBERS_LIST]
+              && ((window.outerWidth < cui.autoCollapseThreshold[cui.I_MEMBERS_LIST]
               && BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true')
-              || (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[cui.I_MEMBERS_LIST]
+              || (window.outerWidth > cui.autoCollapseThreshold[cui.I_MEMBERS_LIST]
               && BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_MEMBERS_LIST);
             }
             if (cui.profilePanelButton
               && ((cui.autoCollapseConditionals[cui.I_USER_PROFILE] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenWidth < cui.autoCollapseThreshold[cui.I_USER_PROFILE]
+              && ((window.outerWidth < cui.autoCollapseThreshold[cui.I_USER_PROFILE]
               && BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true')
-              || (BdApi.DOM.screenWidth > cui.autoCollapseThreshold[cui.I_USER_PROFILE]
+              || (window.outerWidth > cui.autoCollapseThreshold[cui.I_USER_PROFILE]
               && BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_USER_PROFILE);
             }
             if (cui.userAreaButton
               && ((cui.autoCollapseConditionals[cui.I_USER_AREA] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[cui.I_USER_AREA]
+              && ((window.outerHeight < cui.autoCollapseThreshold[cui.I_USER_AREA]
               && BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'true')
-              || (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[cui.I_USER_AREA]
+              || (window.outerHeight > cui.autoCollapseThreshold[cui.I_USER_AREA]
               && BdApi.getData('CollapsibleUI', 'userAreaButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_USER_AREA);
             }
             if (cui.callContainerButton
               && ((cui.autoCollapseConditionals[cui.I_CALL_CONTAINER] === '')
               || !(cui.conditionalAutoCollapse))
-              && ((BdApi.DOM.screenHeight < cui.autoCollapseThreshold[cui.I_CALL_CONTAINER]
+              && ((window.outerHeight < cui.autoCollapseThreshold[cui.I_CALL_CONTAINER]
               && BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'true')
-              || (BdApi.DOM.screenHeight > cui.autoCollapseThreshold[cui.I_CALL_CONTAINER]
+              || (window.outerHeight > cui.autoCollapseThreshold[cui.I_CALL_CONTAINER]
               && BdApi.getData('CollapsibleUI', 'callContainerButtonActive') === 'false'))) {
               cui.toggleButton(cui.I_CALL_CONTAINER);
             }
@@ -4238,7 +4243,8 @@ module.exports = (() => {
         this.pluginStyle.sheet.insertRule(':root {--cui-members-width: 240px}', 0);
         this.pluginStyle.sheet.insertRule(':root {--cui-profile-width: 340px}', 1);
         this.pluginStyle.sheet.insertRule('::-webkit-scrollbar {width: 0px; background: transparent;}', 2);
-        this.pluginStyle.sheet.insertRule('.content__23cab, .headerRow__16d8e {min-width: 0px !important;}', 3);
+        this.pluginStyle.sheet.insertRule('.content_eed6a8, .headerRow_a6d69a {min-width: 0px !important;}', 3);
+        this.pluginStyle.sheet.insertRule('.userPanelInner_c69a7b .profileEffects_f867f9 {transform: scaleX(-1);}', 4);
 
         // Handle resizing channel list
         if (this.resizableChannelList) {
@@ -4246,7 +4252,7 @@ module.exports = (() => {
           this.channelList.style.maxWidth = '80vw';
 
           // Hide webkit resizer
-          this.pluginStyle.sheet.insertRule('::-webkit-resizer {display: none;}', 3);
+          this.pluginStyle.sheet.insertRule('::-webkit-resizer {display: none;}', 5);
 
           document.body.addEventListener('mousedown', function () {
             cui.channelList.style.transition = 'none';
@@ -4254,7 +4260,7 @@ module.exports = (() => {
 
           if (this.fullscreenButton) {
             this.fullscreenButton.addEventListener('click', function () {
-              if (document.fullscreen)
+              if (document.fullscreenElement != null)
                 cui.channelList.style.maxWidth = '80vw';
               else
                 cui.channelList.style.maxWidth = '0px';
@@ -4285,7 +4291,7 @@ module.exports = (() => {
             try {
               if (((!cui.isCollapsed[cui.I_CHANNEL_LIST])
                 || (BdApi.getData('CollapsibleUI', 'channelListButtonActive') === 'true'))
-                && !document.fullscreen) {
+                && document.fullscreenElement == null) {
                 var oldChannelListWidth = cui.channelListWidth;
                 if (parseInt(cui.channelList.style.width)) {
                   cui.channelListWidth = parseInt(cui.channelList.style.width);
@@ -4345,11 +4351,11 @@ module.exports = (() => {
 
             // Hide webkit resizer
             if (!this.resizableChannelList) {
-              this.pluginStyle.sheet.insertRule('::-webkit-resizer {display: none;}', 3);
+              this.pluginStyle.sheet.insertRule('::-webkit-resizer {display: none;}', 5);
             }
 
             // DateViewer compatibility
-            this.pluginStyle.sheet.insertRule('#dv-mount {transform: scaleX(-1);}', 4);
+            this.pluginStyle.sheet.insertRule('#dv-mount {transform: scaleX(-1);}', 6);
 
             document.body.addEventListener('mousedown', function () {
               cui.membersList.style.transition = 'none';
@@ -4360,7 +4366,7 @@ module.exports = (() => {
 
             if (this.fullscreenButton) {
               this.fullscreenButton.addEventListener('click', function () {
-                if (document.fullscreen)
+                if (document.fullscreenElement != null)
                   cui.membersList.style.maxWidth = '80vw';
                 else
                   cui.membersList.style.maxWidth = '0px';
@@ -4399,7 +4405,7 @@ module.exports = (() => {
               try {
                 if (((!cui.isCollapsed[cui.I_MEMBERS_LIST])
                   || (BdApi.getData('CollapsibleUI', 'membersListButtonActive') === 'true'))
-                  && !document.fullscreen) {
+                  && document.fullscreenElement == null) {
                   var oldMembersListWidth = cui.membersListWidth;
                   if (parseInt(cui.membersList.style.width)) {
                     cui.membersListWidth = parseInt(cui.membersList.style.width);
@@ -4476,10 +4482,11 @@ module.exports = (() => {
             // Without affecting the elements inside
             this.profilePanel.style.transform = 'scaleX(-1)';
             this.profilePanelInner.style.transform = 'scaleX(-1)';
+            this.profilePanelFooter.style.transform = 'scaleX(-1)';
 
             // Hide webkit resizer
             if (!this.resizableChannelList) {
-              this.pluginStyle.sheet.insertRule('::-webkit-resizer {display: none;}', 3);
+              this.pluginStyle.sheet.insertRule('::-webkit-resizer {display: none;}', 5);
             }
 
             document.body.addEventListener('mousedown', function () {
@@ -4488,7 +4495,7 @@ module.exports = (() => {
 
             if (this.fullscreenButton) {
               this.fullscreenButton.addEventListener('click', function () {
-                if (document.fullscreen)
+                if (document.fullscreenElement != null)
                   cui.profilePanel.style.maxWidth = '80vw';
                 else
                   cui.profilePanel.style.maxWidth = '0px';
@@ -4520,7 +4527,7 @@ module.exports = (() => {
               try {
                 if (((!cui.isCollapsed[cui.I_USER_PROFILE])
                   || (BdApi.getData('CollapsibleUI', 'profilePanelButtonActive') === 'true'))
-                  && !document.fullscreen) {
+                  && document.fullscreenElement == null) {
                   var oldProfilePanelWidth = cui.profilePanelWidth;
                   if (parseInt(cui.profilePanel.style.width)) {
                     cui.profilePanelWidth = parseInt(cui.profilePanel.style.width);
@@ -4562,9 +4569,20 @@ module.exports = (() => {
         if (this.userArea)
           this.userArea.style.transition = 'max-height ' + this.transitionSpeed + 'ms';
 
-        if (document.querySelector('.' + this.classCallContainer))
+        if (document.querySelector('.' + this.classCallContainer)) {
           document.querySelector('.' + this.classCallContainer).style.transition =
             'max-height ' + this.transitionSpeed + 'ms';
+          window.addEventListener('resize', function (event) {
+            try {
+              if (document.querySelector('.' + cui.classCallContainer)
+                .style.maxHeight != '0px') {
+                document.querySelector('.' + cui.classCallContainer)
+                  .style.maxHeight = window.outerHeight + 'px';
+              }
+            }
+            catch {}
+          }, { signal: this.eventListenerSignal });
+        }
 
         if (this.windowBase) {
           if (this.isDarkMatterLoaded)
@@ -4946,10 +4964,10 @@ module.exports = (() => {
           this.callDUDelay = setTimeout(() => {
             if (document.querySelector('.' + cui.classNoChat))
               document.querySelector('.' + cui.classCallContainer)
-                .style.maxHeight = BdApi.DOM.screenHeight + 'px';
+                .style.maxHeight = window.outerHeight + 'px';
             else
               document.querySelector('.' + cui.classCallContainer)
-                .style.maxHeight = (BdApi.DOM.screenHeight - 222) + 'px';
+                .style.maxHeight = (window.outerHeight - 222) + 'px';
             if (document.querySelector('.' + cui.classCallUserWrapper))
               document.querySelector('.' + cui.classCallUserWrapper)
                 .style.removeProperty('display');
@@ -5214,10 +5232,10 @@ module.exports = (() => {
               else {
                 if (document.querySelector('.' + this.classNoChat))
                   document.querySelector('.' + this.classCallContainer)
-                    .style.maxHeight = BdApi.DOM.screenHeight + 'px';
+                    .style.maxHeight = window.outerHeight + 'px';
                 else
                   document.querySelector('.' + this.classCallContainer)
-                    .style.maxHeight = (BdApi.DOM.screenHeight - 222) + 'px';
+                    .style.maxHeight = (window.outerHeight - 222) + 'px';
                 if (document.querySelector('.' + this.classCallUserWrapper))
                   document.querySelector('.' + this.classCallUserWrapper)
                     .style.removeProperty('display');

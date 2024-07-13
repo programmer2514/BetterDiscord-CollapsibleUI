@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.2:
+* Fixed dynamically uncollapsed elements collapsing when switching servers/channels
+* Fixed profile panel briefly jumping open when switching DMs
+
 ### v8.4.1:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <309513)
 

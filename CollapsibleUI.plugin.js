@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.0
+ * @version 8.4.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,19 +21,15 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.0',
+      version: '8.4.1',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.0',
+      title: '8.4.1',
       items: [
-        'Hotfix for newest Discord release (breaks plugin on Discord versions <304187)',
-        'Fixed some elements of new profiles being shown reversed',
-        'Fixed call container not filling available space while in fullscreen',
-        'Standardized code formatting using ESLint + Stylistic',
-        'Updated deprecated code',
+        'Hotfix for newest Discord release (breaks plugin on Discord versions <309513)',
       ],
     }, {
       title: '1.0.0 - 8.4.0',
@@ -459,10 +455,10 @@ module.exports = (() => {
     abstractClassesAndElements = () => {
       // Classes
       if (this.classSelected === undefined) {
-        this.classSelected = 'selected_e44302';
-        this.classIconWrapper = 'iconWrapper_e44302';
-        this.classClickable = 'clickable_e44302';
-        this.classIcon = 'icon_e44302';
+        this.classSelected = 'selected_fc4f04';
+        this.classIconWrapper = 'iconWrapper_fc4f04';
+        this.classClickable = 'clickable_fc4f04';
+        this.classIcon = 'icon_fc4f04';
         this.classCallContainer = 'wrapper_d880dc';
         this.classCallUserWrapper = 'voiceCallWrapper_bae578';
         this.classDMElement = 'channel_c91bad';
@@ -502,7 +498,7 @@ module.exports = (() => {
       // Elements
       this.windowBase = document.querySelector('.base_a4d4d9');
       this.baseLayer = document.querySelector('.baseLayer_d4b6c5');
-      this.toolBar = document.querySelector('.toolbar_e44302');
+      this.toolBar = document.querySelector('.toolbar_fc4f04');
       this.searchBar = document.querySelector('.search_ff5f90');
       this.inviteToolbar = document.querySelector('.inviteToolbar_c2739c');
       this.windowBar = document.querySelector('.typeWindows_a934d8');

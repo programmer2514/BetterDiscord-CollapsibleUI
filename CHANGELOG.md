@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.1:
+* Hotfix for newest Discord release (breaks plugin on Discord versions <309513)
+
 ### v8.4.0:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <304187)
 * Fixed some elements of new profiles being shown reversed

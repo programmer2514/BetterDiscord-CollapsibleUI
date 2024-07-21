@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.3:
+* Fixed unnecessary console spam
+* Updated outdated code
+
 ### v8.4.2:
 * Fixed dynamically uncollapsed elements collapsing when switching servers/channels
 * Fixed profile panel briefly jumping open when switching DMs

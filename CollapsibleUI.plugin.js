@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.2
+ * @version 8.4.3
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,19 +21,19 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.2',
+      version: '8.4.3',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.2',
+      title: '8.4.3',
       items: [
-        'Fixed dynamically uncollapsed elements collapsing when switching servers/channels',
-        'Fixed profile panel briefly jumping open when switching DMs',
+        'Fixed unnecessary console spam',
+        'Updated outdated code',
       ],
     }, {
-      title: '1.0.0 - 8.4.1',
+      title: '1.0.0 - 8.4.2',
       items: [
         `See the full changelog here:
            https://programmer2514.github.io/?l=cui-changelog`,
@@ -45,28 +45,8 @@ module.exports = (() => {
   // Check for ZeresPluginLibrary
   if (!window.ZeresPluginLibrary) {
     return class {
-      constructor() {
-        this._config = config;
-      }
-
-      getName() {
-        return config.info.name;
-      }
-
-      getAuthor() {
-        return config.info.authors.map(a => a.name).join(', ');
-      }
-
-      getDescription() {
-        return config.info.description;
-      }
-
-      getVersion() {
-        return config.info.version;
-      }
-
-      load() {
-        BdApi.showConfirmationModal(
+      load = () => {
+        BdApi.UI.showConfirmationModal(
           'Library Missing',
           `The library plugin needed for ${config.info.name} is missing. \
             Please click Download Now to install it.`, {
@@ -85,11 +65,10 @@ module.exports = (() => {
                   });
             },
           });
-      }
+      };
 
-      start() {}
-
-      stop() {}
+      start = () => {};
+      stop = () => {};
     };
   }
 
@@ -3107,7 +3086,6 @@ module.exports = (() => {
 
           // Checks for a variety of small mutations and reloads if necessary
           // This is required for BDFDB compatibility
-          console.log(mutationList);
           for (var i = 0; i < mutationList.length; i++) {
             if (mutationList[i].addedNodes[0]?.classList?.contains(cui.classAppWrapperInner)
               || mutationList[i].addedNodes[0]?.classList?.contains(cui.classLayers)

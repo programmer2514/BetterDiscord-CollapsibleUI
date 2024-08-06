@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.3
+ * @version 8.4.4
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,19 +21,18 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.3',
+      version: '8.4.4',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.3',
+      title: '8.4.4',
       items: [
-        'Fixed unnecessary console spam',
-        'Updated outdated code',
+        'Hotfix for newest Discord release (breaks plugin on Discord versions <315866)'
       ],
     }, {
-      title: '1.0.0 - 8.4.2',
+      title: '1.0.0 - 8.4.3',
       items: [
         `See the full changelog here:
            https://programmer2514.github.io/?l=cui-changelog`,
@@ -462,7 +461,7 @@ module.exports = (() => {
         this.classProfilePanelWrapper = 'profilePanel_b433b4';
         this.classTextInput = '[data-slate-string="true"]';
         this.classNoChat = 'noChat_a7d72e';
-        this.classMsgButtons = 'wrapper_ef319f';
+        this.classMsgButtons = 'wrapper_f7e168';
         this.classEphemeralContent = 'content_eed6a8';
         this.classUnreadDMBadge = 'numberBadge_df8943';
         this.classUnreadDmBadgeBase = 'base_df8943';
@@ -500,7 +499,7 @@ module.exports = (() => {
       this.channelList = document.querySelector('.' + this.classChannelList);
       this.settingsContainerBase = document.querySelector('.container_b2ca13');
       this.settingsContainer = this.settingsContainerBase
-        .querySelector('.flex_bba380');
+        .querySelector('.flex_dc333f');
       this.spotifyContainer = document.querySelector('.container_6sXIoE');
       this.appWrapperOuter = document.querySelector('.app_bd26cc');
       this.avatarWrapper = document.querySelector('.avatarWrapper_b2ca13');

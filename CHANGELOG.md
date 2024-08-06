@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.4:
+* Hotfix for newest Discord release (breaks plugin on Discord versions <315866)
+
 ### v8.4.3:
 * Fixed unnecessary console spam
 * Updated outdated code

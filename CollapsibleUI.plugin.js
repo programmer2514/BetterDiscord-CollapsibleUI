@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.4
+ * @version 8.4.5
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,20 +21,20 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.4',
+      version: '8.4.5',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.4',
+      title: '8.4.5',
       items: [
-        'Hotfix for newest Discord release (breaks plugin on Discord versions <315866)'
+        'Hotfix for newest Discord release (breaks plugin on Discord versions <317617)',
       ],
     }, {
-      title: '1.0.0 - 8.4.3',
+      title: '1.0.0 - 8.4.4',
       items: [
-        `See the full changelog here:
+        `See the full changelog here:\
            https://programmer2514.github.io/?l=cui-changelog`,
       ],
     },
@@ -490,7 +490,7 @@ module.exports = (() => {
         + this.classProfilePanel);
       this.profilePanelInner = document.querySelector('.userPanelInner_c69a7b')
         ?.firstElementChild;
-      this.profilePanelFooter = document.querySelector('.footer_be6801');
+      this.profilePanelFooter = document.querySelector('.footer_ecc60d');
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);
       this.profileBannerSVGWrapper = document.querySelector('.bannerSVGWrapper_b32cc2');

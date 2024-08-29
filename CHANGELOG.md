@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.6:
+* Hotfix for newest Discord release (breaks plugin on Discord versions <322979)
+
 ### v8.4.5:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <317617)
 

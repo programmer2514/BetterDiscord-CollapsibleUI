@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.7:
+* Fixed grey bar at bottom of screen when zooming out in a fullscreen/server call
+
 ### v8.4.6:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <322979)
 

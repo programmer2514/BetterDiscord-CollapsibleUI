@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.6
+ * @version 8.4.7
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,18 +21,18 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.6',
+      version: '8.4.7',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.6',
+      title: '8.4.7',
       items: [
-        'Hotfix for newest Discord release (breaks plugin on Discord versions <322979)',
+        'Fixed grey bar at bottom of screen when zooming out in a fullscreen/server call',
       ],
     }, {
-      title: '1.0.0 - 8.4.5',
+      title: '1.0.0 - 8.4.6',
       items: [
         `See the full changelog here:\
            https://programmer2514.github.io/?l=cui-changelog`,
@@ -372,7 +372,7 @@ module.exports = (() => {
         if (document.querySelector('.' + this.classCallContainer)) {
           if (document.querySelector('.' + this.classNoChat))
             document.querySelector('.' + this.classCallContainer)
-              .style.maxHeight = window.outerHeight + 'px';
+              .style.maxHeight = (window.outerHeight * 2) + 'px';
           else
             document.querySelector('.' + this.classCallContainer)
               .style.maxHeight = (window.outerHeight - 222) + 'px';
@@ -4575,7 +4575,7 @@ module.exports = (() => {
               if (document.querySelector('.' + cui.classCallContainer)
                 .style.maxHeight != '0px') {
                 document.querySelector('.' + cui.classCallContainer)
-                  .style.maxHeight = window.outerHeight + 'px';
+                  .style.maxHeight = (window.outerHeight * 2) + 'px';
               }
             }
             catch {}
@@ -4962,7 +4962,7 @@ module.exports = (() => {
           this.callDUDelay = setTimeout(() => {
             if (document.querySelector('.' + cui.classNoChat))
               document.querySelector('.' + cui.classCallContainer)
-                .style.maxHeight = window.outerHeight + 'px';
+                .style.maxHeight = (window.outerHeight * 2) + 'px';
             else
               document.querySelector('.' + cui.classCallContainer)
                 .style.maxHeight = (window.outerHeight - 222) + 'px';
@@ -5230,7 +5230,7 @@ module.exports = (() => {
               else {
                 if (document.querySelector('.' + this.classNoChat))
                   document.querySelector('.' + this.classCallContainer)
-                    .style.maxHeight = window.outerHeight + 'px';
+                    .style.maxHeight = (window.outerHeight * 2) + 'px';
                 else
                   document.querySelector('.' + this.classCallContainer)
                     .style.maxHeight = (window.outerHeight - 222) + 'px';

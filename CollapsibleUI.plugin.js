@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.7
+ * @version 8.4.8
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,18 +21,18 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.7',
+      version: '8.4.8',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.7',
+      title: '8.4.8',
       items: [
-        'Fixed grey bar at bottom of screen when zooming out in a fullscreen/server call',
+        'Hotfix for newest Discord release (breaks plugin on Discord versions <325120)',
       ],
     }, {
-      title: '1.0.0 - 8.4.6',
+      title: '1.0.0 - 8.4.7',
       items: [
         `See the full changelog here:\
            https://programmer2514.github.io/?l=cui-changelog`,
@@ -490,10 +490,10 @@ module.exports = (() => {
         + this.classProfilePanel);
       this.profilePanelInner = document.querySelector('.userPanelInner_c69a7b')
         ?.firstElementChild;
-      this.profilePanelFooter = document.querySelector('.footer_ecc60d');
+      this.profilePanelFooter = document.querySelector('.footer_a823cd');
       this.profilePanelWrapper = document.querySelector('.'
         + this.classProfilePanelWrapper);
-      this.profileBannerSVGWrapper = document.querySelector('.mask_c3e427');
+      this.profileBannerSVGWrapper = document.querySelector('.mask_d5fdb1');
       this.membersList = document.querySelector('.' + this.classMembersList);
       this.serverList = document.querySelector('.' + this.classServerList);
       this.channelList = document.querySelector('.' + this.classChannelList);

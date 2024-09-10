@@ -53,7 +53,7 @@ module.exports = (() => {
             cancelText: 'Cancel',
             onConfirm: () => {
               require('request')
-                .get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js',
+                .get('https://betterdiscord.app/Download?id=9',
                   async (err, _response, body) => {
                     if (err) {
                       return require('electron').shell

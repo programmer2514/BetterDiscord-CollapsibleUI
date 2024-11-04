@@ -3,7 +3,7 @@
  * @author TenorTheHusky
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 8.4.8
+ * @version 8.4.9
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -21,18 +21,18 @@ module.exports = (() => {
         github_username: 'programmer2514',
       },
       ],
-      version: '8.4.8',
+      version: '8.4.9',
       description: 'A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular',
       github: 'https://github.com/programmer2514/BetterDiscord-CollapsibleUI',
       github_raw: 'https://raw.githubusercontent.com/programmer2514/BetterDiscord-CollapsibleUI/main/CollapsibleUI.plugin.js',
     },
     changelog: [{
-      title: '8.4.8',
+      title: '8.4.9',
       items: [
-        'Hotfix for newest Discord release (breaks plugin on Discord versions <325120)',
+        'Fixed Members List occasionally reversing itself',
       ],
     }, {
-      title: '1.0.0 - 8.4.7',
+      title: '1.0.0 - 8.4.8',
       items: [
         `See the full changelog here:\
            https://programmer2514.github.io/?l=cui-changelog`,
@@ -457,6 +457,7 @@ module.exports = (() => {
         this.classUserPopout = 'userPopoutOuter_c69a7b';
         this.classMembersListWrapper = 'container_cbd271';
         this.classMembersListMember = 'member_a31c43';
+        this.classMembersListInner = 'members_cbd271';
         this.classProfilePanel = 'userPanelOuter_c69a7b';
         this.classProfilePanelWrapper = 'profilePanel_b433b4';
         this.classTextInput = '[data-slate-string="true"]';
@@ -529,7 +530,7 @@ module.exports = (() => {
         + ' 1-2 2h-3a1 1 0 1 0 0 2h3a4 4 0 0 0 4-4v-3a1 1 0 1 0-2 0v3Z"]')
         ?.parentElement.parentElement.parentElement;
       this.msgBarBtnContainer = document.querySelector('.buttons_d0696b');
-      this.membersListInner = document.querySelector('.members_cbd271');
+      this.membersListInner = document.querySelector('.' + this.classMembersListInner);
       this.membersListWrapper = document.querySelector('.container_cbd271');
       this.contentWindow = document.querySelector('.chatContent_a7d72e');
       if (!this.contentWindow)
@@ -3095,6 +3096,7 @@ module.exports = (() => {
               || mutationList[i].addedNodes[0]?.classList?.contains(cui.classProfilePanel)
               || mutationList[i].addedNodes[0]?.classList?.contains(cui.classProfilePanelWrapper)
               || mutationList[i].addedNodes[0]?.classList?.contains(cui.classCallContainer)
+              || mutationList[i].addedNodes[0]?.classList?.contains(cui.classMembersListInner)
               || mutationList[i].removedNodes[0]?.classList?.contains(cui.classCallContainer)) {
               cui.initialize();
               return;

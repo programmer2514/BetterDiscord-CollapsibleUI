@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v8.4.9:
+* Fixed Members List occasionally reversing itself
+
 ### v8.4.8:
 * Hotfix for newest Discord release (breaks plugin on Discord versions <325120)
 

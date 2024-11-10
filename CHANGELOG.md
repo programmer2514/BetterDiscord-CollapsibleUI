@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v8.5.0:
+* Fixed profile panel and settings buttons on latest update
+* Fixed plugin failing to load in thread channels
+
 ### v8.4.9:
 * Fixed Members List occasionally reversing itself
 

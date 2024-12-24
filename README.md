@@ -6,11 +6,11 @@ A feature-rich BetterDiscord plugin that reworks the Discord UI to be significan
 
 ### Features
 * Members list style collapsing of most UI elements
-* Dynamic uncollapsing of hidden elements on hover
-* Autocollapse for parts of the Discord UI based on window size
+* Dynamic expansion of hidden elements on hover
+* Auto-collapse parts of the Discord UI based on window size
 * Out-of-the-box compatibility with most themes and plugins
 * Keyboard shortcuts for most actions
-* Resizable members and channel/DMs lists
+* Resizable members list, channel/DM list, and user profile panel
 * Smooth transition effects
 * And most importantly, ___everything___ is customizable
 

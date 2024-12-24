@@ -19,7 +19,6 @@ export default [
     languageOptions: {
       globals: {
         BdApi: 'readonly',
-        ZeresPluginLibrary: 'readonly',
         require: 'readonly',
         module: 'readonly',
       },

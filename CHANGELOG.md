@@ -1,5 +1,15 @@
 # CollapsibleUI Patch Notes
 
+### v9.0.0:
+* Plugin no longer depends on ZeresPluginLibrary
+* Greatly increased robustness against breaking with Discord updates
+* Reworked plugin settings and changed defaults
+* Decreased plugin size and increased runtime speed
+* Updated translations for increased accuracy and consistency
+* Added compatibility for MemberCount and CompleteTimestamps
+* Fixed channel list failing to collapse/resize
+* Fixed VC buttons shrinking when channel list is resized
+
 ### v8.5.0:
 * Fixed profile panel and settings buttons on latest update
 * Fixed plugin failing to load in thread channels

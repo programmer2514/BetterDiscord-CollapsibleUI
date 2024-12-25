@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.0.0
+ * @version 9.0.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,23 +13,16 @@
 const config = {
   changelog: [
     {
-      title: '9.0.0',
+      title: '9.0.2',
       type: 'added',
       items: [
-        'Plugin no longer depends on ZeresPluginLibrary',
-        'Greatly increased robustness against breaking with Discord updates',
-        'Reworked plugin settings and changed defaults',
-        'Decreased plugin size and increased runtime speed',
-        'Updated translations for increased accuracy and consistency',
-        'Added compatibility for MemberCount and CompleteTimestamps',
-        'Fixed channel list failing to collapse/resize',
-        'Fixed VC buttons shrinking when channel list is resized',
-        'THIS UPDATE RESETS EVERYTHING TO DEFAULTS',
-        'IF A FEATURE YOU USE IS DISABLED, YOU CAN RE-ENABLE IT IN SETTINGS',
+        'Fixed plugin crashing on MacOS',
+        'Fixed plugin failing to load in forum channels',
+        'Added Quests compatibility (ew)',
       ],
     },
     {
-      title: '1.0.0 - 8.5.0',
+      title: '1.0.0 - 9.0.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -679,32 +672,32 @@ const settings = {
 };
 
 const modules = {
-  icons: BdApi.Webpack.getByKeys('selected', 'iconWrapper', 'clickable', 'icon'),
-  callContainer: BdApi.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer'),
-  callMembers: BdApi.Webpack.getByKeys('voiceCallWrapper', 'videoGrid', 'hiddenParticipants'),
-  dms: BdApi.Webpack.getByKeys('channel', 'linkButton', 'dm'),
-  app: BdApi.Webpack.getByKeys('app', 'layers'),
-  sidebar: BdApi.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded'),
-  servers: BdApi.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'fixedDiscoveryIcon'),
-  members: BdApi.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon'),
-  member: BdApi.Webpack.getByKeys('member', 'ownerIcon', 'activityText', 'clanTag'),
-  panel: BdApi.Webpack.getByKeys('biteSize', 'panel', 'overlay'),
-  banner: BdApi.Webpack.getByKeys('banner', 'gifTag', 'mask'),
-  guilds: BdApi.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby'),
-  buttons: BdApi.Webpack.getByKeys('button', 'selected', 'separator', 'disabled'),
-  ephemeral: BdApi.Webpack.getByKeys('thin', 'customTheme', 'fade', 'scrolling'),
-  badge: BdApi.Webpack.getByKeys('baseShapeRound', 'numberBadge', 'premiumBadge'),
-  threads: BdApi.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton'),
-  layers: BdApi.Webpack.getByKeys('layers', 'animating', 'bg', 'baseLayer'),
-  toolbar: BdApi.Webpack.getByKeys('updateIconForeground', 'search', 'forumOrHome'),
-  social: BdApi.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend'),
-  frame: BdApi.Webpack.getByKeys('typeMacOS', 'typeWindows', 'withBackgroundOverride'),
-  profile: BdApi.Webpack.getByKeys('header', 'footer', 'banner', 'backdrop', 'toast'),
-  user: BdApi.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons'),
-  layout: BdApi.Webpack.getByKeys('flex', 'horizontal', 'flexChild'),
-  window: BdApi.Webpack.getByKeys('appAsidePanelWrapper', 'mobileApp', 'allowsScrolling'),
-  input: BdApi.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton'),
-  controls: BdApi.Webpack.getByKeys('krispLogo', 'micTestButton', 'voiceButtonsContainer'),
+  icons: null,
+  callContainer: null,
+  callMembers: null,
+  dms: null,
+  app: null,
+  sidebar: null,
+  servers: null,
+  members: null,
+  member: null,
+  panel: null,
+  banner: null,
+  guilds: null,
+  buttons: null,
+  ephemeral: null,
+  badge: null,
+  threads: null,
+  layers: null,
+  toolbar: null,
+  social: null,
+  frame: null,
+  profile: null,
+  user: null,
+  layout: null,
+  window: null,
+  input: null,
+  controls: null,
 };
 
 const elements = {
@@ -770,6 +763,7 @@ const runtime = {
     darkMatter: false,
     horizontalServerList: false,
   },
+  moduleLoader: null,
 };
 
 // Export plugin class
@@ -844,6 +838,10 @@ module.exports = class CollapsibleUI {
   // Main plugin code
   initialize = async () => {
     try {
+      this.locateModules();
+      this.locateElements();
+      this.getLabels();
+
       this.terminate(); // Clean up UI
 
       // Display reloading message (dev only)
@@ -853,11 +851,9 @@ module.exports = class CollapsibleUI {
       runtime.events.controller = new AbortController();
       runtime.events.signal = runtime.events.controller.signal;
 
-      this.locateElements();
       this.initSettings();
       this.initThemeIntegration();
       this.initObservers();
-      this.getLabels();
 
       // Hide default Members List/Profile Panel buttons
       if (elements.membersListButton && elements.membersList)
@@ -954,7 +950,6 @@ module.exports = class CollapsibleUI {
         elements.serverList.style.removeProperty('overflow-y');
       }
       if (elements.windowBar) {
-        elements.wordMark.style.removeProperty('display');
         elements.windowBar.style.removeProperty('height');
         elements.windowBar.style.removeProperty('opacity');
         elements.windowBar.style.removeProperty('padding');
@@ -1080,6 +1075,7 @@ module.exports = class CollapsibleUI {
       }
 
       if (elements.wordMark) {
+        elements.wordMark.style.removeProperty('display');
         elements.wordMark.style.removeProperty('margin-left');
       }
 
@@ -1099,6 +1095,38 @@ module.exports = class CollapsibleUI {
         'color: #3a71c1; font-weight: 700;', '');
       console.warn(e);
     }
+  };
+
+  // Locates needed webpack modules
+  locateModules = (listening = false) => {
+    if (!listening) {
+      modules.icons = runtime.api.Webpack.getByKeys('selected', 'iconWrapper', 'clickable', 'icon');
+      modules.callContainer = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer');
+      modules.callMembers = runtime.api.Webpack.getByKeys('voiceCallWrapper', 'videoGrid', 'hiddenParticipants');
+      modules.dms = runtime.api.Webpack.getByKeys('channel', 'linkButton', 'dm');
+      modules.app = runtime.api.Webpack.getByKeys('app', 'layers');
+      modules.sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded');
+      modules.servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'fixedDiscoveryIcon');
+      modules.members = runtime.api.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon');
+      modules.member = runtime.api.Webpack.getByKeys('member', 'ownerIcon', 'activityText', 'clanTag');
+      modules.panel = runtime.api.Webpack.getByKeys('biteSize', 'panel', 'overlay');
+      modules.banner = runtime.api.Webpack.getByKeys('banner', 'gifTag', 'mask');
+      modules.guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby');
+      modules.buttons = runtime.api.Webpack.getByKeys('button', 'selected', 'separator', 'disabled');
+      modules.ephemeral = runtime.api.Webpack.getByKeys('thin', 'customTheme', 'fade', 'scrolling');
+      modules.badge = runtime.api.Webpack.getByKeys('baseShapeRound', 'numberBadge', 'premiumBadge');
+      modules.layers = runtime.api.Webpack.getByKeys('layers', 'animating', 'bg', 'baseLayer');
+      modules.toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'forumOrHome');
+      modules.social = runtime.api.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend');
+      modules.frame = runtime.api.Webpack.getByKeys('typeMacOS', 'typeWindows', 'withBackgroundOverride');
+      modules.profile = runtime.api.Webpack.getByKeys('header', 'footer', 'banner', 'backdrop', 'toast');
+      modules.user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons');
+      modules.layout = runtime.api.Webpack.getByKeys('flex', 'horizontal', 'flexChild');
+      modules.window = runtime.api.Webpack.getByKeys('appAsidePanelWrapper', 'mobileApp', 'allowsScrolling');
+      modules.input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton');
+      modules.controls = runtime.api.Webpack.getByKeys('krispLogo', 'micTestButton', 'voiceButtonsContainer');
+    }
+    modules.threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton');
   };
 
   // Locates needed elements in the DOM
@@ -1154,8 +1182,26 @@ module.exports = class CollapsibleUI {
     elements.membersListWrapper = document.querySelector('.' + modules.members?.container);
     elements.callContainer = (document.querySelector('.' + modules.callContainer?.wrapper));
     elements.contentWindow = document.querySelector('.' + modules.guilds?.chatContent);
-    if (!elements.contentWindow)
+    if (!elements.contentWindow) {
+      // In order to load threads module, we must be on a forum page
+      // Unfortunately, module loads AFTER onSwitch() event, so we have
+      // to kick off a listener to wait for it
+      // CollapsibleUI may throw a few warnings when switching to forum pages,
+      // but it shouldn't affect performance or functionality
+      if (!modules.threads && !runtime.moduleLoader) {
+        runtime.moduleLoader = setInterval(() => {
+          this.locateModules(true);
+          if (modules.threads) {
+            clearInterval(runtime.moduleLoader);
+            runtime.moduleLoader = null;
+            console.log('test');
+            this.initialize();
+          }
+        }, 100);
+      }
+
       elements.contentWindow = document.querySelector('.' + modules.threads?.container);
+    }
     elements.membersList = document.querySelector('.' + modules.members?.membersWrap);
     if (runtime.api.Plugins.isEnabled('ChannelDms') && document.querySelector('.ChannelDms-channelmembers-wrap'))
       elements.membersList = document.querySelector('.ChannelDms-channelmembers-wrap');
@@ -1464,7 +1510,7 @@ module.exports = class CollapsibleUI {
           elements.windowBar.style.setProperty('padding', '0px', 'important');
           elements.windowBar.style.setProperty('margin', '0px', 'important');
           elements.windowBar.style.setProperty('overflow', 'hidden', 'important');
-          elements.wordMark.style.setProperty('display', 'none', 'important');
+          elements.wordMark?.style.setProperty('display', 'none', 'important');
           runtime.collapsed[constants.I_WINDOW_BAR] = true;
         }
 
@@ -3105,8 +3151,6 @@ module.exports = class CollapsibleUI {
         .forEach(e => e.style.setProperty('max-width', '200000px'), 'important');
     if (elements.avatarWrapper)
       elements.avatarWrapper.style.setProperty('min-width', '0', 'important');
-    if (elements.userArea)
-      elements.userArea.style.setProperty('overflow', 'hidden', 'important');
     if (elements.channelList)
       elements.channelList.style.setProperty('overflow', 'hidden', 'important');
 
@@ -3219,7 +3263,7 @@ module.exports = class CollapsibleUI {
             elements.windowBar.style.setProperty('padding', '0px', 'important');
             elements.windowBar.style.setProperty('margin', '0px', 'important');
             elements.windowBar.style.setProperty('overflow', 'hidden', 'important');
-            elements.wordMark.style.setProperty('display', 'none', 'important');
+            elements.wordMark?.style.setProperty('display', 'none', 'important');
           }
           else if (runtime.api.Data.load('window-bar-button-active') === 'true') {
             if (runtime.buttons[constants.I_WINDOW_BAR])
@@ -3968,7 +4012,7 @@ module.exports = class CollapsibleUI {
             elements.windowBar.style.setProperty('height', settings.windowBarHeight + 'px', 'important');
           elements.windowBar.style.removeProperty('padding');
           elements.windowBar.style.removeProperty('margin');
-          elements.wordMark.style.removeProperty('display');
+          elements.wordMark?.style.removeProperty('display');
           elements.windowBar.style.removeProperty('overflow');
           runtime.collapsed[constants.I_WINDOW_BAR] = false;
           runtime.delays[constants.I_WINDOW_BAR] = false;
@@ -3987,7 +4031,7 @@ module.exports = class CollapsibleUI {
         elements.windowBar.style.setProperty('padding', '0px', 'important');
         elements.windowBar.style.setProperty('margin', '0px', 'important');
         elements.windowBar.style.setProperty('overflow', 'hidden', 'important');
-        elements.wordMark.style.setProperty('display', 'none', 'important');
+        elements.wordMark?.style.setProperty('display', 'none', 'important');
         runtime.collapsed[constants.I_WINDOW_BAR] = true;
       }
     }
@@ -4309,7 +4353,7 @@ module.exports = class CollapsibleUI {
           elements.windowBar.style.setProperty('padding', '0px', 'important');
           elements.windowBar.style.setProperty('margin', '0px', 'important');
           elements.windowBar.style.setProperty('overflow', 'hidden', 'important');
-          elements.wordMark.style.setProperty('display', 'none', 'important');
+          elements.wordMark?.style.setProperty('display', 'none', 'important');
           runtime.api.Data.save('window-bar-button-active', 'false');
           runtime.buttons[constants.I_WINDOW_BAR].classList.remove(modules.icons?.selected);
         }
@@ -4324,7 +4368,7 @@ module.exports = class CollapsibleUI {
           elements.windowBar.style.removeProperty('padding');
           elements.windowBar.style.removeProperty('margin');
           elements.windowBar.style.removeProperty('overflow');
-          elements.wordMark.style.removeProperty('display');
+          elements.wordMark?.style.removeProperty('display');
           runtime.api.Data.save('window-bar-button-active', 'true');
           runtime.buttons[constants.I_WINDOW_BAR].classList.add(modules.icons?.selected);
         }
@@ -4381,46 +4425,48 @@ module.exports = class CollapsibleUI {
 
   // Sends/clears a persistent notification for unread DMs
   updateDMBadge = (clear) => {
-    // Clear old notification if it exists
-    document.querySelectorAll('.collapsible-ui-notif')
-      .forEach(e => e.remove());
-    elements.wordMark.style.removeProperty('margin-left');
+    if (elements.wordMark) {
+      // Clear old notification if it exists
+      document.querySelectorAll('.collapsible-ui-notif')
+        .forEach(e => e.remove());
+      elements.wordMark.style.removeProperty('margin-left');
 
-    // Count DM notifications
-    var dmNotifs = 0;
-    document.querySelectorAll('.' + modules.badge?.numberBadge.split(' ')[0])
-      .forEach(e => dmNotifs += parseInt(e.innerHTML));
+      // Count DM notifications
+      var dmNotifs = 0;
+      document.querySelectorAll('.' + modules.badge?.numberBadge.split(' ')[0])
+        .forEach(e => dmNotifs += parseInt(e.innerHTML));
 
-    // Return if a new notification doesn't need to be created
-    if (clear || (dmNotifs == 0)) return;
+      // Return if a new notification doesn't need to be created
+      if (clear || (dmNotifs == 0)) return;
 
-    // Create new notification
-    var dmBadge = document.createElement('div');
-    dmBadge.classList.add('collapsible-ui-element');
-    dmBadge.classList.add('collapsible-ui-notif');
-    dmBadge.classList.add(modules.badge?.numberBadge.split(' ')[0]);
-    dmBadge.classList.add(modules.badge?.numberBadge.split(' ')[1]);
-    dmBadge.classList.add(modules.badge?.numberBadge.split(' ')[2]);
-    dmBadge.classList.add(modules.badge?.baseShapeRound);
-    dmBadge.style.setProperty('background-color', 'var(--status-danger)', 'important');
-    dmBadge.style.setProperty('padding', '4px', 'important');
-    dmBadge.style.maxHeight = (elements.wordMark.getBoundingClientRect().height
-    - 6) + 'px';
-    dmBadge.style.setProperty('min-height', '0px', 'important');
-    dmBadge.style.marginLeft = (parseInt(getComputedStyle(elements.wordMark, null)
-      .getPropertyValue('padding-left')) * 2 / 3) + 'px';
-    dmBadge.style.marginTop = getComputedStyle(elements.wordMark, null)
-      .getPropertyValue('padding-top');
-    dmBadge.style.setProperty('position', 'fixed', 'important');
-    dmBadge.style.setProperty('z-index', '10000', 'important');
-    dmBadge.innerHTML = `${dmNotifs}`;
+      // Create new notification
+      var dmBadge = document.createElement('div');
+      dmBadge.classList.add('collapsible-ui-element');
+      dmBadge.classList.add('collapsible-ui-notif');
+      dmBadge.classList.add(modules.badge?.numberBadge.split(' ')[0]);
+      dmBadge.classList.add(modules.badge?.numberBadge.split(' ')[1]);
+      dmBadge.classList.add(modules.badge?.numberBadge.split(' ')[2]);
+      dmBadge.classList.add(modules.badge?.baseShapeRound);
+      dmBadge.style.setProperty('background-color', 'var(--status-danger)', 'important');
+      dmBadge.style.setProperty('padding', '4px', 'important');
+      dmBadge.style.maxHeight = (elements.wordMark.getBoundingClientRect().height
+      - 6) + 'px';
+      dmBadge.style.setProperty('min-height', '0px', 'important');
+      dmBadge.style.marginLeft = (parseInt(getComputedStyle(elements.wordMark, null)
+        .getPropertyValue('padding-left')) * 2 / 3) + 'px';
+      dmBadge.style.marginTop = getComputedStyle(elements.wordMark, null)
+        .getPropertyValue('padding-top');
+      dmBadge.style.setProperty('position', 'fixed', 'important');
+      dmBadge.style.setProperty('z-index', '10000', 'important');
+      dmBadge.innerHTML = `${dmNotifs}`;
 
-    // Insert into document
-    document.body.appendChild(dmBadge);
+      // Insert into document
+      document.body.appendChild(dmBadge);
 
-    // Display notification
-    dmBadge.style.setProperty('left', elements.wordMark.getBoundingClientRect().left + 'px', 'important');
-    dmBadge.style.setProperty('top', elements.wordMark.getBoundingClientRect().top + 'px', 'important');
-    elements.wordMark.style.setProperty('margin-left', `${dmBadge.getBoundingClientRect().width}px`, 'important');
+      // Display notification
+      dmBadge.style.setProperty('left', elements.wordMark.getBoundingClientRect().left + 'px', 'important');
+      dmBadge.style.setProperty('top', elements.wordMark.getBoundingClientRect().top + 'px', 'important');
+      elements.wordMark.style.setProperty('margin-left', `${dmBadge.getBoundingClientRect().width}px`, 'important');
+    }
   };
 };

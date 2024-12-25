@@ -1,5 +1,10 @@
 # CollapsibleUI Patch Notes
 
+### v9.0.2:
+* Fixed plugin crashing on MacOS
+* Fixed plugin failing to load in forum channels
+* Added Quests compatibility
+
 ### v9.0.0:
 * Plugin no longer depends on ZeresPluginLibrary
 * Greatly increased robustness against breaking with Discord updates

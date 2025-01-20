@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.0.2
+ * @version 9.1.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,16 +13,15 @@
 const config = {
   changelog: [
     {
-      title: '9.0.2',
+      title: '9.1.0',
       type: 'added',
       items: [
-        'Fixed plugin crashing on MacOS',
-        'Fixed plugin failing to load in forum channels',
-        'Added Quests compatibility (ew)',
+        'Fix for newest Discord release (breaks plugin on Discord versions <360320)',
+        'Message bar no longer collapses when uploading attachments or using the emoji picker',
       ],
     },
     {
-      title: '1.0.0 - 9.0.0',
+      title: '1.0.0 - 9.0.2',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -698,6 +697,7 @@ const modules = {
   window: null,
   input: null,
   controls: null,
+  attachments: null,
 };
 
 const elements = {
@@ -1106,7 +1106,7 @@ module.exports = class CollapsibleUI {
       modules.dms = runtime.api.Webpack.getByKeys('channel', 'linkButton', 'dm');
       modules.app = runtime.api.Webpack.getByKeys('app', 'layers');
       modules.sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded');
-      modules.servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'fixedDiscoveryIcon');
+      modules.servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'discoveryIcon');
       modules.members = runtime.api.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon');
       modules.member = runtime.api.Webpack.getByKeys('member', 'ownerIcon', 'activityText', 'clanTag');
       modules.panel = runtime.api.Webpack.getByKeys('biteSize', 'panel', 'overlay');
@@ -1125,6 +1125,7 @@ module.exports = class CollapsibleUI {
       modules.window = runtime.api.Webpack.getByKeys('appAsidePanelWrapper', 'mobileApp', 'allowsScrolling');
       modules.input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton');
       modules.controls = runtime.api.Webpack.getByKeys('krispLogo', 'micTestButton', 'voiceButtonsContainer');
+      modules.attachments = runtime.api.Webpack.getByKeys('channelAttachmentArea');
     }
     modules.threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton');
   };
@@ -1486,7 +1487,11 @@ module.exports = class CollapsibleUI {
 
         // Message Bar
         if ((runtime.api.Data.load('message-input-button-active') === 'false')
-          && elements.messageInput && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)) {
+          && elements.messageInput
+          && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
+          && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
+          && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+          && !(document.querySelector('#channel-attach'))) {
           if (runtime.delays[constants.I_MESSAGE_INPUT]) {
             clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
             runtime.delays[constants.I_MESSAGE_INPUT] = false;
@@ -1570,7 +1575,10 @@ module.exports = class CollapsibleUI {
         if ((runtime.api.Data.load('message-input-button-active') === 'false')
           && elements.messageInput && settings.expandOnHoverEnabled[constants.I_MESSAGE_INPUT]) {
           if (runtime.collapsed[constants.I_MESSAGE_INPUT]
-            && document.querySelector('[data-slate-string="true"]')?.innerHTML) {
+            && (document.querySelector('[data-slate-string="true"]')?.innerHTML
+            || document.querySelector('.' + modules.attachments.channelAttachmentArea)
+            || document.querySelector('.' + modules.input.expressionPickerPositionLayer)
+            || document.querySelector('#channel-attach'))) {
             if (runtime.delays[constants.I_MESSAGE_INPUT]) {
               clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
               runtime.delays[constants.I_MESSAGE_INPUT] = false;
@@ -1580,7 +1588,10 @@ module.exports = class CollapsibleUI {
             runtime.collapsed[constants.I_MESSAGE_INPUT] = false;
           }
           else if (!(runtime.collapsed[constants.I_MESSAGE_INPUT])
-            && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)) {
+            && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
+            && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
+            && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+            && !(document.querySelector('#channel-attach'))) {
             if (runtime.delays[constants.I_MESSAGE_INPUT]) {
               clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
               runtime.delays[constants.I_MESSAGE_INPUT] = false;
@@ -3229,7 +3240,10 @@ module.exports = class CollapsibleUI {
           if (runtime.api.Data.load('message-input-button-active') === 'false') {
             if (runtime.buttons[constants.I_MESSAGE_INPUT])
               runtime.buttons[constants.I_MESSAGE_INPUT].classList.remove(modules.icons?.selected);
-            if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)) {
+            if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)
+              && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
+              && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+              && !(document.querySelector('#channel-attach'))) {
               elements.messageInput.style
                 .setProperty('max-height', settings.collapseSize + 'px', 'important');
               elements.messageInput.style.setProperty('overflow', 'hidden', 'important');
@@ -3875,7 +3889,6 @@ module.exports = class CollapsibleUI {
     // Message Bar Button Container
     if ((settings.messageInputCollapse) && elements.messageInputButtonContainer) {
       if (!this.isNear(elements.messageInputButtonContainer, settings.buttonCollapseFudgeFactor, runtime.mouse.x, runtime.mouse.y))
-
         elements.messageInputButtonContainer.style.setProperty('max-width', settings.messageInputButtonsCollapsedWidth + 'px', 'important');
     }
 
@@ -3983,7 +3996,10 @@ module.exports = class CollapsibleUI {
       else if (!settings.expandOnHoverEnabled[constants.I_MESSAGE_INPUT]
         || (!(runtime.collapsed[constants.I_MESSAGE_INPUT])
         && !(this.isNear(elements.messageInput, settings.expandOnHoverClosingFudgeFactor, runtime.mouse.x, runtime.mouse.y))
-        && !(document.querySelector('[data-slate-string="true"]')?.innerHTML))) {
+        && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
+        && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
+        && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+        && !(document.querySelector('#channel-attach')))) {
         if (runtime.delays[constants.I_MESSAGE_INPUT]) {
           clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
           runtime.delays[constants.I_MESSAGE_INPUT] = false;
@@ -4328,7 +4344,10 @@ module.exports = class CollapsibleUI {
 
       case 4: // constants.I_MESSAGE_INPUT
         if (runtime.api.Data.load('message-input-button-active') === 'true') {
-          if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)) {
+          if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)
+            && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
+            && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+            && !(document.querySelector('#channel-attach'))) {
             elements.messageInput.style
               .setProperty('max-height', settings.collapseSize + 'px', 'important');
             elements.messageInput.style.setProperty('overflow', 'hidden', 'important');

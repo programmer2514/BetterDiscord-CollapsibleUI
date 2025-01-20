@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v9.1.0:
+* Fix for newest Discord release (breaks plugin on Discord versions <360320)
+* Message bar no longer collapses when uploading attachments or using the emoji picker
+
 ### v9.0.2:
 * Fixed plugin crashing on MacOS
 * Fixed plugin failing to load in forum channels

@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v9.1.1:
+* Hotfix for newest Discord release
+* Fix for ImageUtilities compatibility
+
 ### v9.1.0:
 * Fix for newest Discord release (breaks plugin on Discord versions <360320)
 * Message bar no longer collapses when uploading attachments or using the emoji picker

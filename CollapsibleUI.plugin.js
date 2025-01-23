@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.1.0
+ * @version 9.1.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,15 +13,15 @@
 const config = {
   changelog: [
     {
-      title: '9.1.0',
+      title: '9.1.1',
       type: 'added',
       items: [
-        'Fix for newest Discord release (breaks plugin on Discord versions <360320)',
-        'Message bar no longer collapses when uploading attachments or using the emoji picker',
+        'Hotfix for newest Discord release',
+        'Fix for ImageUtilities compatibility',
       ],
     },
     {
-      title: '1.0.0 - 9.0.2',
+      title: '1.0.0 - 9.1.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1122,7 +1122,7 @@ module.exports = class CollapsibleUI {
       modules.profile = runtime.api.Webpack.getByKeys('header', 'footer', 'banner', 'backdrop', 'toast');
       modules.user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons');
       modules.layout = runtime.api.Webpack.getByKeys('flex', 'horizontal', 'flexChild');
-      modules.window = runtime.api.Webpack.getByKeys('appAsidePanelWrapper', 'mobileApp', 'allowsScrolling');
+      modules.window = runtime.api.Webpack.getByKeys('appAsidePanelWrapper', 'mobileApp');
       modules.input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton');
       modules.controls = runtime.api.Webpack.getByKeys('krispLogo', 'micTestButton', 'voiceButtonsContainer');
       modules.attachments = runtime.api.Webpack.getByKeys('channelAttachmentArea');
@@ -1145,7 +1145,7 @@ module.exports = class CollapsibleUI {
     elements.innerUserProfile = elements.userProfile?.firstElementChild;
     elements.userProfileFooter = document.querySelector('.' + modules.profile?.footer);
     elements.userProfileWrapper = document.querySelector('.' + modules.panel?.outer + '.' + modules.panel?.panel);
-    elements.userProfileSVGWrapper = document.querySelector('.' + modules.banner?.mask);
+    elements.userProfileSVGWrapper = elements.userProfileWrapper.querySelector('.' + modules.banner?.mask);
     elements.serverList = document.querySelector('.' + modules.servers?.wrapper);
     elements.channelList = document.querySelector('.' + modules.sidebar?.sidebar);
     elements.settingsContainerBase = document.querySelector('.' + modules.user?.container);

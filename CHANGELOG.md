@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v9.1.2:
+* Fixed plugin failing to load when profile panel is unloaded
+
 ### v9.1.1:
 * Hotfix for newest Discord release
 * Fix for ImageUtilities compatibility

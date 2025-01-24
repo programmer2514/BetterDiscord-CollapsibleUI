@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.1.1
+ * @version 9.1.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,15 +13,14 @@
 const config = {
   changelog: [
     {
-      title: '9.1.1',
+      title: '9.1.2',
       type: 'added',
       items: [
-        'Hotfix for newest Discord release',
-        'Fix for ImageUtilities compatibility',
+        'Fixed plugin failing to load when profile panel is unloaded',
       ],
     },
     {
-      title: '1.0.0 - 9.1.0',
+      title: '1.0.0 - 9.1.1',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1145,7 +1144,7 @@ module.exports = class CollapsibleUI {
     elements.innerUserProfile = elements.userProfile?.firstElementChild;
     elements.userProfileFooter = document.querySelector('.' + modules.profile?.footer);
     elements.userProfileWrapper = document.querySelector('.' + modules.panel?.outer + '.' + modules.panel?.panel);
-    elements.userProfileSVGWrapper = elements.userProfileWrapper.querySelector('.' + modules.banner?.mask);
+    elements.userProfileSVGWrapper = elements.userProfileWrapper?.querySelector('.' + modules.banner?.mask);
     elements.serverList = document.querySelector('.' + modules.servers?.wrapper);
     elements.channelList = document.querySelector('.' + modules.sidebar?.sidebar);
     elements.settingsContainerBase = document.querySelector('.' + modules.user?.container);

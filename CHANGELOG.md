@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v9.1.3:
+* Fixed profile panel failing to collapse on latest Discord update
+
 ### v9.1.2:
 * Fixed plugin failing to load when profile panel is unloaded
 

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.1.2
+ * @version 9.1.3
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,14 +13,14 @@
 const config = {
   changelog: [
     {
-      title: '9.1.2',
+      title: '9.1.3',
       type: 'added',
       items: [
-        'Fixed plugin failing to load when profile panel is unloaded',
+        'Fixed profile panel failing to collapse on latest Discord update',
       ],
     },
     {
-      title: '1.0.0 - 9.1.1',
+      title: '1.0.0 - 9.1.2',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1108,7 +1108,7 @@ module.exports = class CollapsibleUI {
       modules.servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'discoveryIcon');
       modules.members = runtime.api.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon');
       modules.member = runtime.api.Webpack.getByKeys('member', 'ownerIcon', 'activityText', 'clanTag');
-      modules.panel = runtime.api.Webpack.getByKeys('biteSize', 'panel', 'overlay');
+      modules.panel = runtime.api.Webpack.getByKeys('biteSize', 'fullSize', 'panel', 'outer', 'inner', 'overlay');
       modules.banner = runtime.api.Webpack.getByKeys('banner', 'gifTag', 'mask');
       modules.guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby');
       modules.buttons = runtime.api.Webpack.getByKeys('button', 'selected', 'separator', 'disabled');
@@ -1194,7 +1194,6 @@ module.exports = class CollapsibleUI {
           if (modules.threads) {
             clearInterval(runtime.moduleLoader);
             runtime.moduleLoader = null;
-            console.log('test');
             this.initialize();
           }
         }, 100);

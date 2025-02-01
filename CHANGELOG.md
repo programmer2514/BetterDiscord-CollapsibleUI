@@ -1,5 +1,10 @@
 # CollapsibleUI Patch Notes
 
+### v9.1.4:
+* Switched to BdApi for stylesheet handling
+* Fixed profile effects and empty members list displaying backwards
+* Improved compatibility with DateViewer, MemberCount, and HorizontalServerList
+
 ### v9.1.3:
 * Fixed profile panel failing to collapse on latest Discord update
 

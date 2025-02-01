@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.1.3
+ * @version 9.1.4
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,14 +13,16 @@
 const config = {
   changelog: [
     {
-      title: '9.1.3',
+      title: '9.1.4',
       type: 'added',
       items: [
-        'Fixed profile panel failing to collapse on latest Discord update',
+        'Switched to BdApi for stylesheet handling',
+        'Fixed profile effects and empty members list displaying backwards',
+        'Improved compatibility with DateViewer, MemberCount, and HorizontalServerList',
       ],
     },
     {
-      title: '1.0.0 - 9.1.2',
+      title: '1.0.0 - 9.1.3',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -697,6 +699,9 @@ const modules = {
   input: null,
   controls: null,
   attachments: null,
+  floating: null,
+  emptyState: null,
+  effects: null,
 };
 
 const elements = {
@@ -747,7 +752,6 @@ const runtime = {
     controller: null,
     signal: null,
   },
-  style: null,
   observers: {
     app: null,
     settings: null,
@@ -1078,8 +1082,9 @@ module.exports = class CollapsibleUI {
         elements.wordMark.style.removeProperty('margin-left');
       }
 
-      // Delete plugin stylesheet
-      runtime.style?.parentNode?.removeChild(runtime.style);
+      // Delete plugin stylesheets
+      runtime.api.DOM.removeStyle('cui-root');
+      runtime.api.DOM.removeStyle('cui-members');
 
       // Abort listeners & observers
       runtime.events.controller?.abort();
@@ -1125,6 +1130,9 @@ module.exports = class CollapsibleUI {
       modules.input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton');
       modules.controls = runtime.api.Webpack.getByKeys('krispLogo', 'micTestButton', 'voiceButtonsContainer');
       modules.attachments = runtime.api.Webpack.getByKeys('channelAttachmentArea');
+      modules.floating = runtime.api.Webpack.getByKeys('container', 'floating', 'chatTarget');
+      modules.emptyState = runtime.api.Webpack.getByKeys('emptyState', 'emptyStateHeader', 'emptyStateIcon');
+      modules.effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect');
     }
     modules.threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton');
   };
@@ -1487,8 +1495,8 @@ module.exports = class CollapsibleUI {
         if ((runtime.api.Data.load('message-input-button-active') === 'false')
           && elements.messageInput
           && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
-          && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
-          && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+          && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
+          && !(document.querySelector('.' + modules.input?.expressionPickerPositionLayer))
           && !(document.querySelector('#channel-attach'))) {
           if (runtime.delays[constants.I_MESSAGE_INPUT]) {
             clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
@@ -1574,8 +1582,8 @@ module.exports = class CollapsibleUI {
           && elements.messageInput && settings.expandOnHoverEnabled[constants.I_MESSAGE_INPUT]) {
           if (runtime.collapsed[constants.I_MESSAGE_INPUT]
             && (document.querySelector('[data-slate-string="true"]')?.innerHTML
-            || document.querySelector('.' + modules.attachments.channelAttachmentArea)
-            || document.querySelector('.' + modules.input.expressionPickerPositionLayer)
+            || document.querySelector('.' + modules.attachments?.channelAttachmentArea)
+            || document.querySelector('.' + modules.input?.expressionPickerPositionLayer)
             || document.querySelector('#channel-attach'))) {
             if (runtime.delays[constants.I_MESSAGE_INPUT]) {
               clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
@@ -1587,8 +1595,8 @@ module.exports = class CollapsibleUI {
           }
           else if (!(runtime.collapsed[constants.I_MESSAGE_INPUT])
             && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
-            && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
-            && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+            && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
+            && !(document.querySelector('.' + modules.input?.expressionPickerPositionLayer))
             && !(document.querySelector('#channel-attach'))) {
             if (runtime.delays[constants.I_MESSAGE_INPUT]) {
               clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
@@ -1911,7 +1919,8 @@ module.exports = class CollapsibleUI {
           elements.serverList.style.setProperty('overflow-y', 'scroll', 'important');
           if (runtime.themes.horizontalServerList) {
             elements.serverList.style.setProperty('max-height', '100vw', 'important');
-          } else {
+          }
+          else {
             elements.serverList.style.setProperty('max-height', '100%', 'important');
           }
         }
@@ -2437,6 +2446,13 @@ module.exports = class CollapsibleUI {
             || mutationList[i].addedNodes[0]?.classList?.contains(modules.banner?.mask)
             || mutationList[i].removedNodes[0]?.classList?.contains(modules.callContainer?.wrapper)) {
             _this.initialize();
+            return;
+          }
+
+          // Resizes the forum list to be the correct size when a thread window is popped out
+          if (mutationList[i].addedNodes[0]?.classList?.contains(modules.floating?.chatLayerWrapper)) {
+            document.querySelector('.' + modules.threads?.container).style
+              .setProperty('max-width', 'calc(100% - ' + document.querySelector('.' + modules.floating?.floating).style.width + ')', 'important');
             return;
           }
         }
@@ -3243,8 +3259,8 @@ module.exports = class CollapsibleUI {
             if (runtime.buttons[constants.I_MESSAGE_INPUT])
               runtime.buttons[constants.I_MESSAGE_INPUT].classList.remove(modules.icons?.selected);
             if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)
-              && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
-              && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+              && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
+              && !(document.querySelector('.' + modules.input?.expressionPickerPositionLayer))
               && !(document.querySelector('#channel-attach'))) {
               elements.messageInput.style
                 .setProperty('max-height', settings.collapseSize + 'px', 'important');
@@ -3457,18 +3473,26 @@ module.exports = class CollapsibleUI {
       }
     }
 
-    // Apply transitions to UI elements
+    // Create root stylesheet
+    runtime.api.DOM.addStyle('cui-root', `
+      :root {
+        --cui-members-width: 240px;
+        --cui-profile-width: 340px;
+      }
 
-    // Create plugin stylesheet
-    runtime.style = document.createElement('style');
-    runtime.style.setAttribute('id', 'cui-stylesheet');
-    runtime.style.appendChild(document.createTextNode(''));
-    document.head.appendChild(runtime.style);
-    runtime.style.sheet.insertRule(':root {--cui-members-width: 240px}', 0);
-    runtime.style.sheet.insertRule(':root {--cui-profile-width: 340px}', 1);
-    runtime.style.sheet.insertRule('::-webkit-scrollbar {width: 0px; background: transparent;}', 2);
-    runtime.style.sheet.insertRule('.content_eed6a8, .headerRow_a6d69a {min-width: 0px !important;}', 3);
-    runtime.style.sheet.insertRule('.userPanelInner_c69a7b .profileEffects_f867f9 {transform: scaleX(-1);}', 4);
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+      
+      ::-webkit-resizer {
+        display: none;
+      }
+
+      .${modules.panel?.inner} .${modules.effects?.profileEffects} {
+        transform: scaleX(-1);
+      }
+    `);
 
     // Handle resizing channel list
     if (settings.resizableChannelList) {
@@ -3477,9 +3501,6 @@ module.exports = class CollapsibleUI {
 
       document.querySelectorAll('.' + modules.controls?.button)
         .forEach((e) => { e.style.setProperty('padding', '0px', 'important'); });
-
-      // Hide webkit resizer
-      runtime.style.sheet.insertRule('::-webkit-resizer {display: none;}', 5);
 
       document.body.addEventListener('mousedown', () => {
         elements.channelList.style.setProperty('transition', 'none', 'important');
@@ -3579,22 +3600,33 @@ module.exports = class CollapsibleUI {
         document.querySelectorAll('.' + modules.member?.member)
           .forEach(e => e.style.setProperty('max-width', '100%'), 'important');
 
-        // Hide webkit resizer
-        if (!settings.resizableChannelList) {
-          runtime.style.sheet.insertRule('::-webkit-resizer {display: none;}', 5);
-        }
+        // Create members resize stylesheet
+        runtime.api.DOM.addStyle('cui-members', `
+          .${modules.emptyState?.emptyStateHeader},
+          .${modules.emptyState?.emptyStateIconContainer},
+          .${modules.emptyState?.emptyStateIconContainer} + h2,
+          .${modules.emptyState?.emptyStateSubtext} {
+            transform: scaleX(-1);
+          }
 
-        // DateViewer compatibility
-        runtime.style.sheet.insertRule('#dv-mount {transform: scaleX(-1);}', 6);
-
-        // MemberCount compatibility
-        runtime.style.sheet.insertRule('#MemberCount {transform: scaleX(-1);}', 7);
+          #dv-main {
+            transform: scaleX(-1);
+          }
+          
+          #dv-mount {
+            min-width: 100%;
+          }
+          
+          #MemberCount {
+            transform: scaleX(-1);
+            min-width: 100%;
+          }
+        `);
 
         document.body.addEventListener('mousedown', () => {
           elements.membersList.style.setProperty('transition', 'none', 'important');
           elements.contentWindow.style.setProperty('transition', 'none', 'important');
           elements.membersList.style.setProperty('min-width', '0', 'important');
-          // elements.contentWindow.style.setProperty('max-width', '100%', 'important');
         }, { signal: runtime.events.signal });
 
         if (elements.fullscreenButton) {
@@ -3726,11 +3758,6 @@ module.exports = class CollapsibleUI {
         elements.innerUserProfile.style.setProperty('transform', 'scaleX(-1)', 'important');
         elements.userProfileFooter.style.setProperty('transform', 'scaleX(-1)', 'important');
 
-        // Hide webkit resizer
-        if (!settings.resizableChannelList) {
-          runtime.style.sheet.insertRule('::-webkit-resizer {display: none;}', 5);
-        }
-
         document.body.addEventListener('mousedown', () => {
           elements.userProfile.style.setProperty('transition', 'none', 'important');
         }, { signal: runtime.events.signal });
@@ -3842,7 +3869,7 @@ module.exports = class CollapsibleUI {
         var top = 0,
           left = element.getBoundingClientRect().left - distance,
           right = left + element.getBoundingClientRect().width + 2 * distance,
-          bottom = parseInt(runtime.api.Data.load('windowBarHeight'))
+          bottom = parseInt(runtime.api.Data.load('window-bar-height'))
               + element.getBoundingClientRect().height + distance;
       }
       else {
@@ -3999,8 +4026,8 @@ module.exports = class CollapsibleUI {
         || (!(runtime.collapsed[constants.I_MESSAGE_INPUT])
         && !(this.isNear(elements.messageInput, settings.expandOnHoverClosingFudgeFactor, runtime.mouse.x, runtime.mouse.y))
         && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
-        && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
-        && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+        && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
+        && !(document.querySelector('.' + modules.input?.expressionPickerPositionLayer))
         && !(document.querySelector('#channel-attach')))) {
         if (runtime.delays[constants.I_MESSAGE_INPUT]) {
           clearTimeout(runtime.delays[constants.I_MESSAGE_INPUT]);
@@ -4347,8 +4374,8 @@ module.exports = class CollapsibleUI {
       case 4: // constants.I_MESSAGE_INPUT
         if (runtime.api.Data.load('message-input-button-active') === 'true') {
           if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)
-            && !(document.querySelector('.' + modules.attachments.channelAttachmentArea))
-            && !(document.querySelector('.' + modules.input.expressionPickerPositionLayer))
+            && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
+            && !(document.querySelector('.' + modules.input?.expressionPickerPositionLayer))
             && !(document.querySelector('#channel-attach'))) {
             elements.messageInput.style
               .setProperty('max-height', settings.collapseSize + 'px', 'important');

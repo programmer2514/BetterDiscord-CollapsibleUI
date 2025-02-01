@@ -1907,9 +1907,13 @@ module.exports = class CollapsibleUI {
         if (floating && settings.floatingPanels) {
           elements.serverList.style.setProperty('position', 'absolute', 'important');
           elements.serverList.style.setProperty('z-index', '191', 'important');
-          elements.serverList.style.setProperty('max-height', '100%', 'important');
           elements.serverList.style.setProperty('min-height', '100%', 'important');
           elements.serverList.style.setProperty('overflow-y', 'scroll', 'important');
+          if (runtime.themes.horizontalServerList) {
+            elements.serverList.style.setProperty('max-height', '100vw', 'important');
+          } else {
+            elements.serverList.style.setProperty('max-height', '100%', 'important');
+          }
         }
         else {
           elements.serverList.style.removeProperty('position');

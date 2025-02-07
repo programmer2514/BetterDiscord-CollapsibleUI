@@ -1,5 +1,12 @@
 # CollapsibleUI Patch Notes
 
+### v10.0.0:
+* Added the ability to resize the search panel
+* Added the ability to resize the forum popout
+* Fixed boolean settings being stored as strings
+* Fixed server voice channel being detected as call window
+* Fixed forum channels being cut off when channel/members lists are resized too wide
+
 ### v9.1.4:
 * Switched to BdApi for stylesheet handling
 * Fixed profile effects and empty members list displaying backwards

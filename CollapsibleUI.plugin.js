@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 9.1.4
+ * @version 10.0.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,16 +13,19 @@
 const config = {
   changelog: [
     {
-      title: '9.1.4',
+      title: '10.0.0',
       type: 'added',
       items: [
-        'Switched to BdApi for stylesheet handling',
-        'Fixed profile effects and empty members list displaying backwards',
-        'Improved compatibility with DateViewer, MemberCount, and HorizontalServerList',
+        'Added the ability to resize the search panel',
+        'Added the ability to resize the forum popout',
+        'Fixed boolean settings being stored as strings',
+        'Fixed server voice channel being detected as call window',
+        'Fixed forum channels being cut off when channel/members lists are resized too wide',
+        'WARNING: THIS UPDATE WILL COLLAPSE ALL PANELS',
       ],
     },
     {
-      title: '1.0.0 - 9.1.3',
+      title: '1.0.0 - 9.1.4',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -98,6 +101,20 @@ const config = {
           id: 'resizable-user-profile',
           name: 'Resizable User Profile',
           note: 'Resize the user profile in DMs by clicking-and-dragging the bottom-left corner. Right-click to reset width',
+          value: true,
+        },
+        {
+          type: 'switch',
+          id: 'resizable-search-panel',
+          name: 'Resizable Search Panel',
+          note: 'Resize the message search panel by clicking-and-dragging the bottom-left corner. Right-click to reset width',
+          value: true,
+        },
+        {
+          type: 'switch',
+          id: 'resizable-forum-popout',
+          name: 'Resizable Forum Popout',
+          note: 'Resize the thread popup in forum channels by clicking-and-dragging the bottom-left corner. Right-click to reset width',
           value: true,
         },
         {
@@ -632,6 +649,8 @@ const settings = {
   resizableChannelList: true,
   resizableMembersList: true,
   resizableUserProfile: true,
+  resizableSearchPanel: true,
+  resizableForumPopout: true,
   unreadDMsBadge: false,
   keyboardShortcuts: true,
   shortcutList: [
@@ -669,6 +688,8 @@ const settings = {
   channelListWidth: 0,
   membersListWidth: 0,
   profilePanelWidth: 0,
+  searchPanelWidth: 0,
+  forumPopoutWidth: 0,
 };
 
 const modules = {
@@ -702,6 +723,8 @@ const modules = {
   floating: null,
   emptyState: null,
   effects: null,
+  search: null,
+  searchHeader: null,
 };
 
 const elements = {
@@ -727,6 +750,9 @@ const elements = {
   spotifyContainer: null,
   outerAppWrapper: null,
   avatarWrapper: null,
+  searchPanel: null,
+  forumPopout: null,
+  forumPopoutTarget: null,
   moreButton: null,
   membersListButton: null,
   userProfileButton: null,
@@ -759,6 +785,8 @@ const runtime = {
       channelList: null,
       membersList: null,
       userProfile: null,
+      searchPanel: null,
+      forumPopout: null,
     },
   },
   buttons: [null, null, null, null, null, null, null, null],
@@ -1043,17 +1071,11 @@ module.exports = class CollapsibleUI {
         elements.userArea.style.removeProperty('display');
         elements.userArea.style.removeProperty('overflow');
       }
-      if (document.querySelector('.' + modules.callContainer?.wrapper)) {
-        if (document.querySelector('.' + modules.guilds?.noChat))
-          document.querySelector('.' + modules.callContainer?.wrapper).style
-            .setProperty('max-height', (window.outerHeight * 2) + 'px', 'important');
-        else
-          document.querySelector('.' + modules.callContainer?.wrapper).style
-            .setProperty('max-height', (window.outerHeight - 222) + 'px', 'important');
-        document.querySelector('.' + modules.callContainer?.wrapper).style
-          .removeProperty('transition');
-        document.querySelector('.' + modules.callContainer?.wrapper).style
-          .removeProperty('display');
+      if (elements.callContainer()) {
+        elements.callContainer().style.setProperty('max-height',
+          (window.outerHeight - 222) + 'px', 'important');
+        elements.callContainer().style.removeProperty('transition');
+        elements.callContainer().style.removeProperty('display');
         if (document.querySelector('.' + modules.callMembers?.voiceCallWrapper))
           document.querySelector('.' + modules.callMembers?.voiceCallWrapper).style
             .removeProperty('display');
@@ -1133,6 +1155,8 @@ module.exports = class CollapsibleUI {
       modules.floating = runtime.api.Webpack.getByKeys('container', 'floating', 'chatTarget');
       modules.emptyState = runtime.api.Webpack.getByKeys('emptyState', 'emptyStateHeader', 'emptyStateIcon');
       modules.effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect');
+      modules.search = runtime.api.Webpack.getByKeys('searchResultsWrap', 'stillIndexing', 'noResults');
+      modules.searchHeader = runtime.api.Webpack.getByKeys('searchHeader', 'searchHeaderTabList');
     }
     modules.threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton');
   };
@@ -1160,6 +1184,9 @@ module.exports = class CollapsibleUI {
     elements.spotifyContainer = document.querySelector('.container_6sXIoE'); // SpotifyControls
     elements.outerAppWrapper = document.querySelector('.' + modules.window?.app);
     elements.avatarWrapper = document.querySelector('.' + modules.user?.avatarWrapper);
+    elements.searchPanel = document.querySelector('.' + modules.search?.searchResultsWrap);
+    elements.forumPopout = document.querySelector('.' + modules.floating?.floating + ':not(.' + modules.floating?.chatTarget.split(' ')[0] + ')');
+    elements.forumPopoutTarget = document.querySelector('.' + modules.floating?.chatTarget.split(' ')[0]);
     elements.moreButton = elements.toolbar.querySelector('[d="M4 14a2 2 0 1 0 0-4 2 2'
       + ' 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 '
       + '0 0 1 4 0Z"]');
@@ -1185,17 +1212,19 @@ module.exports = class CollapsibleUI {
       + ' 2v3a1 1 0 1 0 2 0V6a4 4 0 0 0-4-4h-3a1 1 0 1 0 0 2h3ZM20 18a2 2 0 0'
       + ' 1-2 2h-3a1 1 0 1 0 0 2h3a4 4 0 0 0 4-4v-3a1 1 0 1 0-2 0v3Z"]')
       ?.parentElement.parentElement.parentElement;
+    elements.callContainer = () => {
+      return document.querySelector('.' + modules.callContainer?.wrapper + ':not(.' + modules.callContainer?.noChat + ')');
+    };
     elements.messageInputButtonContainer = document.querySelector('.' + modules.input?.buttons);
     elements.innerMembersList = document.querySelector('.' + modules.members?.members);
     elements.membersListWrapper = document.querySelector('.' + modules.members?.container);
-    elements.callContainer = (document.querySelector('.' + modules.callContainer?.wrapper));
     elements.contentWindow = document.querySelector('.' + modules.guilds?.chatContent);
     if (!elements.contentWindow) {
       // In order to load threads module, we must be on a forum page
-      // Unfortunately, module loads AFTER onSwitch() event, so we have
-      // to kick off a listener to wait for it
-      // CollapsibleUI may throw a few warnings when switching to forum pages,
-      // but it shouldn't affect performance or functionality
+      // Unfortunately, module loads AFTER onSwitch() event, so we
+      // have to kick off a listener to wait for it
+      // CollapsibleUI may throw a few warnings when switching to forum
+      // pages, but it shouldn't affect performance or functionality
       if (!modules.threads && !runtime.moduleLoader) {
         runtime.moduleLoader = setInterval(() => {
           this.locateModules(true);
@@ -1373,73 +1402,73 @@ module.exports = class CollapsibleUI {
             || !(settings.conditionalCollapse))
             && (((runtime.themes.horizontalServerList ? window.outerHeight : window.outerWidth)
             < settings.sizeCollapseThreshold[constants.I_SERVER_LIST]
-            && runtime.api.Data.load('server-list-button-active') === 'true')
+            && runtime.api.Data.load('server-list-button-active'))
             || ((runtime.themes.horizontalServerList ? window.outerHeight : window.outerWidth)
             > settings.sizeCollapseThreshold[constants.I_SERVER_LIST]
-            && runtime.api.Data.load('server-list-button-active') === 'false'))) {
+            && !runtime.api.Data.load('server-list-button-active')))) {
             _this.toggleButton(constants.I_SERVER_LIST);
           }
           if (runtime.buttons[constants.I_CHANNEL_LIST]
             && ((settings.collapseConditionals[constants.I_CHANNEL_LIST] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerWidth < settings.sizeCollapseThreshold[constants.I_CHANNEL_LIST]
-            && runtime.api.Data.load('channel-list-button-active') === 'true')
+            && runtime.api.Data.load('channel-list-button-active'))
             || (window.outerWidth > settings.sizeCollapseThreshold[constants.I_CHANNEL_LIST]
-            && runtime.api.Data.load('channel-list-button-active') === 'false'))) {
+            && !runtime.api.Data.load('channel-list-button-active')))) {
             _this.toggleButton(constants.I_CHANNEL_LIST);
           }
           if (runtime.buttons[constants.I_MESSAGE_INPUT]
             && ((settings.collapseConditionals[constants.I_MESSAGE_INPUT] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerHeight < settings.sizeCollapseThreshold[constants.I_MESSAGE_INPUT]
-            && runtime.api.Data.load('message-input-button-active') === 'true')
+            && runtime.api.Data.load('message-input-button-active'))
             || (window.outerHeight > settings.sizeCollapseThreshold[constants.I_MESSAGE_INPUT]
-            && runtime.api.Data.load('message-input-button-active') === 'false'))) {
+            && !runtime.api.Data.load('message-input-button-active')))) {
             _this.toggleButton(constants.I_MESSAGE_INPUT);
           }
           if (runtime.buttons[constants.I_WINDOW_BAR]
             && ((settings.collapseConditionals[constants.I_WINDOW_BAR] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerHeight < settings.sizeCollapseThreshold[constants.I_WINDOW_BAR]
-            && runtime.api.Data.load('window-bar-button-active') === 'true')
+            && runtime.api.Data.load('window-bar-button-active'))
             || (window.outerHeight > settings.sizeCollapseThreshold[constants.I_WINDOW_BAR]
-            && runtime.api.Data.load('window-bar-button-active') === 'false'))) {
+            && !runtime.api.Data.load('window-bar-button-active')))) {
             _this.toggleButton(constants.I_WINDOW_BAR);
           }
           if (runtime.buttons[constants.I_MEMBERS_LIST]
             && ((settings.collapseConditionals[constants.I_MEMBERS_LIST] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerWidth < settings.sizeCollapseThreshold[constants.I_MEMBERS_LIST]
-            && runtime.api.Data.load('members-list-button-active') === 'true')
+            && runtime.api.Data.load('members-list-button-active'))
             || (window.outerWidth > settings.sizeCollapseThreshold[constants.I_MEMBERS_LIST]
-            && runtime.api.Data.load('members-list-button-active') === 'false'))) {
+            && !runtime.api.Data.load('members-list-button-active')))) {
             _this.toggleButton(constants.I_MEMBERS_LIST);
           }
           if (runtime.buttons[constants.I_USER_PROFILE]
             && ((settings.collapseConditionals[constants.I_USER_PROFILE] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerWidth < settings.sizeCollapseThreshold[constants.I_USER_PROFILE]
-            && runtime.api.Data.load('user-profile-button-active') === 'true')
+            && runtime.api.Data.load('user-profile-button-active'))
             || (window.outerWidth > settings.sizeCollapseThreshold[constants.I_USER_PROFILE]
-            && runtime.api.Data.load('user-profile-button-active') === 'false'))) {
+            && !runtime.api.Data.load('user-profile-button-active')))) {
             _this.toggleButton(constants.I_USER_PROFILE);
           }
           if (runtime.buttons[constants.I_USER_AREA]
             && ((settings.collapseConditionals[constants.I_USER_AREA] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerHeight < settings.sizeCollapseThreshold[constants.I_USER_AREA]
-            && runtime.api.Data.load('user-area-button-active') === 'true')
+            && runtime.api.Data.load('user-area-button-active'))
             || (window.outerHeight > settings.sizeCollapseThreshold[constants.I_USER_AREA]
-            && runtime.api.Data.load('user-area-button-active') === 'false'))) {
+            && !runtime.api.Data.load('user-area-button-active')))) {
             _this.toggleButton(constants.I_USER_AREA);
           }
           if (runtime.buttons[constants.I_CALL_WINDOW]
             && ((settings.collapseConditionals[constants.I_CALL_WINDOW] === '')
             || !(settings.conditionalCollapse))
             && ((window.outerHeight < settings.sizeCollapseThreshold[constants.I_CALL_WINDOW]
-            && runtime.api.Data.load('call-window-button-active') === 'true')
+            && runtime.api.Data.load('call-window-button-active'))
             || (window.outerHeight > settings.sizeCollapseThreshold[constants.I_CALL_WINDOW]
-            && runtime.api.Data.load('call-window-button-active') === 'false'))) {
+            && !runtime.api.Data.load('call-window-button-active')))) {
             _this.toggleButton(constants.I_CALL_WINDOW);
           }
         }, { signal: runtime.events.signal });
@@ -1457,7 +1486,7 @@ module.exports = class CollapsibleUI {
 
       document.body.addEventListener('mouseleave', () => {
         // Server List
-        if ((runtime.api.Data.load('server-list-button-active') === 'false')
+        if ((!runtime.api.Data.load('server-list-button-active'))
           && elements.serverList) {
           if (runtime.delays[constants.I_SERVER_LIST]) {
             clearTimeout(runtime.delays[constants.I_SERVER_LIST]);
@@ -1475,7 +1504,7 @@ module.exports = class CollapsibleUI {
         }
 
         // Channel List
-        if ((runtime.api.Data.load('channel-list-button-active') === 'false')
+        if ((!runtime.api.Data.load('channel-list-button-active'))
           && elements.channelList) {
           if (runtime.delays[constants.I_CHANNEL_LIST]) {
             clearTimeout(runtime.delays[constants.I_CHANNEL_LIST]);
@@ -1492,7 +1521,7 @@ module.exports = class CollapsibleUI {
         }
 
         // Message Bar
-        if ((runtime.api.Data.load('message-input-button-active') === 'false')
+        if ((!runtime.api.Data.load('message-input-button-active'))
           && elements.messageInput
           && !(document.querySelector('[data-slate-string="true"]')?.innerHTML)
           && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
@@ -1508,7 +1537,7 @@ module.exports = class CollapsibleUI {
         }
 
         // Window Bar
-        if ((runtime.api.Data.load('window-bar-button-active') === 'false')
+        if ((!runtime.api.Data.load('window-bar-button-active'))
           && elements.windowBar
           && (runtime.mouse.y > settings.windowBarHeight + settings.expandOnHoverClosingFudgeFactor)) {
           if (runtime.delays[constants.I_WINDOW_BAR]) {
@@ -1526,7 +1555,7 @@ module.exports = class CollapsibleUI {
         }
 
         // Members List
-        if ((runtime.api.Data.load('members-list-button-active') === 'false')
+        if ((!runtime.api.Data.load('members-list-button-active'))
           && elements.membersList
           && !(_this.isNear(document.querySelector('.' + modules.panel?.outer + '.' + modules.panel?.panel), 10000, runtime.mouse.x, runtime.mouse.y))) {
           if (runtime.delays[constants.I_MEMBERS_LIST]) {
@@ -1542,7 +1571,7 @@ module.exports = class CollapsibleUI {
         }
 
         // Profile Panel
-        if ((runtime.api.Data.load('user-profile-button-active') === 'false')
+        if ((!runtime.api.Data.load('user-profile-button-active'))
           && elements.userProfile && !(_this.isNear(document.querySelector('.' + modules.panel?.outer + '.' + modules.panel?.panel), 10000, runtime.mouse.x, runtime.mouse.y))) {
           if (runtime.delays[constants.I_USER_PROFILE]) {
             clearTimeout(runtime.delays[constants.I_USER_PROFILE]);
@@ -1554,7 +1583,7 @@ module.exports = class CollapsibleUI {
         }
 
         // User Area
-        if ((runtime.api.Data.load('user-area-button-active') === 'false')
+        if ((!runtime.api.Data.load('user-area-button-active'))
           && elements.userArea) {
           if (runtime.delays[constants.I_USER_AREA]) {
             clearTimeout(runtime.delays[constants.I_USER_AREA]);
@@ -1565,20 +1594,19 @@ module.exports = class CollapsibleUI {
         }
 
         // Call Container
-        if ((runtime.api.Data.load('call-window-button-active') === 'false')
-          && document.querySelector('.' + modules.callContainer?.wrapper)) {
+        if ((!runtime.api.Data.load('call-window-button-active'))
+          && elements.callContainer()) {
           if (runtime.delays[constants.I_CALL_WINDOW]) {
             clearTimeout(runtime.delays[constants.I_CALL_WINDOW]);
             runtime.delays[constants.I_CALL_WINDOW] = false;
           }
-          document.querySelector('.' + modules.callContainer?.wrapper).style
-            .setProperty('max-height', '0px', 'important');
+          elements.callContainer().style.setProperty('max-height', '0px', 'important');
           runtime.collapsed[constants.I_CALL_WINDOW] = true;
         }
       }, { signal: runtime.events.signal });
 
       window.addEventListener('keyup', (e) => {
-        if ((runtime.api.Data.load('message-input-button-active') === 'false')
+        if ((!runtime.api.Data.load('message-input-button-active'))
           && elements.messageInput && settings.expandOnHoverEnabled[constants.I_MESSAGE_INPUT]) {
           if (runtime.collapsed[constants.I_MESSAGE_INPUT]
             && (document.querySelector('[data-slate-string="true"]')?.innerHTML
@@ -1744,58 +1772,58 @@ module.exports = class CollapsibleUI {
     if (settings.conditionalCollapse) {
       if ((settings.collapseConditionals[constants.I_SERVER_LIST] !== '')
         && ((eval(settings.collapseConditionals[constants.I_SERVER_LIST])
-        && (runtime.api.Data.load('server-list-button-active') === 'true'))
+        && (runtime.api.Data.load('server-list-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_SERVER_LIST])
-        && (runtime.api.Data.load('server-list-button-active') === 'false'))))
+        && (!runtime.api.Data.load('server-list-button-active')))))
         this.toggleButton(constants.I_SERVER_LIST);
 
       if ((settings.collapseConditionals[constants.I_CHANNEL_LIST] !== '')
         && ((eval(settings.collapseConditionals[constants.I_CHANNEL_LIST])
-        && (runtime.api.Data.load('channel-list-button-active') === 'true'))
+        && (runtime.api.Data.load('channel-list-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_CHANNEL_LIST])
-        && (runtime.api.Data.load('channel-list-button-active') === 'false'))))
+        && (!runtime.api.Data.load('channel-list-button-active')))))
         this.toggleButton(constants.I_CHANNEL_LIST);
 
       if ((settings.collapseConditionals[constants.I_MESSAGE_INPUT] !== '')
         && ((eval(settings.collapseConditionals[constants.I_MESSAGE_INPUT])
-        && (runtime.api.Data.load('message-input-button-active') === 'true'))
+        && (runtime.api.Data.load('message-input-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_MESSAGE_INPUT])
-        && (runtime.api.Data.load('message-input-button-active') === 'false'))))
+        && (!runtime.api.Data.load('message-input-button-active')))))
         this.toggleButton(constants.I_MESSAGE_INPUT);
 
       if ((settings.collapseConditionals[constants.I_WINDOW_BAR] !== '')
         && ((eval(settings.collapseConditionals[constants.I_WINDOW_BAR])
-        && (runtime.api.Data.load('window-bar-button-active') === 'true'))
+        && (runtime.api.Data.load('window-bar-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_WINDOW_BAR])
-        && (runtime.api.Data.load('window-bar-button-active') === 'false'))))
+        && (!runtime.api.Data.load('window-bar-button-active')))))
         this.toggleButton(constants.I_WINDOW_BAR);
 
       if ((settings.collapseConditionals[constants.I_MEMBERS_LIST] !== '')
         && ((eval(settings.collapseConditionals[constants.I_MEMBERS_LIST])
-        && (runtime.api.Data.load('members-list-button-active') === 'true'))
+        && (runtime.api.Data.load('members-list-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_MEMBERS_LIST])
-        && (runtime.api.Data.load('members-list-button-active') === 'false'))))
+        && (!runtime.api.Data.load('members-list-button-active')))))
         this.toggleButton(constants.I_MEMBERS_LIST);
 
       if ((settings.collapseConditionals[constants.I_USER_PROFILE] !== '')
         && ((eval(settings.collapseConditionals[constants.I_USER_PROFILE])
-        && (runtime.api.Data.load('user-profile-button-active') === 'true'))
+        && (runtime.api.Data.load('user-profile-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_USER_PROFILE])
-        && (runtime.api.Data.load('user-profile-button-active') === 'false'))))
+        && (!runtime.api.Data.load('user-profile-button-active')))))
         this.toggleButton(constants.I_USER_PROFILE);
 
       if ((settings.collapseConditionals[constants.I_USER_AREA] !== '')
         && ((eval(settings.collapseConditionals[constants.I_USER_AREA])
-        && (runtime.api.Data.load('user-area-button-active') === 'true'))
+        && (runtime.api.Data.load('user-area-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_USER_AREA])
-        && (runtime.api.Data.load('user-area-button-active') === 'false'))))
+        && (!runtime.api.Data.load('user-area-button-active')))))
         this.toggleButton(constants.I_USER_AREA);
 
       if ((settings.collapseConditionals[constants.I_CALL_WINDOW] !== '')
         && ((eval(settings.collapseConditionals[constants.I_CALL_WINDOW])
-        && (runtime.api.Data.load('call-window-button-active') === 'true'))
+        && (runtime.api.Data.load('call-window-button-active')))
         || (!eval(settings.collapseConditionals[constants.I_CALL_WINDOW])
-        && (runtime.api.Data.load('call-window-button-active') === 'false'))))
+        && (!runtime.api.Data.load('call-window-button-active')))))
         this.toggleButton(constants.I_CALL_WINDOW);
     }
   };
@@ -2400,7 +2428,7 @@ module.exports = class CollapsibleUI {
     // Add mutation observer to reload when user closes settings page
     runtime.observers.settings = new MutationObserver((mutationList) => {
       try {
-        if (mutationList[0].target.ariaHidden == 'false') {
+        if (mutationList[0].target.ariaHidden == false) {
           _this.initialize();
           return;
         }
@@ -2444,15 +2472,10 @@ module.exports = class CollapsibleUI {
             || mutationList[i].addedNodes[0]?.classList?.contains(modules.members?.members)
             || mutationList[i].addedNodes[0]?.classList?.contains(modules.threads?.container)
             || mutationList[i].addedNodes[0]?.classList?.contains(modules.banner?.mask)
+            || mutationList[i].addedNodes[0]?.classList?.contains(modules.search?.searchResultsWrap)
+            || mutationList[i].addedNodes[0]?.classList?.contains(modules.floating?.chatLayerWrapper)
             || mutationList[i].removedNodes[0]?.classList?.contains(modules.callContainer?.wrapper)) {
             _this.initialize();
-            return;
-          }
-
-          // Resizes the forum list to be the correct size when a thread window is popped out
-          if (mutationList[i].addedNodes[0]?.classList?.contains(modules.floating?.chatLayerWrapper)) {
-            document.querySelector('.' + modules.threads?.container).style
-              .setProperty('max-width', 'calc(100% - ' + document.querySelector('.' + modules.floating?.floating).style.width + ')', 'important');
             return;
           }
         }
@@ -2535,9 +2558,21 @@ module.exports = class CollapsibleUI {
       runtime.api.Data.delete('persistentUnreadBadge');
       runtime.api.Data.delete('profilePanelButtonActive');
       runtime.api.Data.delete('messageBarButtonsMaxWidth');
+    }
+
+    if (parseInt(runtime.api.Data.load('settings-version')) < 15) {
+      // Clean up (v15)
+      runtime.api.Data.delete('server-list-button-active');
+      runtime.api.Data.delete('channel-list-button-active');
+      runtime.api.Data.delete('message-input-button-active');
+      runtime.api.Data.delete('window-bar-button-active');
+      runtime.api.Data.delete('user-profile-button-active');
+      runtime.api.Data.delete('user-area-button-active');
+      runtime.api.Data.delete('members-list-button-active');
+      runtime.api.Data.delete('call-window-button-active');
 
       // Set new settings version
-      runtime.api.Data.save('settings-version', '14');
+      runtime.api.Data.save('settings-version', '15');
     }
 
     if (runtime.api.Data.load('transition-speed') !== undefined) {
@@ -2575,9 +2610,19 @@ module.exports = class CollapsibleUI {
       config.settings[0].settings[6].value = settings.resizableUserProfile;
     }
     else runtime.api.Data.save('resizable-user-profile', settings.resizableUserProfile);
+    if (runtime.api.Data.load('resizable-search-panel') !== undefined) {
+      settings.resizableSearchPanel = runtime.api.Data.load('resizable-search-panel');
+      config.settings[0].settings[7].value = settings.resizableSearchPanel;
+    }
+    else runtime.api.Data.save('resizable-search-panel', settings.resizableSearchPanel);
+    if (runtime.api.Data.load('resizable-forum-popout') !== undefined) {
+      settings.resizableForumPopout = runtime.api.Data.load('resizable-forum-popout');
+      config.settings[0].settings[8].value = settings.resizableForumPopout;
+    }
+    else runtime.api.Data.save('resizable-forum-popout', settings.resizableForumPopout);
     if (runtime.api.Data.load('unread-dms-badge') !== undefined) {
       settings.unreadDMsBadge = runtime.api.Data.load('unread-dms-badge');
-      config.settings[0].settings[7].value = settings.unreadDMsBadge;
+      config.settings[0].settings[9].value = settings.unreadDMsBadge;
     }
     else runtime.api.Data.save('unread-dms-badge', settings.unreadDMsBadge);
 
@@ -2894,6 +2939,14 @@ module.exports = class CollapsibleUI {
       settings.profilePanelWidth = runtime.api.Data.load('profile-panel-width');
     }
     else runtime.api.Data.save('profile-panel-width', settings.profilePanelWidth);
+    if (runtime.api.Data.load('search-panel-width') !== undefined) {
+      settings.searchPanelWidth = runtime.api.Data.load('search-panel-width');
+    }
+    else runtime.api.Data.save('search-panel-width', settings.searchPanelWidth);
+    if (runtime.api.Data.load('forum-popout-width') !== undefined) {
+      settings.forumPopoutWidth = runtime.api.Data.load('forum-popout-width');
+    }
+    else runtime.api.Data.save('forum-popout-width', settings.forumPopoutWidth);
   };
 
   // Initializes integration with various themes
@@ -3100,7 +3153,7 @@ module.exports = class CollapsibleUI {
       }
       if (i == settings.buttonIndexes[constants.I_CALL_WINDOW]) {
         if (settings.buttonIndexes[constants.I_CALL_WINDOW]
-          && document.querySelector('.' + modules.callContainer?.wrapper)) {
+          && elements.callContainer()) {
           runtime.buttons[constants.I_CALL_WINDOW] = this.addToolbarIcon(runtime.localeLabels.callWindow,
             '<path fill="currentColor" d="M20.7,16.2c-0.1-0.1-0.2-0.2-0.3-0.'
               + '2c-0.5-0.4-1-0.8-1.6-1.1l-0.3-0.2c-0.7-0.5-1.3-0.7-1.8-0.7c-0.'
@@ -3172,9 +3225,8 @@ module.exports = class CollapsibleUI {
       elements.userProfileWrapper.style.setProperty('width', 'auto', 'important');
     if (elements.messageInput)
       elements.messageInput.style.setProperty('max-height', settings.messageInputMaxHeight + 'px', 'important');
-    if (elements.callContainer)
-      document.querySelector('.' + modules.callContainer?.wrapper).style
-        .setProperty('min-height', '0px', 'important');
+    if (elements.callContainer())
+      elements.callContainer().style.setProperty('min-height', '0px', 'important');
     if (document.querySelector('.' + modules.dms?.channel))
       document.querySelectorAll('.' + modules.dms?.channel)
         .forEach(e => e.style.setProperty('max-width', '200000px'), 'important');
@@ -3188,7 +3240,7 @@ module.exports = class CollapsibleUI {
       if (runtime.collapsed[constants.I_SERVER_LIST]) {
         this.floatElement(constants.I_SERVER_LIST, false);
         if (settings.buttonIndexes[constants.I_SERVER_LIST] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('server-list-button-active') === 'false') {
+          if (!runtime.api.Data.load('server-list-button-active')) {
             if (runtime.buttons[constants.I_SERVER_LIST])
               runtime.buttons[constants.I_SERVER_LIST].classList.remove(modules.icons?.selected);
             elements.serverList.style.setProperty('width', settings.collapseSize + 'px', 'important');
@@ -3201,18 +3253,18 @@ module.exports = class CollapsibleUI {
               elements.appBase.style.setProperty('top', '0px', 'important');
             }
           }
-          else if (runtime.api.Data.load('server-list-button-active') === 'true') {
+          else if (runtime.api.Data.load('server-list-button-active')) {
             if (runtime.buttons[constants.I_SERVER_LIST])
               runtime.buttons[constants.I_SERVER_LIST].classList.add(modules.icons?.selected);
           }
           else {
-            runtime.api.Data.save('server-list-button-active', 'true');
+            runtime.api.Data.save('server-list-button-active', true);
             if (runtime.buttons[constants.I_SERVER_LIST])
               runtime.buttons[constants.I_SERVER_LIST].classList.add(modules.icons?.selected);
           }
         }
         else
-          runtime.api.Data.save('server-list-button-active', 'true');
+          runtime.api.Data.save('server-list-button-active', true);
       }
       else this.floatElement(constants.I_SERVER_LIST, true);
     }
@@ -3222,7 +3274,7 @@ module.exports = class CollapsibleUI {
       if (runtime.collapsed[constants.I_CHANNEL_LIST]) {
         this.floatElement(constants.I_CHANNEL_LIST, false);
         if (settings.buttonIndexes[constants.I_CHANNEL_LIST] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('channel-list-button-active') === 'false') {
+          if (!runtime.api.Data.load('channel-list-button-active')) {
             if (runtime.buttons[constants.I_CHANNEL_LIST])
               runtime.buttons[constants.I_CHANNEL_LIST].classList.remove(modules.icons?.selected);
             elements.channelList.style
@@ -3235,18 +3287,18 @@ module.exports = class CollapsibleUI {
                 elements.spotifyContainer.style.setProperty('display', 'none', 'important');
             }
           }
-          else if (runtime.api.Data.load('channel-list-button-active') === 'true') {
+          else if (runtime.api.Data.load('channel-list-button-active')) {
             if (runtime.buttons[constants.I_CHANNEL_LIST])
               runtime.buttons[constants.I_CHANNEL_LIST].classList.add(modules.icons?.selected);
           }
           else {
-            runtime.api.Data.save('channel-list-button-active', 'true');
+            runtime.api.Data.save('channel-list-button-active', true);
             if (runtime.buttons[constants.I_CHANNEL_LIST])
               runtime.buttons[constants.I_CHANNEL_LIST].classList.add(modules.icons?.selected);
           }
         }
         else
-          runtime.api.Data.save('channel-list-button-active', 'true');
+          runtime.api.Data.save('channel-list-button-active', true);
       }
       else this.floatElement(constants.I_CHANNEL_LIST, true);
     }
@@ -3255,7 +3307,7 @@ module.exports = class CollapsibleUI {
     if (elements.messageInput) {
       if (runtime.collapsed[constants.I_MESSAGE_INPUT]) {
         if (settings.buttonIndexes[constants.I_MESSAGE_INPUT] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('message-input-button-active') === 'false') {
+          if (!runtime.api.Data.load('message-input-button-active')) {
             if (runtime.buttons[constants.I_MESSAGE_INPUT])
               runtime.buttons[constants.I_MESSAGE_INPUT].classList.remove(modules.icons?.selected);
             if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)
@@ -3267,18 +3319,18 @@ module.exports = class CollapsibleUI {
               elements.messageInput.style.setProperty('overflow', 'hidden', 'important');
             }
           }
-          else if (runtime.api.Data.load('message-input-button-active') === 'true') {
+          else if (runtime.api.Data.load('message-input-button-active')) {
             if (runtime.buttons[constants.I_MESSAGE_INPUT])
               runtime.buttons[constants.I_MESSAGE_INPUT].classList.add(modules.icons?.selected);
           }
           else {
-            runtime.api.Data.save('message-input-button-active', 'true');
+            runtime.api.Data.save('message-input-button-active', true);
             if (runtime.buttons[constants.I_MESSAGE_INPUT])
               runtime.buttons[constants.I_MESSAGE_INPUT].classList.add(modules.icons?.selected);
           }
         }
         else
-          runtime.api.Data.save('message-input-button-active', 'true');
+          runtime.api.Data.save('message-input-button-active', true);
       }
     }
 
@@ -3286,7 +3338,7 @@ module.exports = class CollapsibleUI {
     if (elements.windowBar) {
       if (runtime.collapsed[constants.I_WINDOW_BAR]) {
         if (settings.buttonIndexes[constants.I_WINDOW_BAR] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('window-bar-button-active') === 'false') {
+          if (!runtime.api.Data.load('window-bar-button-active')) {
             if (runtime.buttons[constants.I_WINDOW_BAR])
               runtime.buttons[constants.I_WINDOW_BAR].classList.remove(modules.icons?.selected);
             elements.windowBar.style.setProperty('height', '0px', 'important');
@@ -3297,18 +3349,18 @@ module.exports = class CollapsibleUI {
             elements.windowBar.style.setProperty('overflow', 'hidden', 'important');
             elements.wordMark?.style.setProperty('display', 'none', 'important');
           }
-          else if (runtime.api.Data.load('window-bar-button-active') === 'true') {
+          else if (runtime.api.Data.load('window-bar-button-active')) {
             if (runtime.buttons[constants.I_WINDOW_BAR])
               runtime.buttons[constants.I_WINDOW_BAR].classList.add(modules.icons?.selected);
           }
           else {
-            runtime.api.Data.save('window-bar-button-active', 'true');
+            runtime.api.Data.save('window-bar-button-active', true);
             if (runtime.buttons[constants.I_WINDOW_BAR])
               runtime.buttons[constants.I_WINDOW_BAR].classList.add(modules.icons?.selected);
           }
         }
         else
-          runtime.api.Data.save('window-bar-button-active', 'true');
+          runtime.api.Data.save('window-bar-button-active', true);
       }
     }
 
@@ -3317,7 +3369,7 @@ module.exports = class CollapsibleUI {
       if (runtime.collapsed[constants.I_MEMBERS_LIST]) {
         this.floatElement(constants.I_MEMBERS_LIST, false);
         if (settings.buttonIndexes[constants.I_MEMBERS_LIST] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('members-list-button-active') === 'false') {
+          if (!runtime.api.Data.load('members-list-button-active')) {
             if (runtime.buttons[constants.I_MEMBERS_LIST])
               runtime.buttons[constants.I_MEMBERS_LIST].classList.remove(modules.icons?.selected);
             elements.membersList.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
@@ -3330,7 +3382,7 @@ module.exports = class CollapsibleUI {
             elements.contentWindow.style
               .setProperty('max-width', 'calc(100% - ' + settings.collapseSize + 'px)', 'important');
           }
-          else if (runtime.api.Data.load('members-list-button-active') === 'true') {
+          else if (runtime.api.Data.load('members-list-button-active')) {
             if (runtime.buttons[constants.I_MEMBERS_LIST])
               runtime.buttons[constants.I_MEMBERS_LIST].classList.add(modules.icons?.selected);
             if (settings.membersListWidth != 0) {
@@ -3351,7 +3403,7 @@ module.exports = class CollapsibleUI {
             }
           }
           else {
-            runtime.api.Data.save('members-list-button-active', 'true');
+            runtime.api.Data.save('members-list-button-active', true);
             if (runtime.buttons[constants.I_MEMBERS_LIST])
               runtime.buttons[constants.I_MEMBERS_LIST].classList.add(modules.icons?.selected);
             if (settings.membersListWidth != 0) {
@@ -3373,7 +3425,7 @@ module.exports = class CollapsibleUI {
           }
         }
         else
-          runtime.api.Data.save('members-list-button-active', 'true');
+          runtime.api.Data.save('members-list-button-active', true);
       }
       else this.floatElement(constants.I_MEMBERS_LIST, true);
     }
@@ -3383,14 +3435,14 @@ module.exports = class CollapsibleUI {
       if (runtime.collapsed[constants.I_USER_PROFILE]) {
         this.floatElement(constants.I_USER_PROFILE, false);
         if (settings.buttonIndexes[constants.I_USER_PROFILE] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('user-profile-button-active') === 'false') {
+          if (!runtime.api.Data.load('user-profile-button-active')) {
             if (runtime.buttons[constants.I_USER_PROFILE])
               runtime.buttons[constants.I_USER_PROFILE].classList.remove(modules.icons?.selected);
             elements.userProfile.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
             elements.userProfile.style
               .setProperty('width', settings.collapseSize + 'px', 'important');
           }
-          else if (runtime.api.Data.load('user-profile-button-active') === 'true') {
+          else if (runtime.api.Data.load('user-profile-button-active')) {
             if (runtime.buttons[constants.I_USER_PROFILE])
               runtime.buttons[constants.I_USER_PROFILE].classList.add(modules.icons?.selected);
             if (settings.profilePanelWidth != 0)
@@ -3401,7 +3453,7 @@ module.exports = class CollapsibleUI {
                 .setProperty('width', 'var(--cui-profile-width)', 'important');
           }
           else {
-            runtime.api.Data.save('user-profile-button-active', 'true');
+            runtime.api.Data.save('user-profile-button-active', true);
             if (runtime.buttons[constants.I_USER_PROFILE])
               runtime.buttons[constants.I_USER_PROFILE].classList.add(modules.icons?.selected);
             if (settings.profilePanelWidth != 0)
@@ -3413,7 +3465,7 @@ module.exports = class CollapsibleUI {
           }
         }
         else
-          runtime.api.Data.save('user-profile-button-active', 'true');
+          runtime.api.Data.save('user-profile-button-active', true);
       }
       else this.floatElement(constants.I_USER_PROFILE, true);
     }
@@ -3422,54 +3474,53 @@ module.exports = class CollapsibleUI {
     if (elements.userArea) {
       if (runtime.collapsed[constants.I_USER_AREA]) {
         if (settings.buttonIndexes[constants.I_USER_AREA] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('user-area-button-active') === 'false') {
+          if (!runtime.api.Data.load('user-area-button-active')) {
             if (runtime.buttons[constants.I_USER_AREA])
               runtime.buttons[constants.I_USER_AREA].classList.remove(modules.icons?.selected);
             elements.userArea.style
               .setProperty('max-height', settings.collapseSize + 'px', 'important');
           }
-          else if (runtime.api.Data.load('user-area-button-active') === 'true') {
+          else if (runtime.api.Data.load('user-area-button-active')) {
             if (runtime.buttons[constants.I_USER_AREA])
               runtime.buttons[constants.I_USER_AREA].classList.add(modules.icons?.selected);
           }
           else {
-            runtime.api.Data.save('user-area-button-active', 'true');
+            runtime.api.Data.save('user-area-button-active', true);
             if (runtime.buttons[constants.I_USER_AREA])
               runtime.buttons[constants.I_USER_AREA].classList.add(modules.icons?.selected);
           }
         }
         else
-          runtime.api.Data.save('user-area-button-active', 'true');
+          runtime.api.Data.save('user-area-button-active', true);
       }
     }
 
     // Read stored user data to decide active state of Call Container button
-    if (document.querySelector('.' + modules.callContainer?.wrapper)) {
+    if (elements.callContainer()) {
       if (runtime.collapsed[constants.I_CALL_WINDOW]) {
         if (settings.buttonIndexes[constants.I_CALL_WINDOW] || settings.collapseDisabledButtons) {
-          if (runtime.api.Data.load('call-window-button-active') === 'false') {
+          if (!runtime.api.Data.load('call-window-button-active')) {
             if (runtime.buttons[constants.I_CALL_WINDOW])
               runtime.buttons[constants.I_CALL_WINDOW].classList.remove(modules.icons?.selected);
-            if (document.querySelector('.' + modules.callContainer?.wrapper)) {
-              document.querySelector('.' + modules.callContainer?.wrapper).style
-                .setProperty('max-height', '0px', 'important');
+            if (elements.callContainer()) {
+              elements.callContainer().style.setProperty('max-height', '0px', 'important');
               if (document.querySelector('.' + modules.callMembers?.voiceCallWrapper))
                 document.querySelector('.' + modules.callMembers?.voiceCallWrapper).style
                   .setProperty('display', 'none', 'important');
             }
           }
-          else if (runtime.api.Data.load('call-window-button-active') === 'true') {
+          else if (runtime.api.Data.load('call-window-button-active')) {
             if (runtime.buttons[constants.I_CALL_WINDOW])
               runtime.buttons[constants.I_CALL_WINDOW].classList.add(modules.icons?.selected);
           }
           else {
-            runtime.api.Data.save('call-window-button-active', 'true');
+            runtime.api.Data.save('call-window-button-active', true);
             if (runtime.buttons[constants.I_CALL_WINDOW])
               runtime.buttons[constants.I_CALL_WINDOW].classList.add(modules.icons?.selected);
           }
         }
         else
-          runtime.api.Data.save('call-window-button-active', 'true');
+          runtime.api.Data.save('call-window-button-active', true);
       }
     }
 
@@ -3478,6 +3529,8 @@ module.exports = class CollapsibleUI {
       :root {
         --cui-members-width: 240px;
         --cui-profile-width: 340px;
+        --cui-search-width: 418px;
+        --cui-popout-width: 450px;
       }
 
       ::-webkit-scrollbar {
@@ -3487,6 +3540,16 @@ module.exports = class CollapsibleUI {
       
       ::-webkit-resizer {
         display: none;
+      }
+
+      .${modules.threads?.grid}>div:first-child,
+      .${modules.threads?.headerRow},
+      .${modules.threads?.list}>div:first-child {
+        min-width: 0px !important;
+      }
+
+      .${modules.searchHeader?.searchHeaderTabList} {
+        justify-content: end !important;
       }
 
       .${modules.panel?.inner} .${modules.effects?.profileEffects} {
@@ -3537,7 +3600,7 @@ module.exports = class CollapsibleUI {
       runtime.observers.resize.channelList = new MutationObserver((mutationList) => {
         try {
           if (((!runtime.collapsed[constants.I_CHANNEL_LIST])
-            || (runtime.api.Data.load('channel-list-button-active') === 'true'))
+            || (runtime.api.Data.load('channel-list-button-active')))
             && document.fullscreenElement == null) {
             var oldChannelListWidth = settings.channelListWidth;
             if (parseInt(elements.channelList.style.width)) {
@@ -3568,7 +3631,7 @@ module.exports = class CollapsibleUI {
       runtime.observers.resize.channelList.observe(elements.channelList, { attributeFilter: ['style'] });
     }
     if (((!runtime.collapsed[constants.I_CHANNEL_LIST])
-      || (runtime.api.Data.load('channel-list-button-active') === 'true'))
+      || (runtime.api.Data.load('channel-list-button-active')))
       && settings.channelListWidth != 0) {
       elements.channelList.style.setProperty('transition', 'none', 'important');
       elements.channelList.style
@@ -3655,7 +3718,7 @@ module.exports = class CollapsibleUI {
           elements.membersList.style
             .setProperty('min-width', 'var(--cui-members-width)', 'important');
           if ((!settings.floatingPanels) || (runtime.api.Data.load(
-            'members-list-button-active') === 'true'))
+            'members-list-button-active')))
             elements.contentWindow.style
               .setProperty('max-width', 'calc(100% - var(--cui-members-width))', 'important');
           else
@@ -3670,7 +3733,7 @@ module.exports = class CollapsibleUI {
         runtime.observers.resize.membersList = new MutationObserver((mutationList) => {
           try {
             if (((!runtime.collapsed[constants.I_MEMBERS_LIST])
-              || (runtime.api.Data.load('members-list-button-active') === 'true'))
+              || (runtime.api.Data.load('members-list-button-active')))
               && document.fullscreenElement == null) {
               var oldMembersListWidth = settings.membersListWidth;
               if (parseInt(elements.membersList.style.width)) {
@@ -3680,7 +3743,7 @@ module.exports = class CollapsibleUI {
                 elements.membersList.style
                   .setProperty('min-width', settings.membersListWidth + 'px', 'important');
                 if ((!settings.floatingPanels) || (runtime.api.Data.load(
-                  'members-list-button-active') === 'true'))
+                  'members-list-button-active')))
                   elements.contentWindow.style
                     .setProperty('max-width', 'calc(100% - ' + settings.membersListWidth + 'px)', 'important');
                 else
@@ -3695,7 +3758,7 @@ module.exports = class CollapsibleUI {
                 elements.membersList.style
                   .setProperty('min-width', settings.membersListWidth + 'px', 'important');
                 if ((!settings.floatingPanels) || (runtime.api.Data.load(
-                  'members-list-button-active') === 'true'))
+                  'members-list-button-active')))
                   elements.contentWindow.style
                     .setProperty('max-width', 'calc(100% - ' + settings.membersListWidth + 'px)', 'important');
                 else
@@ -3717,7 +3780,7 @@ module.exports = class CollapsibleUI {
         runtime.observers.resize.membersList.observe(elements.membersList, { attributeFilter: ['style'] });
       }
       if (((!runtime.collapsed[constants.I_MEMBERS_LIST])
-        || (runtime.api.Data.load('members-list-button-active') === 'true'))
+        || (runtime.api.Data.load('members-list-button-active')))
         && settings.membersListWidth != 0) {
         elements.membersList.style.setProperty('transition', 'none', 'important');
         elements.contentWindow.style.setProperty('transition', 'none', 'important');
@@ -3726,7 +3789,7 @@ module.exports = class CollapsibleUI {
         elements.membersList.style
           .setProperty('min-width', settings.membersListWidth + 'px', 'important');
         if ((!settings.floatingPanels) || (runtime.api.Data.load(
-          'members-list-button-active') === 'true'))
+          'members-list-button-active')))
           elements.contentWindow.style
             .setProperty('max-width', 'calc(100% - ' + settings.membersListWidth + 'px)', 'important');
         else
@@ -3792,7 +3855,7 @@ module.exports = class CollapsibleUI {
         runtime.observers.resize.userProfile = new MutationObserver((mutationList) => {
           try {
             if (((!runtime.collapsed[constants.I_USER_PROFILE])
-              || (runtime.api.Data.load('user-profile-button-active') === 'true'))
+              || (runtime.api.Data.load('user-profile-button-active')))
               && document.fullscreenElement == null) {
               var oldProfilePanelWidth = settings.profilePanelWidth;
               if (parseInt(elements.userProfile.style.width)) {
@@ -3819,13 +3882,155 @@ module.exports = class CollapsibleUI {
         runtime.observers.resize.userProfile.observe(elements.userProfile, { attributeFilter: ['style'] });
       }
       if (((!runtime.collapsed[constants.I_USER_PROFILE])
-        || (runtime.api.Data.load('user-profile-button-active') === 'true'))
+        || (runtime.api.Data.load('user-profile-button-active')))
         && settings.profilePanelWidth != 0) {
         elements.userProfile.style.setProperty('transition', 'none', 'important');
         elements.userProfile.style.setProperty('width', settings.profilePanelWidth + 'px', 'important');
       }
 
       elements.userProfile.style.setProperty('transition', 'none', 'important');
+    }
+
+    if (elements.searchPanel) {
+      // Handle resizing search panel
+      if (settings.resizableSearchPanel) {
+        elements.searchPanel.style.setProperty('resize', 'horizontal', 'important');
+        elements.searchPanel.style.setProperty('max-width', '80vw', 'important');
+        elements.searchPanel.style.setProperty('min-width', '0', 'important');
+
+        // Flip search panel outer wrapper, then flip inner elements back
+        // This moves the webkit resize handle to the bottom left
+        // Without affecting the elements inside
+        elements.searchPanel.style.setProperty('transform', 'scaleX(-1)', 'important');
+        elements.searchPanel.childNodes.forEach((node) => {
+          node.style.setProperty('transform', 'scaleX(-1)', 'important');
+        });
+
+        document.body.addEventListener('mousedown', () => {
+          elements.searchPanel.style.setProperty('transition', 'none', 'important');
+        }, { signal: runtime.events.signal });
+
+        elements.searchPanel.addEventListener('contextmenu', (e) => {
+          if (e.target !== e.currentTarget)
+            return;
+          try {
+            runtime.observers.resize.searchPanel.disconnect();
+          }
+          catch {}
+          settings.searchPanelWidth = 0;
+          runtime.api.Data.save('search-panel-width', settings.searchPanelWidth);
+          elements.searchPanel.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
+          elements.searchPanel.style.setProperty('width', 'var(--cui-search-width)', 'important');
+          try {
+            runtime.observers.resize.searchPanel.observe(elements.searchPanel, { attributeFilter: ['style'] });
+          }
+          catch {}
+          e.preventDefault();
+        }, { signal: runtime.events.signal });
+
+        runtime.observers.resize.searchPanel = new MutationObserver((mutationList) => {
+          try {
+            var oldSearchPanelWidth = settings.searchPanelWidth;
+            if (parseInt(elements.searchPanel.style.width)) {
+              settings.searchPanelWidth = parseInt(elements.searchPanel.style.width);
+              elements.searchPanel.style
+                .setProperty('width', settings.searchPanelWidth + 'px', 'important');
+            }
+            else if (settings.searchPanelWidth != 0) {
+              elements.searchPanel.style
+                .setProperty('width', settings.searchPanelWidth + 'px', 'important');
+            }
+            if (oldSearchPanelWidth != settings.searchPanelWidth)
+              runtime.api.Data.save('search-panel-width', settings.searchPanelWidth);
+          }
+          catch (e) {
+            console.warn('%c[CollapsibleUI] ' + '%cFailed to trigger mutationObserver width update! (see below)',
+              'color: #3a71c1; font-weight: 700;', '');
+            console.warn(e);
+          }
+        });
+        runtime.observers.resize.searchPanel.observe(elements.searchPanel, { attributeFilter: ['style'] });
+      }
+      if (settings.searchPanelWidth != 0) {
+        elements.searchPanel.style.setProperty('width', settings.searchPanelWidth + 'px', 'important');
+      }
+    }
+
+    if (elements.forumPopout) {
+      // Handle resizing forum popout
+      if (settings.resizableForumPopout) {
+        elements.forumPopout.style.setProperty('resize', 'horizontal', 'important');
+        elements.forumPopout.style.setProperty('max-width', '80vw', 'important');
+        elements.forumPopout.style.setProperty('min-width', '0', 'important');
+
+        // Flip forum popout outer wrapper, then flip inner elements back
+        // This moves the webkit resize handle to the bottom left
+        // Without affecting the elements inside
+        elements.forumPopout.style.setProperty('transform', 'scaleX(-1)', 'important');
+        elements.forumPopout.childNodes.forEach((node) => {
+          node.style.setProperty('transform', 'scaleX(-1)', 'important');
+        });
+
+        document.body.addEventListener('mousedown', () => {
+          elements.forumPopout.style.setProperty('transition', 'none', 'important');
+          elements.forumPopoutTarget.style.setProperty('transition', 'none', 'important');
+        }, { signal: runtime.events.signal });
+
+        elements.forumPopout.addEventListener('contextmenu', (e) => {
+          if (e.target !== e.currentTarget)
+            return;
+          try {
+            runtime.observers.resize.forumPopout.disconnect();
+          }
+          catch {}
+          settings.forumPopoutWidth = 0;
+          runtime.api.Data.save('forum-popout-width', settings.forumPopoutWidth);
+          elements.forumPopout.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
+          elements.forumPopoutTarget.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
+          elements.forumPopout.style.setProperty('width', 'var(--cui-popout-width)', 'important');
+          elements.forumPopoutTarget.style.setProperty('width', 'var(--cui-popout-width)', 'important');
+          try {
+            runtime.observers.resize.forumPopout.observe(elements.forumPopout, { attributeFilter: ['style'] });
+          }
+          catch {}
+          e.preventDefault();
+        }, { signal: runtime.events.signal });
+
+        runtime.observers.resize.forumPopout = new MutationObserver((mutationList) => {
+          try {
+            var oldForumPopoutWidth = settings.forumPopoutWidth;
+            if (parseInt(elements.forumPopout.style.width)) {
+              settings.forumPopoutWidth = parseInt(elements.forumPopout.style.width);
+              elements.forumPopout.style.setProperty('width',
+                settings.forumPopoutWidth + 'px', 'important');
+              elements.forumPopoutTarget.style.setProperty('width',
+                settings.forumPopoutWidth + 'px', 'important');
+            }
+            else if (settings.forumPopoutWidth != 0) {
+              elements.forumPopout.style.setProperty('width',
+                settings.forumPopoutWidth + 'px', 'important');
+              elements.forumPopoutTarget.style.setProperty('width',
+                settings.forumPopoutWidth + 'px', 'important');
+            }
+            if (oldForumPopoutWidth != settings.forumPopoutWidth)
+              runtime.api.Data.save('forum-popout-width', settings.forumPopoutWidth);
+          }
+          catch (e) {
+            console.warn('%c[CollapsibleUI] ' + '%cFailed to trigger mutationObserver width update! (see below)',
+              'color: #3a71c1; font-weight: 700;', '');
+            console.warn(e);
+          }
+        });
+        runtime.observers.resize.forumPopout.observe(elements.forumPopout, { attributeFilter: ['style'] });
+      }
+
+      document.querySelector('.' + modules.threads?.container).style
+        .setProperty('max-width', '100%', 'important');
+
+      if (settings.forumPopoutWidth != 0) {
+        elements.forumPopout.style.setProperty('width', settings.forumPopoutWidth + 'px', 'important');
+        elements.forumPopoutTarget.style.setProperty('width', settings.forumPopoutWidth + 'px', 'important');
+      }
     }
 
     if (elements.messageInput)
@@ -3836,14 +4041,13 @@ module.exports = class CollapsibleUI {
       elements.userArea.style
         .setProperty('transition', 'max-height ' + settings.transitionSpeed + 'ms', 'important');
 
-    if (document.querySelector('.' + modules.callContainer?.wrapper)) {
-      document.querySelector('.' + modules.callContainer?.wrapper).style.transition =
-        'max-height ' + settings.transitionSpeed + 'ms';
+    if (elements.callContainer()) {
+      elements.callContainer().style.transition = 'max-height ' + settings.transitionSpeed + 'ms';
       window.addEventListener('resize', (e) => {
         try {
-          if (document.querySelector('.' + modules.callContainer?.wrapper).style.maxHeight != '0px') {
-            document.querySelector('.' + modules.callContainer?.wrapper).style
-              .setProperty('max-height', (window.outerHeight * 2) + 'px', 'important');
+          if (elements.callContainer().style.maxHeight != '0px') {
+            elements.callContainer().style.setProperty('max-height',
+              (window.outerHeight * 2) + 'px', 'important');
           }
         }
         catch {}
@@ -3922,7 +4126,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Server List
-    if ((runtime.api.Data.load('server-list-button-active') === 'false') && elements.serverList) {
+    if ((!runtime.api.Data.load('server-list-button-active')) && elements.serverList) {
       this.floatElement(constants.I_SERVER_LIST, true);
       if (settings.expandOnHoverEnabled[constants.I_SERVER_LIST]
         && runtime.collapsed[constants.I_SERVER_LIST]
@@ -3966,7 +4170,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Channel List
-    if ((runtime.api.Data.load('channel-list-button-active') === 'false') && elements.channelList) {
+    if ((!runtime.api.Data.load('channel-list-button-active')) && elements.channelList) {
       this.floatElement(constants.I_CHANNEL_LIST, true);
       if (settings.expandOnHoverEnabled[constants.I_CHANNEL_LIST]
         && runtime.collapsed[constants.I_CHANNEL_LIST]
@@ -4007,7 +4211,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Message Bar
-    if ((runtime.api.Data.load('message-input-button-active') === 'false') && elements.messageInput) {
+    if ((!runtime.api.Data.load('message-input-button-active')) && elements.messageInput) {
       if (settings.expandOnHoverEnabled[constants.I_MESSAGE_INPUT]
         && runtime.collapsed[constants.I_MESSAGE_INPUT]
         && this.isNear(elements.messageInput, settings.expandOnHoverOpeningFudgeFactor, runtime.mouse.x, runtime.mouse.y)) {
@@ -4040,7 +4244,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Window Bar
-    if ((runtime.api.Data.load('window-bar-button-active') === 'false') && elements.windowBar) {
+    if ((!runtime.api.Data.load('window-bar-button-active')) && elements.windowBar) {
       if (settings.expandOnHoverEnabled[constants.I_WINDOW_BAR]
         && runtime.collapsed[constants.I_WINDOW_BAR]
         && this.isNear(elements.windowBar, settings.expandOnHoverOpeningFudgeFactor, runtime.mouse.x, runtime.mouse.y)) {
@@ -4082,7 +4286,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Members List
-    if ((runtime.api.Data.load('members-list-button-active') === 'false') && elements.membersList) {
+    if ((!runtime.api.Data.load('members-list-button-active')) && elements.membersList) {
       this.floatElement(constants.I_MEMBERS_LIST, true);
       if (settings.expandOnHoverEnabled[constants.I_MEMBERS_LIST]
         && runtime.collapsed[constants.I_MEMBERS_LIST]
@@ -4146,7 +4350,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Profile Panel
-    if ((runtime.api.Data.load('user-profile-button-active') === 'false') && elements.userProfile) {
+    if ((!runtime.api.Data.load('user-profile-button-active')) && elements.userProfile) {
       this.floatElement(constants.I_USER_PROFILE, true);
       if (settings.expandOnHoverEnabled[constants.I_USER_PROFILE]
         && runtime.collapsed[constants.I_USER_PROFILE]
@@ -4181,7 +4385,7 @@ module.exports = class CollapsibleUI {
     }
 
     // User Area
-    if ((runtime.api.Data.load('user-area-button-active') === 'false') && elements.userArea) {
+    if ((!runtime.api.Data.load('user-area-button-active')) && elements.userArea) {
       if (settings.expandOnHoverEnabled[constants.I_USER_AREA]
         && runtime.collapsed[constants.I_USER_AREA]
         && this.isNear(elements.userArea, settings.expandOnHoverOpeningFudgeFactor, runtime.mouse.x, runtime.mouse.y)) {
@@ -4208,22 +4412,18 @@ module.exports = class CollapsibleUI {
     }
 
     // Call Container
-    if ((runtime.api.Data.load('call-window-button-active') === 'false')
-      && document.querySelector('.' + modules.callContainer?.wrapper)) {
+    if ((!runtime.api.Data.load('call-window-button-active'))
+      && elements.callContainer()) {
       if (settings.expandOnHoverEnabled[constants.I_CALL_WINDOW]
         && runtime.collapsed[constants.I_CALL_WINDOW]
-        && this.isNear(document.querySelector('.' + modules.callContainer?.wrapper), settings.expandOnHoverOpeningFudgeFactor, runtime.mouse.x, runtime.mouse.y)) {
+        && this.isNear(elements.callContainer(), settings.expandOnHoverOpeningFudgeFactor, runtime.mouse.x, runtime.mouse.y)) {
         if (runtime.delays[constants.I_CALL_WINDOW]) {
           clearTimeout(runtime.delays[constants.I_CALL_WINDOW]);
           runtime.delays[constants.I_CALL_WINDOW] = false;
         }
         runtime.delays[constants.I_CALL_WINDOW] = setTimeout(() => {
-          if (document.querySelector('.' + modules.guilds?.noChat))
-            document.querySelector('.' + modules.callContainer?.wrapper).style
-              .setProperty('max-height', (window.outerHeight * 2) + 'px', 'important');
-          else
-            document.querySelector('.' + modules.callContainer?.wrapper).style
-              .setProperty('max-height', (window.outerHeight - 222) + 'px', 'important');
+          elements.callContainer().style.setProperty('max-height',
+            (window.outerHeight - 222) + 'px', 'important');
           if (document.querySelector('.' + modules.callMembers?.voiceCallWrapper))
             document.querySelector('.' + modules.callMembers?.voiceCallWrapper).style
               .removeProperty('display');
@@ -4233,13 +4433,12 @@ module.exports = class CollapsibleUI {
       }
       else if (!settings.expandOnHoverEnabled[constants.I_CALL_WINDOW]
         || (!(runtime.collapsed[constants.I_CALL_WINDOW])
-        && !(this.isNear(document.querySelector('.' + modules.callContainer?.wrapper), settings.expandOnHoverClosingFudgeFactor, runtime.mouse.x, runtime.mouse.y)))) {
+        && !(this.isNear(elements.callContainer(), settings.expandOnHoverClosingFudgeFactor, runtime.mouse.x, runtime.mouse.y)))) {
         if (runtime.delays[constants.I_CALL_WINDOW]) {
           clearTimeout(runtime.delays[constants.I_CALL_WINDOW]);
           runtime.delays[constants.I_CALL_WINDOW] = false;
         }
-        document.querySelector('.' + modules.callContainer?.wrapper).style
-          .setProperty('max-height', '0px', 'important');
+        elements.callContainer().style.setProperty('max-height', '0px', 'important');
         if (document.querySelector('.' + modules.callMembers?.voiceCallWrapper))
           document.querySelector('.' + modules.callMembers?.voiceCallWrapper).style
             .setProperty('display', 'none', 'important');
@@ -4253,7 +4452,7 @@ module.exports = class CollapsibleUI {
     switch (index) {
       case 0: // constants.I_SERVER_LIST
         this.floatElement(constants.I_SERVER_LIST, false);
-        if (runtime.api.Data.load('server-list-button-active') === 'true') {
+        if (runtime.api.Data.load('server-list-button-active')) {
           elements.serverList.style
             .setProperty('width', settings.collapseSize + 'px', 'important');
           if (runtime.themes.darkMatter) {
@@ -4264,7 +4463,7 @@ module.exports = class CollapsibleUI {
           if (runtime.themes.horizontalServerList) {
             elements.appBase.style.setProperty('top', '0px', 'important');
           }
-          runtime.api.Data.save('server-list-button-active', 'false');
+          runtime.api.Data.save('server-list-button-active', false);
           runtime.buttons[constants.I_SERVER_LIST].classList.remove(modules.icons?.selected);
         }
         else {
@@ -4280,14 +4479,14 @@ module.exports = class CollapsibleUI {
           if (runtime.themes.horizontalServerList) {
             elements.appBase.style.removeProperty('top');
           }
-          runtime.api.Data.save('server-list-button-active', 'true');
+          runtime.api.Data.save('server-list-button-active', true);
           runtime.buttons[constants.I_SERVER_LIST].classList.add(modules.icons?.selected);
         }
         break;
 
       case 1: // constants.I_CHANNEL_LIST
         this.floatElement(constants.I_CHANNEL_LIST, false);
-        if (runtime.api.Data.load('channel-list-button-active') === 'true') {
+        if (runtime.api.Data.load('channel-list-button-active')) {
           elements.channelList.style.transition = 'width ' + settings.transitionSpeed + 'ms';
           elements.channelList.style
             .setProperty('width', settings.collapseSize + 'px', 'important');
@@ -4296,7 +4495,7 @@ module.exports = class CollapsibleUI {
             if (elements.spotifyContainer)
               elements.spotifyContainer.style.setProperty('display', 'none', 'important');
           }
-          runtime.api.Data.save('channel-list-button-active', 'false');
+          runtime.api.Data.save('channel-list-button-active', false);
           runtime.buttons[constants.I_CHANNEL_LIST].classList.remove(modules.icons?.selected);
         }
         else {
@@ -4307,14 +4506,14 @@ module.exports = class CollapsibleUI {
             if (elements.spotifyContainer)
               elements.spotifyContainer.style.removeProperty('display');
           }
-          runtime.api.Data.save('channel-list-button-active', 'true');
+          runtime.api.Data.save('channel-list-button-active', true);
           runtime.buttons[constants.I_CHANNEL_LIST].classList.add(modules.icons?.selected);
         }
         break;
 
       case 2: // constants.I_MEMBERS_LIST
         this.floatElement(constants.I_MEMBERS_LIST, false);
-        if (runtime.api.Data.load('members-list-button-active') === 'true') {
+        if (runtime.api.Data.load('members-list-button-active')) {
           elements.membersList.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
           elements.contentWindow.style
             .setProperty('transition', 'max-width ' + settings.transitionSpeed + 'ms', 'important');
@@ -4324,7 +4523,7 @@ module.exports = class CollapsibleUI {
             .setProperty('min-width', settings.collapseSize + 'px', 'important');
           elements.contentWindow.style
             .setProperty('max-width', 'calc(100% - ' + settings.collapseSize + 'px)', 'important');
-          runtime.api.Data.save('members-list-button-active', 'false');
+          runtime.api.Data.save('members-list-button-active', false);
           runtime.buttons[constants.I_MEMBERS_LIST].classList.remove(modules.icons?.selected);
         }
         else {
@@ -4347,17 +4546,17 @@ module.exports = class CollapsibleUI {
             elements.contentWindow.style
               .setProperty('max-width', 'calc(100% - var(--cui-members-width))', 'important');
           }
-          runtime.api.Data.save('members-list-button-active', 'true');
+          runtime.api.Data.save('members-list-button-active', true);
           runtime.buttons[constants.I_MEMBERS_LIST].classList.add(modules.icons?.selected);
         }
         break;
 
       case 3: // constants.I_USER_PROFILE
         this.floatElement(constants.I_USER_PROFILE, false);
-        if (runtime.api.Data.load('user-profile-button-active') === 'true') {
+        if (runtime.api.Data.load('user-profile-button-active')) {
           elements.userProfile.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
           elements.userProfile.style.setProperty('width', settings.collapseSize + 'px', 'important');
-          runtime.api.Data.save('user-profile-button-active', 'false');
+          runtime.api.Data.save('user-profile-button-active', false);
           runtime.buttons[constants.I_USER_PROFILE].classList.remove(modules.icons?.selected);
         }
         else {
@@ -4366,13 +4565,13 @@ module.exports = class CollapsibleUI {
             elements.userProfile.style.setProperty('width', settings.profilePanelWidth + 'px', 'important');
           else
             elements.userProfile.style.setProperty('width', 'var(--cui-profile-width)', 'important');
-          runtime.api.Data.save('user-profile-button-active', 'true');
+          runtime.api.Data.save('user-profile-button-active', true);
           runtime.buttons[constants.I_USER_PROFILE].classList.add(modules.icons?.selected);
         }
         break;
 
       case 4: // constants.I_MESSAGE_INPUT
-        if (runtime.api.Data.load('message-input-button-active') === 'true') {
+        if (runtime.api.Data.load('message-input-button-active')) {
           if (!(document.querySelector('[data-slate-string="true"]')?.innerHTML)
             && !(document.querySelector('.' + modules.attachments?.channelAttachmentArea))
             && !(document.querySelector('.' + modules.input?.expressionPickerPositionLayer))
@@ -4381,20 +4580,20 @@ module.exports = class CollapsibleUI {
               .setProperty('max-height', settings.collapseSize + 'px', 'important');
             elements.messageInput.style.setProperty('overflow', 'hidden', 'important');
           }
-          runtime.api.Data.save('message-input-button-active', 'false');
+          runtime.api.Data.save('message-input-button-active', false);
           runtime.buttons[constants.I_MESSAGE_INPUT].classList.remove(modules.icons?.selected);
         }
         else {
           elements.messageInput.style
             .setProperty('max-height', settings.messageInputMaxHeight + 'px', 'important');
           elements.messageInput.style.removeProperty('overflow');
-          runtime.api.Data.save('message-input-button-active', 'true');
+          runtime.api.Data.save('message-input-button-active', true);
           runtime.buttons[constants.I_MESSAGE_INPUT].classList.add(modules.icons?.selected);
         }
         break;
 
       case 5: // constants.I_WINDOW_BAR
-        if (runtime.api.Data.load('window-bar-button-active') === 'true') {
+        if (runtime.api.Data.load('window-bar-button-active')) {
           elements.windowBar.style.setProperty('height', '0px', 'important');
           if (runtime.themes.darkMatter)
             elements.windowBar.style.setProperty('opacity', '0', 'important');
@@ -4402,7 +4601,7 @@ module.exports = class CollapsibleUI {
           elements.windowBar.style.setProperty('margin', '0px', 'important');
           elements.windowBar.style.setProperty('overflow', 'hidden', 'important');
           elements.wordMark?.style.setProperty('display', 'none', 'important');
-          runtime.api.Data.save('window-bar-button-active', 'false');
+          runtime.api.Data.save('window-bar-button-active', false);
           runtime.buttons[constants.I_WINDOW_BAR].classList.remove(modules.icons?.selected);
         }
         else {
@@ -4417,51 +4616,46 @@ module.exports = class CollapsibleUI {
           elements.windowBar.style.removeProperty('margin');
           elements.windowBar.style.removeProperty('overflow');
           elements.wordMark?.style.removeProperty('display');
-          runtime.api.Data.save('window-bar-button-active', 'true');
+          runtime.api.Data.save('window-bar-button-active', true);
           runtime.buttons[constants.I_WINDOW_BAR].classList.add(modules.icons?.selected);
         }
         break;
 
       case 6: // constants.I_CALL_WINDOW
-        if (runtime.api.Data.load('call-window-button-active') === 'true') {
-          if (document.querySelector('.' + modules.callContainer?.wrapper)) {
-            document.querySelector('.' + modules.callContainer?.wrapper).style
-              .setProperty('max-height', '0px', 'important');
+        if (runtime.api.Data.load('call-window-button-active')) {
+          if (elements.callContainer()) {
+            elements.callContainer().style.setProperty('max-height', '0px', 'important');
             if (document.querySelector('.' + modules.callMembers?.voiceCallWrapper))
               document.querySelector('.' + modules.callMembers?.voiceCallWrapper).style
                 .setProperty('display', 'none', 'important');
           }
-          runtime.api.Data.save('call-window-button-active', 'false');
+          runtime.api.Data.save('call-window-button-active', false);
           runtime.buttons[constants.I_CALL_WINDOW].classList.remove(modules.icons?.selected);
         }
         else {
-          if (document.querySelector('.' + modules.callContainer?.wrapper)) {
-            if (document.querySelector('.' + modules.guilds?.noChat))
-              document.querySelector('.' + modules.callContainer?.wrapper).style
-                .setProperty('max-height', (window.outerHeight * 2) + 'px', 'important');
-            else
-              document.querySelector('.' + modules.callContainer?.wrapper).style
-                .setProperty('max-height', (window.outerHeight - 222) + 'px', 'important');
+          if (elements.callContainer()) {
+            elements.callContainer().style.setProperty('max-height',
+              (window.outerHeight - 222) + 'px', 'important');
             if (document.querySelector('.' + modules.callMembers?.voiceCallWrapper))
               document.querySelector('.' + modules.callMembers?.voiceCallWrapper).style
                 .removeProperty('display');
           }
-          runtime.api.Data.save('call-window-button-active', 'true');
+          runtime.api.Data.save('call-window-button-active', true);
           runtime.buttons[constants.I_CALL_WINDOW].classList.add(modules.icons?.selected);
         }
         break;
 
       case 7: // constants.I_USER_AREA
-        if (runtime.api.Data.load('user-area-button-active') === 'true') {
+        if (runtime.api.Data.load('user-area-button-active')) {
           elements.userArea.style
             .setProperty('max-height', settings.collapseSize + 'px', 'important');
-          runtime.api.Data.save('user-area-button-active', 'false');
+          runtime.api.Data.save('user-area-button-active', false);
           runtime.buttons[constants.I_USER_AREA].classList.remove(modules.icons?.selected);
         }
         else {
           elements.userArea
             .style.setProperty('max-height', settings.userAreaMaxHeight + 'px', 'important');
-          runtime.api.Data.save('user-area-button-active', 'true');
+          runtime.api.Data.save('user-area-button-active', true);
           runtime.buttons[constants.I_USER_AREA].classList.add(modules.icons?.selected);
         }
         break;

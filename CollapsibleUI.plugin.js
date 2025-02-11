@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 10.0.0
+ * @version 10.0.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -13,19 +13,14 @@
 const config = {
   changelog: [
     {
-      title: '10.0.0',
+      title: '10.0.1',
       type: 'added',
       items: [
-        'Added the ability to resize the search panel',
-        'Added the ability to resize the forum popout',
-        'Fixed boolean settings being stored as strings',
-        'Fixed server voice channel being detected as call window',
-        'Fixed forum channels being cut off when channel/members lists are resized too wide',
-        'WARNING: THIS UPDATE WILL COLLAPSE ALL PANELS',
+        'Fixed settings failing to apply immediately when set',
       ],
     },
     {
-      title: '1.0.0 - 9.1.4',
+      title: '1.0.0 - 10.0.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -809,7 +804,7 @@ module.exports = class CollapsibleUI {
   start = async () => {
     this.getJSON('https://api.github.com/repos/programmer2514/BetterDiscord-CollapsibleUI/releases')
       .then((data) => {
-        if (data[0].tag_name.substring(1) != runtime.meta.version)
+        if (data[0].tag_name.substring(1) !== runtime.meta.version)
           runtime.api.UI.showNotice(`Your version (v${runtime.meta.version}) \
             of CollapsibleUI is outdated and may be missing features! You can \
             either wait for v${data[0].tag_name.substring(1)} to be approved, \
@@ -903,7 +898,7 @@ module.exports = class CollapsibleUI {
         }
 
         // Collapse toolbar buttons
-        if (settings.collapseToolbar !== false)
+        if (settings.collapseToolbar)
           this.collapseToolbarIcons(buttonsActive);
 
         // Fix settings button alignment
@@ -1645,7 +1640,7 @@ module.exports = class CollapsibleUI {
       }
 
       // Add event listeners to the Toolbar Container to update on hover
-      if (settings.collapseToolbar !== false) {
+      if (settings.collapseToolbar) {
         elements.toolbarContainer.addEventListener('mouseenter', () => {
           if (runtime.buttons[constants.I_SERVER_LIST]) {
             runtime.buttons[constants.I_SERVER_LIST].style
@@ -1719,7 +1714,7 @@ module.exports = class CollapsibleUI {
     // Add event listener to detect keyboard shortcuts
     if (settings.keyboardShortcuts) {
       window.addEventListener('keydown', (e) => {
-        if ((e.ctrlKey || e.altKey || e.shiftKey) && (e.key != 'Dead')) {
+        if ((e.ctrlKey || e.altKey || e.shiftKey) && (e.key !== 'Dead')) {
           for (var i = 0; i < settings.buttonIndexes.length; i++) {
             var keyStates = [false, false, false, null];
 
@@ -1732,8 +1727,8 @@ module.exports = class CollapsibleUI {
 
             keyStates[3] = settings.shortcutList[i][settings.shortcutList[i].length - 1].toLowerCase();
 
-            if (e.ctrlKey == keyStates[0] && e.altKey == keyStates[1]
-              && e.shiftKey == keyStates[2] && e.key.toLowerCase() == keyStates[3]) {
+            if (e.ctrlKey === keyStates[0] && e.altKey === keyStates[1]
+              && e.shiftKey === keyStates[2] && e.key.toLowerCase() === keyStates[3]) {
               _this.toggleButton(i);
               e.preventDefault();
             }
@@ -1872,56 +1867,56 @@ module.exports = class CollapsibleUI {
     }
 
     if (runtime.buttons[constants.I_MEMBERS_LIST] && (buttonsActive[constants.I_MEMBERS_LIST]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_MEMBERS_LIST].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_MEMBERS_LIST].style.removeProperty('margin');
       runtime.buttons[constants.I_MEMBERS_LIST].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_WINDOW_BAR] && (buttonsActive[constants.I_WINDOW_BAR]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_WINDOW_BAR].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_WINDOW_BAR].style.removeProperty('margin');
       runtime.buttons[constants.I_WINDOW_BAR].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_MESSAGE_INPUT] && (buttonsActive[constants.I_MESSAGE_INPUT]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_MESSAGE_INPUT].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_MESSAGE_INPUT].style.removeProperty('margin');
       runtime.buttons[constants.I_MESSAGE_INPUT].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_CHANNEL_LIST] && (buttonsActive[constants.I_CHANNEL_LIST]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_CHANNEL_LIST].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_CHANNEL_LIST].style.removeProperty('margin');
       runtime.buttons[constants.I_CHANNEL_LIST].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_SERVER_LIST] && (buttonsActive[constants.I_SERVER_LIST]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_SERVER_LIST].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_SERVER_LIST].style.removeProperty('margin');
       runtime.buttons[constants.I_SERVER_LIST].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_USER_AREA] && (buttonsActive[constants.I_USER_AREA]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_USER_AREA].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_USER_AREA].style.removeProperty('margin');
       runtime.buttons[constants.I_USER_AREA].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_CALL_WINDOW] && (buttonsActive[constants.I_CALL_WINDOW]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_CALL_WINDOW].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_CALL_WINDOW].style.removeProperty('margin');
       runtime.buttons[constants.I_CALL_WINDOW].style.removeProperty('padding');
     }
     else if (runtime.buttons[constants.I_USER_PROFILE] && (buttonsActive[constants.I_USER_PROFILE]
-      == Math.max.apply(Math, buttonsActive))) {
+      === Math.max.apply(Math, buttonsActive))) {
       runtime.buttons[constants.I_USER_PROFILE].style
         .setProperty('max-width', settings.toolbarButtonsMaxWidth + 'px', 'important');
       runtime.buttons[constants.I_USER_PROFILE].style.removeProperty('margin');
@@ -2428,7 +2423,7 @@ module.exports = class CollapsibleUI {
     // Add mutation observer to reload when user closes settings page
     runtime.observers.settings = new MutationObserver((mutationList) => {
       try {
-        if (mutationList[0].target.ariaHidden == false) {
+        if (mutationList[0].target.ariaHidden === 'false') {
           _this.initialize();
           return;
         }
@@ -2955,7 +2950,7 @@ module.exports = class CollapsibleUI {
     try {
       for (var i = 0; i < document.styleSheets.length; i++) {
         try {
-          if (document.styleSheets[i].ownerNode.getAttribute('id') == 'HorizontalServerList-theme-container')
+          if (document.styleSheets[i].ownerNode.getAttribute('id') === 'HorizontalServerList-theme-container')
             runtime.themes.horizontalServerList = true;
         }
         catch {}
@@ -2967,7 +2962,7 @@ module.exports = class CollapsibleUI {
     try {
       for (var i = 0; i < document.styleSheets.length; i++) {
         try {
-          if (document.styleSheets[i].ownerNode.getAttribute('id') == 'Dark-Matter')
+          if (document.styleSheets[i].ownerNode.getAttribute('id') === 'Dark-Matter')
             runtime.themes.darkMatter = true;
         }
         catch {}
@@ -3021,7 +3016,7 @@ module.exports = class CollapsibleUI {
     // Define & add new toolbar icons
     var buttonsActive = settings.buttonIndexes;
     for (var i = 1; i <= settings.buttonIndexes.length; i++) { // lgtm[js/unused-index-variable]
-      if (i == settings.buttonIndexes[constants.I_SERVER_LIST]) {
+      if (i === settings.buttonIndexes[constants.I_SERVER_LIST]) {
         if (settings.buttonIndexes[constants.I_SERVER_LIST]) {
           runtime.buttons[constants.I_SERVER_LIST] = this.addToolbarIcon(runtime.localeLabels.serverList,
             '<path fill="currentColor" d="M18.9,2.5H5.1C2.8,2.5,1,4.3,1,6.6v1'
@@ -3035,7 +3030,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_SERVER_LIST] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_CHANNEL_LIST]) {
+      if (i === settings.buttonIndexes[constants.I_CHANNEL_LIST]) {
         if (settings.buttonIndexes[constants.I_CHANNEL_LIST]) {
           runtime.buttons[constants.I_CHANNEL_LIST] = this.addToolbarIcon(runtime.localeLabels.channelList,
             '<path fill="currentColor" d="M4.1,12c0,0.9-0.7,1.6-1.6,1.6S1,12.'
@@ -3059,7 +3054,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_CHANNEL_LIST] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_MESSAGE_INPUT]) {
+      if (i === settings.buttonIndexes[constants.I_MESSAGE_INPUT]) {
         if (settings.buttonIndexes[constants.I_MESSAGE_INPUT] && elements.messageInput) {
           runtime.buttons[constants.I_MESSAGE_INPUT] = this.addToolbarIcon(runtime.localeLabels.messageInput,
             '<path fill="currentColor" d="M7.5,3c0-0.4,0.3-0.8,0.8-0.8c1.3,0,'
@@ -3087,7 +3082,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_MESSAGE_INPUT] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_WINDOW_BAR]) {
+      if (i === settings.buttonIndexes[constants.I_WINDOW_BAR]) {
         if (settings.buttonIndexes[constants.I_WINDOW_BAR] && elements.windowBar
           && !(runtime.api.Plugins.isEnabled('OldTitleBar'))) {
           runtime.buttons[constants.I_WINDOW_BAR] = this.addToolbarIcon(runtime.localeLabels.windowBar,
@@ -3111,7 +3106,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_WINDOW_BAR] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_MEMBERS_LIST]) {
+      if (i === settings.buttonIndexes[constants.I_MEMBERS_LIST]) {
         if (settings.buttonIndexes[constants.I_MEMBERS_LIST] && elements.membersList) {
           runtime.buttons[constants.I_MEMBERS_LIST] = this.addToolbarIcon(runtime.localeLabels.membersList,
             '<path fill="currentColor" d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.'
@@ -3130,7 +3125,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_MEMBERS_LIST] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_USER_AREA]) {
+      if (i === settings.buttonIndexes[constants.I_USER_AREA]) {
         if (settings.buttonIndexes[constants.I_USER_AREA] && elements.userArea) {
           runtime.buttons[constants.I_USER_AREA] = this.addToolbarIcon(runtime.localeLabels.userArea,
             '<path fill="currentColor" d="M21.2,7.6H2.8C1.3,7.6,0,8.8,0,10.3v'
@@ -3151,7 +3146,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_USER_AREA] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_CALL_WINDOW]) {
+      if (i === settings.buttonIndexes[constants.I_CALL_WINDOW]) {
         if (settings.buttonIndexes[constants.I_CALL_WINDOW]
           && elements.callContainer()) {
           runtime.buttons[constants.I_CALL_WINDOW] = this.addToolbarIcon(runtime.localeLabels.callWindow,
@@ -3170,7 +3165,7 @@ module.exports = class CollapsibleUI {
           buttonsActive[constants.I_CALL_WINDOW] = 0;
         }
       }
-      if (i == settings.buttonIndexes[constants.I_USER_PROFILE]) {
+      if (i === settings.buttonIndexes[constants.I_USER_PROFILE]) {
         if (settings.buttonIndexes[constants.I_USER_PROFILE] && elements.userProfile) {
           runtime.buttons[constants.I_USER_PROFILE] = this.addToolbarIcon(runtime.localeLabels.userProfile,
             '<path fill="currentColor" fill-rule="evenodd" d="M23 12.38c-.02.'
@@ -3385,7 +3380,7 @@ module.exports = class CollapsibleUI {
           else if (runtime.api.Data.load('members-list-button-active')) {
             if (runtime.buttons[constants.I_MEMBERS_LIST])
               runtime.buttons[constants.I_MEMBERS_LIST].classList.add(modules.icons?.selected);
-            if (settings.membersListWidth != 0) {
+            if (settings.membersListWidth !== 0) {
               elements.membersList.style
                 .setProperty('width', settings.membersListWidth + 'px', 'important');
               elements.membersList.style
@@ -3406,7 +3401,7 @@ module.exports = class CollapsibleUI {
             runtime.api.Data.save('members-list-button-active', true);
             if (runtime.buttons[constants.I_MEMBERS_LIST])
               runtime.buttons[constants.I_MEMBERS_LIST].classList.add(modules.icons?.selected);
-            if (settings.membersListWidth != 0) {
+            if (settings.membersListWidth !== 0) {
               elements.membersList.style
                 .setProperty('width', settings.membersListWidth + 'px', 'important');
               elements.membersList.style
@@ -3445,7 +3440,7 @@ module.exports = class CollapsibleUI {
           else if (runtime.api.Data.load('user-profile-button-active')) {
             if (runtime.buttons[constants.I_USER_PROFILE])
               runtime.buttons[constants.I_USER_PROFILE].classList.add(modules.icons?.selected);
-            if (settings.profilePanelWidth != 0)
+            if (settings.profilePanelWidth !== 0)
               elements.userProfile.style
                 .setProperty('width', settings.profilePanelWidth + 'px', 'important');
             else
@@ -3456,7 +3451,7 @@ module.exports = class CollapsibleUI {
             runtime.api.Data.save('user-profile-button-active', true);
             if (runtime.buttons[constants.I_USER_PROFILE])
               runtime.buttons[constants.I_USER_PROFILE].classList.add(modules.icons?.selected);
-            if (settings.profilePanelWidth != 0)
+            if (settings.profilePanelWidth !== 0)
               elements.userProfile.style
                 .setProperty('width', settings.profilePanelWidth + 'px', 'important');
             else
@@ -3571,7 +3566,7 @@ module.exports = class CollapsibleUI {
 
       if (elements.fullscreenButton) {
         elements.fullscreenButton.addEventListener('click', () => {
-          if (document.fullscreenElement != null)
+          if (document.fullscreenElement !== null)
             elements.channelList.style.setProperty('max-width', '80vw', 'important');
           else
             elements.channelList.style.setProperty('max-width', '0px', 'important');
@@ -3601,14 +3596,14 @@ module.exports = class CollapsibleUI {
         try {
           if (((!runtime.collapsed[constants.I_CHANNEL_LIST])
             || (runtime.api.Data.load('channel-list-button-active')))
-            && document.fullscreenElement == null) {
+            && document.fullscreenElement === null) {
             var oldChannelListWidth = settings.channelListWidth;
             if (parseInt(elements.channelList.style.width)) {
               settings.channelListWidth = parseInt(elements.channelList.style.width);
               elements.channelList.style
                 .setProperty('width', settings.channelListWidth + 'px', 'important');
             }
-            else if (settings.channelListWidth != 0) {
+            else if (settings.channelListWidth !== 0) {
               elements.channelList.style.setProperty('transition', 'none', 'important');
               elements.channelList.style
                 .setProperty('width', settings.channelListWidth + 'px', 'important');
@@ -3618,7 +3613,7 @@ module.exports = class CollapsibleUI {
             else {
               elements.channelList.style.removeProperty('width');
             }
-            if (oldChannelListWidth != settings.channelListWidth)
+            if (oldChannelListWidth !== settings.channelListWidth)
               runtime.api.Data.save('channel-list-width', settings.channelListWidth);
           }
         }
@@ -3632,7 +3627,7 @@ module.exports = class CollapsibleUI {
     }
     if (((!runtime.collapsed[constants.I_CHANNEL_LIST])
       || (runtime.api.Data.load('channel-list-button-active')))
-      && settings.channelListWidth != 0) {
+      && settings.channelListWidth !== 0) {
       elements.channelList.style.setProperty('transition', 'none', 'important');
       elements.channelList.style
         .setProperty('width', settings.channelListWidth + 'px', 'important');
@@ -3694,7 +3689,7 @@ module.exports = class CollapsibleUI {
 
         if (elements.fullscreenButton) {
           elements.fullscreenButton.addEventListener('click', () => {
-            if (document.fullscreenElement != null)
+            if (document.fullscreenElement !== null)
               elements.membersList.style.setProperty('max-width', '80vw', 'important');
             else
               elements.membersList.style.setProperty('max-width', '0px', 'important');
@@ -3734,7 +3729,7 @@ module.exports = class CollapsibleUI {
           try {
             if (((!runtime.collapsed[constants.I_MEMBERS_LIST])
               || (runtime.api.Data.load('members-list-button-active')))
-              && document.fullscreenElement == null) {
+              && document.fullscreenElement === null) {
               var oldMembersListWidth = settings.membersListWidth;
               if (parseInt(elements.membersList.style.width)) {
                 settings.membersListWidth = parseInt(elements.membersList.style.width);
@@ -3750,7 +3745,7 @@ module.exports = class CollapsibleUI {
                   elements.contentWindow.style
                     .setProperty('max-width', '100%', 'important');
               }
-              else if (settings.membersListWidth != 0) {
+              else if (settings.membersListWidth !== 0) {
                 elements.membersList.style.setProperty('transition', 'none', 'important');
                 elements.contentWindow.style.setProperty('transition', 'none', 'important');
                 elements.membersList.style
@@ -3767,7 +3762,7 @@ module.exports = class CollapsibleUI {
                 elements.contentWindow.style
                   .setProperty('transition', 'max-width ' + settings.transitionSpeed + 'ms', 'important');
               }
-              if (oldMembersListWidth != settings.membersListWidth)
+              if (oldMembersListWidth !== settings.membersListWidth)
                 runtime.api.Data.save('members-list-width', settings.membersListWidth);
             }
           }
@@ -3781,7 +3776,7 @@ module.exports = class CollapsibleUI {
       }
       if (((!runtime.collapsed[constants.I_MEMBERS_LIST])
         || (runtime.api.Data.load('members-list-button-active')))
-        && settings.membersListWidth != 0) {
+        && settings.membersListWidth !== 0) {
         elements.membersList.style.setProperty('transition', 'none', 'important');
         elements.contentWindow.style.setProperty('transition', 'none', 'important');
         elements.membersList.style
@@ -3827,7 +3822,7 @@ module.exports = class CollapsibleUI {
 
         if (elements.fullscreenButton) {
           elements.fullscreenButton.addEventListener('click', () => {
-            if (document.fullscreenElement != null)
+            if (document.fullscreenElement !== null)
               elements.userProfile.style.setProperty('max-width', '80vw', 'important');
             else
               elements.userProfile.style.setProperty('max-width', '0px', 'important');
@@ -3856,20 +3851,20 @@ module.exports = class CollapsibleUI {
           try {
             if (((!runtime.collapsed[constants.I_USER_PROFILE])
               || (runtime.api.Data.load('user-profile-button-active')))
-              && document.fullscreenElement == null) {
+              && document.fullscreenElement === null) {
               var oldProfilePanelWidth = settings.profilePanelWidth;
               if (parseInt(elements.userProfile.style.width)) {
                 settings.profilePanelWidth = parseInt(elements.userProfile.style.width);
                 elements.userProfile.style
                   .setProperty('width', settings.profilePanelWidth + 'px', 'important');
               }
-              else if (settings.profilePanelWidth != 0) {
+              else if (settings.profilePanelWidth !== 0) {
                 elements.userProfile.style.setProperty('transition', 'none', 'important');
                 elements.userProfile.style
                   .setProperty('width', settings.profilePanelWidth + 'px', 'important');
                 elements.userProfile.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
               }
-              if (oldProfilePanelWidth != settings.profilePanelWidth)
+              if (oldProfilePanelWidth !== settings.profilePanelWidth)
                 runtime.api.Data.save('profile-panel-width', settings.profilePanelWidth);
             }
           }
@@ -3883,7 +3878,7 @@ module.exports = class CollapsibleUI {
       }
       if (((!runtime.collapsed[constants.I_USER_PROFILE])
         || (runtime.api.Data.load('user-profile-button-active')))
-        && settings.profilePanelWidth != 0) {
+        && settings.profilePanelWidth !== 0) {
         elements.userProfile.style.setProperty('transition', 'none', 'important');
         elements.userProfile.style.setProperty('width', settings.profilePanelWidth + 'px', 'important');
       }
@@ -3936,11 +3931,11 @@ module.exports = class CollapsibleUI {
               elements.searchPanel.style
                 .setProperty('width', settings.searchPanelWidth + 'px', 'important');
             }
-            else if (settings.searchPanelWidth != 0) {
+            else if (settings.searchPanelWidth !== 0) {
               elements.searchPanel.style
                 .setProperty('width', settings.searchPanelWidth + 'px', 'important');
             }
-            if (oldSearchPanelWidth != settings.searchPanelWidth)
+            if (oldSearchPanelWidth !== settings.searchPanelWidth)
               runtime.api.Data.save('search-panel-width', settings.searchPanelWidth);
           }
           catch (e) {
@@ -3951,7 +3946,7 @@ module.exports = class CollapsibleUI {
         });
         runtime.observers.resize.searchPanel.observe(elements.searchPanel, { attributeFilter: ['style'] });
       }
-      if (settings.searchPanelWidth != 0) {
+      if (settings.searchPanelWidth !== 0) {
         elements.searchPanel.style.setProperty('width', settings.searchPanelWidth + 'px', 'important');
       }
     }
@@ -4006,13 +4001,13 @@ module.exports = class CollapsibleUI {
               elements.forumPopoutTarget.style.setProperty('width',
                 settings.forumPopoutWidth + 'px', 'important');
             }
-            else if (settings.forumPopoutWidth != 0) {
+            else if (settings.forumPopoutWidth !== 0) {
               elements.forumPopout.style.setProperty('width',
                 settings.forumPopoutWidth + 'px', 'important');
               elements.forumPopoutTarget.style.setProperty('width',
                 settings.forumPopoutWidth + 'px', 'important');
             }
-            if (oldForumPopoutWidth != settings.forumPopoutWidth)
+            if (oldForumPopoutWidth !== settings.forumPopoutWidth)
               runtime.api.Data.save('forum-popout-width', settings.forumPopoutWidth);
           }
           catch (e) {
@@ -4027,7 +4022,7 @@ module.exports = class CollapsibleUI {
       document.querySelector('.' + modules.threads?.container).style
         .setProperty('max-width', '100%', 'important');
 
-      if (settings.forumPopoutWidth != 0) {
+      if (settings.forumPopoutWidth !== 0) {
         elements.forumPopout.style.setProperty('width', settings.forumPopoutWidth + 'px', 'important');
         elements.forumPopoutTarget.style.setProperty('width', settings.forumPopoutWidth + 'px', 'important');
       }
@@ -4045,7 +4040,7 @@ module.exports = class CollapsibleUI {
       elements.callContainer().style.transition = 'max-height ' + settings.transitionSpeed + 'ms';
       window.addEventListener('resize', (e) => {
         try {
-          if (elements.callContainer().style.maxHeight != '0px') {
+          if (elements.callContainer().style.maxHeight !== '0px') {
             elements.callContainer().style.setProperty('max-height',
               (window.outerHeight * 2) + 'px', 'important');
           }
@@ -4104,7 +4099,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Toolbar Container
-    if (settings.collapseToolbar !== false) {
+    if (settings.collapseToolbar) {
       if (!this.isNear(elements.toolbarContainer, settings.buttonCollapseFudgeFactor, runtime.mouse.x, runtime.mouse.y))
 
         this.collapseToolbarIcons(buttonsActive);
@@ -4300,7 +4295,7 @@ module.exports = class CollapsibleUI {
           elements.membersList.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
           elements.contentWindow.style
             .setProperty('transition', 'max-width ' + settings.transitionSpeed + 'ms', 'important');
-          if (settings.membersListWidth != 0) {
+          if (settings.membersListWidth !== 0) {
             elements.membersList.style
               .setProperty('width', settings.membersListWidth + 'px', 'important');
             elements.membersList.style
@@ -4362,7 +4357,7 @@ module.exports = class CollapsibleUI {
         }
         runtime.delays[constants.I_USER_PROFILE] = setTimeout(() => {
           elements.userProfile.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
-          if (settings.profilePanelWidth != 0)
+          if (settings.profilePanelWidth !== 0)
             elements.userProfile.style.setProperty('width', settings.profilePanelWidth + 'px', 'important');
           else
             elements.userProfile.style.setProperty('width', 'var(--cui-profile-width)', 'important');
@@ -4530,7 +4525,7 @@ module.exports = class CollapsibleUI {
           elements.membersList.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
           elements.contentWindow.style
             .setProperty('transition', 'max-width ' + settings.transitionSpeed + 'ms', 'important');
-          if (settings.membersListWidth != 0) {
+          if (settings.membersListWidth !== 0) {
             elements.membersList.style
               .setProperty('width', settings.membersListWidth + 'px', 'important');
             elements.membersList.style
@@ -4561,7 +4556,7 @@ module.exports = class CollapsibleUI {
         }
         else {
           elements.userProfile.style.transition = 'width ' + settings.transitionSpeed + 'ms, min-width ' + settings.transitionSpeed + 'ms';
-          if (settings.profilePanelWidth != 0)
+          if (settings.profilePanelWidth !== 0)
             elements.userProfile.style.setProperty('width', settings.profilePanelWidth + 'px', 'important');
           else
             elements.userProfile.style.setProperty('width', 'var(--cui-profile-width)', 'important');
@@ -4679,7 +4674,7 @@ module.exports = class CollapsibleUI {
         .forEach(e => dmNotifs += parseInt(e.innerHTML));
 
       // Return if a new notification doesn't need to be created
-      if (clear || (dmNotifs == 0)) return;
+      if (clear || (dmNotifs === 0)) return;
 
       // Create new notification
       var dmBadge = document.createElement('div');

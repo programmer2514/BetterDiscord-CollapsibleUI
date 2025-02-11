@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v10.0.1:
+* Fixed settings failing to apply immediately when set
+
 ### v10.0.0:
 * Added the ability to resize the search panel
 * Added the ability to resize the forum popout

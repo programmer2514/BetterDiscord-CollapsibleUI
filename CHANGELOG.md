@@ -1,5 +1,24 @@
 # CollapsibleUI Patch Notes
 
+### v11.0.0:
+* Completely re-wrote plugin from the ground up for performance and stability
+* Switched away from direct DOM manipulation wherever possible
+* Refactored style routines to reduce reliance on MutationObservers
+* Plugin now caches settings and Webpack modules to decrease load times
+* Settings update routines have been changed to reduce the number of disk writes
+* Keyboard shortcuts can now be whatever you want and are not limited to standard patterns
+* Size Collapse has been rewritten using media queries and now does not affect button states
+* Expand on Hover is no longer a requirement for Size Collapse (though it is still recommended)
+* Plugin now relies on significantly fewer webpack modules
+* Fixed showing multiple update notifications if plugin is toggled without reloading Discord
+* Fixed inconsistent Size Collapse when snapping window dimensions in Windows
+* Fixed panels jumping open during transitions on some low-end devices
+* Fixed forum popup resizing inconsistently with other UI elements
+* Improved out-of-the-box compatibility with other plugins
+* Moved Unread DMs Badge feature to its own plugin
+* Greatly increased plugin's overall performance
+* Updated settings panel layout
+
 ### v10.0.1:
 * Fixed settings failing to apply immediately when set
 

@@ -9,7 +9,9 @@
 * Keyboard shortcuts can now be whatever you want and are not limited to standard patterns
 * Size Collapse has been rewritten using media queries and now does not affect button states
 * Expand on Hover is no longer a requirement for Size Collapse (though it is still recommended)
-* Plugin now relies on significantly fewer webpack modules
+* Resizable panels can now be resized by clicking-and-dragging anywhere on the edge of the panel
+* The activities panel in the friends list can now be resized
+* Plugin now relies on fewer webpack modules
 * Fixed showing multiple update notifications if plugin is toggled without reloading Discord
 * Fixed inconsistent Size Collapse when snapping window dimensions in Windows
 * Fixed panels jumping open during transitions on some low-end devices

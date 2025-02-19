@@ -96,8 +96,8 @@ const settings = {
   get messageInputButtonWidth() { return this._messageInputButtonWidth ?? (this._messageInputButtonWidth = runtime.api.Data.load('message-input-button-width') ?? 40); },
   set messageInputButtonWidth(v) { runtime.api.Data.save('message-input-button-width', this._messageInputButtonWidth = v); },
 
-  get toolbarMaxWidth() { return this._toolbarMaxWidth ?? (this._toolbarMaxWidth = runtime.api.Data.load('toolbar-max-width') ?? 800); },
-  set toolbarMaxWidth(v) { runtime.api.Data.save('toolbar-max-width', this._toolbarMaxWidth = v); },
+  get toolbarElementMaxWidth() { return this._toolbarElementMaxWidth ?? (this._toolbarElementMaxWidth = runtime.api.Data.load('toolbar-element-max-width') ?? 400); },
+  set toolbarElementMaxWidth(v) { runtime.api.Data.save('toolbar-element-max-width', this._toolbarElementMaxWidth = v); },
 
   get userAreaMaxHeight() { return this._userAreaMaxHeight ?? (this._userAreaMaxHeight = runtime.api.Data.load('user-area-max-height') ?? 300); },
   set userAreaMaxHeight(v) { runtime.api.Data.save('user-area-max-height', this._userAreaMaxHeight = v); },
@@ -157,7 +157,9 @@ const config = {
         'Keyboard shortcuts can now be whatever you want and are not limited to standard patterns',
         'Size Collapse has been rewritten using media queries and now does not affect button states',
         'Expand on Hover is no longer a requirement for Size Collapse (though it is still recommended)',
-        'Plugin now relies on significantly fewer webpack modules',
+        'Resizable panels can now be resized by clicking-and-dragging anywhere on the edge of the panel',
+        'The activities panel in the friends list can now be resized',
+        'Plugin now relies on fewer webpack modules',
         'Fixed showing multiple update notifications if plugin is toggled without reloading Discord',
         'Fixed inconsistent Size Collapse when snapping window dimensions in Windows',
         'Fixed panels jumping open during transitions on some low-end devices',
@@ -168,6 +170,7 @@ const config = {
         'Updated settings panel layout',
         'THIS UPDATE RESETS MANY OF YOUR SETTINGS TO DEFAULT',
         'TO MINIMIZE BUGS, PLEASE DELETE THE FILE "CollapsibleUI.config.json" IN YOUR PLUGINS FOLDER',
+        'RE-WRITE MAY INTRODUCE REGRESSIONS - PLEASE REPORT ANY NEW ISSUES VIA GITHUB',
       ],
     },
     {
@@ -409,35 +412,35 @@ const config = {
           type: 'switch',
           id: 'resizable-channel-list',
           name: 'Resizable Channel List',
-          note: 'Resize the channel list by clicking-and-dragging the bottom-right corner. Right-click to reset width',
+          note: 'Resize the channel list by clicking-and-dragging right edge. Right-click to reset width',
           get value() { return settings.channelListWidth !== 0; },
         },
         {
           type: 'switch',
           id: 'resizable-members-list',
           name: 'Resizable Members List',
-          note: 'Resize the members list by clicking-and-dragging the bottom-left corner. Right-click to reset width',
+          note: 'Resize the members list by clicking-and-dragging the left edge. Right-click to reset width',
           get value() { return settings.membersListWidth !== 0; },
         },
         {
           type: 'switch',
           id: 'resizable-user-profile',
           name: 'Resizable User Profile',
-          note: 'Resize the user profile in DMs by clicking-and-dragging the bottom-left corner. Right-click to reset width',
+          note: 'Resize the user profile in DMs by clicking-and-dragging the left edge. Right-click to reset width',
           get value() { return settings.userProfileWidth !== 0; },
         },
         {
           type: 'switch',
           id: 'resizable-search-panel',
           name: 'Resizable Search Panel',
-          note: 'Resize the message search panel by clicking-and-dragging the bottom-left corner. Right-click to reset width',
+          note: 'Resize the message search panel by clicking-and-dragging the left edge. Right-click to reset width',
           get value() { return settings.searchPanelWidth !== 0; },
         },
         {
           type: 'switch',
           id: 'resizable-forum-popout',
           name: 'Resizable Forum Popout',
-          note: 'Resize the thread popup in forum channels by clicking-and-dragging the bottom-left corner. Right-click to reset width',
+          note: 'Resize the thread popup in forum channels by clicking-and-dragging the left edge. Right-click to reset width',
           get value() { return settings.forumPopoutWidth !== 0; },
         },
       ],
@@ -702,10 +705,10 @@ const config = {
         },
         {
           type: 'number',
-          id: 'toolbarMaxWidth',
-          name: 'Toolbar - Max Width (px)',
-          note: 'The maximum width of the toolbar when expanded',
-          get value() { return settings.toolbarMaxWidth; },
+          id: 'toolbarElementMaxWidth',
+          name: 'Toolbar Elements - Max Width (px)',
+          note: 'The maximum width of the full toolbar\'s elements when expanded',
+          get value() { return settings.toolbarElementMaxWidth; },
         },
         {
           type: 'number',
@@ -1085,25 +1088,6 @@ const icons = {
   userArea: '<path fill="currentColor" d="M21.2,7.6H2.8C1.3,7.6,0,8.8,0,10.3v3.3c0,1.5,1.3,2.8,2.8,2.8h18.4c1.5,0,2.8-1.3,2.8-2.8v-3.3C24,8.8,22.7,7.6,21.2,7.6z M17.4,10.7c0.7,0,1.3,0.6,1.3,1.3s-0.6,1.3-1.3,1.3s-1.3-0.6-1.3-1.3S16.7,10.7,17.4,10.7z M3.9,10.1c1.1,0,1.9,0.9,1.9,1.9S5,13.9,3.9,13.9S2,13.1,2,12S2.9,10.1,3.9,10.1z M20.7,10.7c0.7,0,1.3,0.6,1.3,1.3s-0.6,1.3-1.3,1.3s-1.3-0.6-1.3-1.3S20,10.7,20.7,10.7z M6.5,10.8C6.5,10.8,6.5,10.8,6.5,10.8c0-0.4,0.3-0.7,0.8-0.7h6.3c0.4,0,0.7,0.3,0.8,0.7c0,0,0,0,0,0v0c0,0.4-0.3,0.8-0.8,0.8H7.2C6.8,11.6,6.5,11.2,6.5,10.8L6.5,10.8z M7.2,12.4h6.3c0.4,0,0.8,0.3,0.8,0.8c0,0,0,0,0,0.1c0,0.4-0.4,0.7-0.7,0.7H7.2c-0.4,0-0.7-0.3-0.7-0.7c0,0,0,0,0-0.1C6.5,12.8,6.8,12.4,7.2,12.4z"/>',
 };
 
-// Declare runtime object structure
-const runtime = {
-  meta: null,
-  api: null,
-  plugin: null,
-  notice: null,
-  toolbar: null,
-  dragging: null,
-  get controller() {
-    if (this._controller && this._controller.signal.aborted) this._controller = null;
-    return this._controller ?? (this._controller = new AbortController());
-  },
-  keys: new Set(),
-  lastKeypress: Date.now(),
-  interval: null,
-  threadsLoaded: false,
-  collapsed: [false, false, false, false, false, false, false, false],
-};
-
 // Define button index constants
 const constants = {
   I_SERVER_LIST: 0,
@@ -1132,6 +1116,10 @@ const modules = {
   get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
   get layout() { return this._layout ?? (this._layout = runtime.api.Webpack.getByKeys('flex', 'horizontal', 'flexChild')); },
   get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton')); },
+  get floating() { return this._floating ?? (this._floating = runtime.api.Webpack.getByKeys('container', 'floating', 'chatTarget')); },
+  get sidebar() { return this._sidebar ?? (this._sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded')); },
+  get servers() { return this._servers ?? (this._servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'discoveryIcon')); },
+  get effects() { return this._effects ?? (this._effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect')); },
 };
 
 const elements = {
@@ -1146,17 +1134,59 @@ const elements = {
   get callWindow() { return document.querySelector(`.${modules.callWindow?.wrapper}:not(.${modules.callWindow?.noChat})`); },
   get settingsContainer() { return document.querySelector(`.${modules.user?.container} .${modules.layout?.flex}`); },
   get messageInputContainer() { return document.querySelector(`.${modules.input?.buttons}`); },
+  get forumPopout() { return document.querySelector(`.${modules.floating?.floating}:not(.${modules.floating?.chatTarget.split(' ')[0]})`); },
+  get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
+  get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
+  get serverList() { return document.querySelector(`.${modules.servers?.wrapper}`); },
+  get channelList() { return document.querySelector(`.${modules.sidebar?.sidebar}`); },
   get index() {
     return [
-      null,
-      null,
+      this.serverList,
+      this.channelList,
       this.membersList,
       this.userProfile,
       this.messageInput,
       this.windowBar,
       this.callWindow,
-      null,
+      this.userArea,
     ];
+  },
+};
+
+// Declare runtime object structure
+const runtime = {
+  meta: null,
+  api: null,
+  plugin: null,
+  notice: null,
+  toolbar: null,
+  dragging: null,
+  interval: null,
+  threadsLoaded: false,
+  collapsed: [false, false, false, false, false, false, false, false],
+  keys: new Set(),
+  lastKeypress: Date.now(),
+  get controller() {
+    if (this._controller && this._controller.signal.aborted) this._controller = null;
+    return this._controller ?? (this._controller = new AbortController());
+  },
+  get observer() {
+    return this._observer ?? (this._observer = new MutationObserver((mutationList) => {
+      mutationList.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.classList?.contains(modules.panel?.outer)) {
+            this.plugin.reloadToolbar();
+            styles.reinit();
+          }
+        });
+        mutation.removedNodes.forEach((node) => {
+          if (node.classList?.contains(modules.panel?.outer)) {
+            this.plugin.reloadToolbar();
+            styles.reinit();
+          }
+        });
+      });
+    }));
   },
 };
 
@@ -1164,7 +1194,6 @@ const elements = {
 const styleFunctions = {
   _toggled: true,
   init: function () {
-    runtime.api.DOM.removeStyle(this._init[0]);
     runtime.api.DOM.addStyle(...this._init);
   },
   toggle: function () {
@@ -1179,23 +1208,23 @@ const styleFunctions = {
     else {
       if (this._toggled) {
         runtime.api.DOM.addStyle(`${this._toggle[0]}_dynamic`, this._toggle[1]);
-        runtime.api.DOM.addStyle(...this._float);
+        if (settings.floatingPanels) runtime.api.DOM.addStyle(...this._float);
       }
       else {
         runtime.api.DOM.removeStyle(`${this._toggle[0]}_dynamic`);
-        runtime.api.DOM.removeStyle(this._float[0]);
+        if (settings.floatingPanels) runtime.api.DOM.removeStyle(this._float[0]);
       }
     }
     this._toggled = !this._toggled;
   },
   float: function () {
-    runtime.api.DOM.removeStyle(this._float[0]);
     runtime.api.DOM.addStyle(...this._float);
   },
   clear: function () {
     runtime.api.DOM.removeStyle(this._init[0]);
     runtime.api.DOM.removeStyle(this._toggle[0]);
     runtime.api.DOM.removeStyle(this._float[0]);
+    if (this._clear) this._clear();
     this._toggled = true;
   },
 };
@@ -1219,6 +1248,12 @@ const styles = {
         
         `];
       },
+      get query() { return ``; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-serverList_queryToggle`, `
+        
+        `];
+      },
       ...styleFunctions,
     },
     {
@@ -1238,6 +1273,12 @@ const styles = {
         
         `];
       },
+      get query() { return ``; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-channelList_queryToggle`, `
+        
+        `];
+      },
       ...styleFunctions,
     },
     {
@@ -1249,23 +1290,32 @@ const styles = {
             width: ${settings.membersListWidth || settings.defaultMembersListWidth}px;
             min-width: 1px !important;
             transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
-            transform: scaleX(-1) !important;
-            ${(settings.membersListWidth) ? 'resize: horizontal !important;' : ''}
             overflow: hidden !important;
             flex-basis: auto !important;
             min-height: 100% !important;
           }
           .${modules.members?.membersWrap} > * {
             width: 100% !important;
-            transform: scaleX(-1) !important;
           }
           .${modules.members?.membersWrap} * {
             max-width: 100% !important;
           }
-          
+          ${(settings.membersListWidth)
+            ? `
+              .${modules.members?.membersWrap}:before {
+                cursor: e-resize;
+                z-index: 200;
+                position: absolute;
+                content: "";
+                width: 8px;
+                height: 100%;
+                left: 0;
+              }
+            `
+            : ''}
           ${(settings.sizeCollapse)
             ? `
-              @media (max-width: ${settings.sizeCollapseThreshold[constants.I_MEMBERS_LIST]}px) {
+              @media ${this.query} {
                 ${this._toggle[1]}
               }
             `
@@ -1281,7 +1331,27 @@ const styles = {
       },
       get _float() {
         return [`${runtime.meta.name}-membersList_float`, `
-        
+          .${modules.members?.membersWrap} {
+            position: absolute !important;
+            z-index: 190 !important;
+            max-height: 100% !important;
+            height: 100% !important;
+            right: 0 !important;
+          }
+        `];
+      },
+      get query() { return `(max-width: ${settings.sizeCollapseThreshold[constants.I_MEMBERS_LIST]}px)`; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-membersList_queryToggle`, `
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                .${modules.members?.membersWrap} {
+                  max-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
+                }
+              }
+            `
+            : ''}
         `];
       },
       ...styleFunctions,
@@ -1289,19 +1359,90 @@ const styles = {
     {
       _index: constants.I_USER_PROFILE,
       get _init() {
+        if (document.querySelector(`.${modules.panel?.outer} header > svg`)) document.querySelector(`.${modules.panel?.outer} header > svg`).style.maxHeight = document.querySelector(`.${modules.panel?.outer} header > svg`).style.minHeight;
+        document.querySelector(`.${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '500%');
+        document.querySelector(`.${modules.panel?.outer} header > svg`)?.removeAttribute('viewBox');
         return [`${runtime.meta.name}-userProfile_init`, `
-        
+          .${modules.panel?.outer}.${modules.panel?.panel} {
+            max-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
+            width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px;
+            min-width: 1px !important;
+            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
+            overflow: hidden !important;
+            flex-basis: auto !important;
+            min-height: 100% !important;
+          }
+          .${modules.panel?.outer}.${modules.panel?.panel} > * {
+            width: 100% !important;
+          }
+          .${modules.panel?.outer}.${modules.panel?.panel} header > svg {
+            min-width: 100% !important;
+          }
+          .${modules.panel?.outer}.${modules.panel?.panel} header > svg > mask > rect {
+            width: 500% !important;
+          }
+          .${modules.panel?.outer}.${modules.panel?.panel} .${modules.effects?.effect} {
+            min-height: 100% !important;
+          }
+          ${(settings.userProfileWidth)
+            ? `
+              .${modules.panel?.outer}.${modules.panel?.panel}:before {
+                cursor: e-resize;
+                z-index: 200;
+                position: absolute;
+                content: "";
+                width: 8px;
+                height: 100%;
+                left: 0;
+              }
+            `
+            : ''}
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                ${this._toggle[1]}
+              }
+            `
+            : ''}
         `];
       },
       get _toggle() {
         return [`${runtime.meta.name}-userProfile_toggle`, `
-        
+          .${modules.panel?.outer}.${modules.panel?.panel} {
+            max-width: ${settings.collapseSize}px !important;
+          }
         `];
       },
       get _float() {
         return [`${runtime.meta.name}-userProfile_float`, `
-        
+          .${modules.panel?.outer}.${modules.panel?.panel} {
+            position: absolute !important;
+            z-index: 190 !important;
+            max-height: 100% !important;
+            height: 100% !important;
+            right: 0 !important;
+            //background: var(--background-secondary-alt) !important;
+          }
         `];
+      },
+      get query() { return `(max-width: ${settings.sizeCollapseThreshold[constants.I_USER_PROFILE]}px)`; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-userProfile_queryToggle`, `
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                .${modules.panel?.outer}.${modules.panel?.panel} {
+                  max-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
+                }
+              }
+            `
+            : ''}
+        `];
+      },
+      _clear: function () {
+        document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.removeProperty('max-height');
+        document.querySelector(`.${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '100%');
+        document.querySelector(`.${modules.panel?.outer} header > svg`)?.setAttribute('viewBox', `0 0 ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minWidth)} ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minHeight)}`);
       },
       ...styleFunctions,
     },
@@ -1322,6 +1463,12 @@ const styles = {
         
         `];
       },
+      get query() { return ``; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-messageInput_queryToggle`, `
+        
+        `];
+      },
       ...styleFunctions,
     },
     {
@@ -1338,6 +1485,12 @@ const styles = {
       },
       get _float() {
         return [`${runtime.meta.name}-windowBar_float`, ''];
+      },
+      get query() { return ``; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-windowBar_queryToggle`, `
+        
+        `];
       },
       ...styleFunctions,
     },
@@ -1356,6 +1509,12 @@ const styles = {
       get _float() {
         return [`${runtime.meta.name}-callWindow_float`, ''];
       },
+      get query() { return ``; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-callWindow_queryToggle`, `
+        
+        `];
+      },
       ...styleFunctions,
     },
     {
@@ -1372,6 +1531,12 @@ const styles = {
       },
       get _float() {
         return [`${runtime.meta.name}-userArea_float`, ''];
+      },
+      get query() { return ``; },
+      get _queryToggle() {
+        return [`${runtime.meta.name}-userArea_queryToggle`, `
+        
+        `];
       },
       ...styleFunctions,
     },
@@ -1469,14 +1634,15 @@ const styles = {
       runtime.api.DOM.addStyle(`${runtime.meta.name}-toolbarFull_init_col`, `
         .${modules.icons?.toolbar} > *:not(:last-child) {
           transition: max-width ${settings.transitionSpeed}ms !important;
-          max-width: 400px !important;
+          max-width: ${settings.toolbarElementMaxWidth}px !important;
           overflow: hidden !important;
         }
       `);
-      if (settings.collapseToolbar == 'all') this.hide();
+      if (settings.collapseToolbar === 'all') this.hide();
     },
     hide: function () {
       // Keep expanded while typing in search bar
+      // Why is this classname not handled the same by Discord as other elements??
       if (document.querySelector('.public-DraftEditor-content[aria-expanded="true"]')) return;
       if (document.querySelector('.public-DraftEditor-content').querySelector('[data-text="true"]').innerHTML) return;
 
@@ -1499,15 +1665,6 @@ const styles = {
   init: function () {
     // Add root styles
     runtime.api.DOM.addStyle(`${runtime.meta.name}-root`, `
-      ::-webkit-scrollbar {
-        width: 0px;
-        background: transparent;
-      }
-      
-      ::-webkit-resizer {
-        display: none;
-      }
-
       .cui-toolbar {
         align-items: right;
         display: flex;
@@ -1536,6 +1693,14 @@ const styles = {
     this.messageInput.init();
     this.toolbar.init();
     this.toolbarFull.init();
+  },
+  reinit: function () {
+    this.buttons.forEach((panel) => {
+      if (panel._clear) {
+        panel.clear();
+        panel.init();
+      }
+    });
   },
   clear: function () {
     // Clear root styles
@@ -1598,6 +1763,12 @@ module.exports = class CollapsibleUI {
     this.addListeners();
     this.addIntervals();
 
+    runtime.observer.observe(document, {
+      childList: true,
+      subtree: true,
+      attributes: false,
+    });
+
     // Initialize the plugin
     this.initialize();
     runtime.api.Logger.info('Enabled');
@@ -1618,12 +1789,17 @@ module.exports = class CollapsibleUI {
     clearInterval(runtime.interval);
     runtime.interval = null;
 
+    runtime.observer.disconnect();
+
     this.terminate();
     runtime.api.Logger.info('Disabled');
   };
 
   // Re-inject the toolbar container when the page changes
-  onSwitch = () => this.createToolbarContainer();
+  onSwitch = () => {
+    this.createToolbarContainer();
+    styles.reinit();
+  };
 
   // Build settings panel
   getSettingsPanel = () => {
@@ -1727,7 +1903,7 @@ module.exports = class CollapsibleUI {
     setTimeout(() => {
       runtime.toolbar.remove();
       this.createToolbarContainer();
-    }, 500);
+    }, 250);
   };
 
   // Create the toolbar container and insert buttons
@@ -1813,26 +1989,24 @@ module.exports = class CollapsibleUI {
 
   // Add event listeners to handle resize/expand on hover
   addListeners = () => {
-    document.body.addEventListener('mousemove', (e) => {
-      runtime.plugin.tickExpandOnHover(e.clientX, e.clientY);
-      runtime.plugin.tickCollapseSettings(e.clientX, e.clientY);
-      runtime.plugin.tickMessageInputCollapse(e.clientX, e.clientY);
-      runtime.plugin.tickCollapseToolbar(e.clientX, e.clientY, settings.collapseToolbar === 'all');
-    }, { passive: true, signal: runtime.controller.signal });
-
-    document.body.addEventListener('mouseleave', (e) => {
-      runtime.plugin.tickExpandOnHover(NaN, NaN);
-    }, { passive: true, signal: runtime.controller.signal });
-
     document.body.addEventListener('mousedown', (e) => {
       // Handle left clicks
       if (e.button === 0) {
         // Dynamically handle resizing members list
         if (e.target.classList.contains(modules.members?.membersWrap)) {
-          e.target.style.setProperty('transition', 'none', 'important');
-          e.target.style.setProperty('max-width', '80vw', 'important');
           e.target.style.setProperty('width', `${settings.membersListWidth}px`);
           runtime.dragging = e.target;
+        }
+
+        // Dynamically handle resizing user profile
+        if (e.target.classList.contains(modules.panel?.outer)) {
+          e.target.style.setProperty('width', `${settings.userProfileWidth}px`);
+          runtime.dragging = e.target;
+        }
+
+        if (runtime.dragging) {
+          e.target.style.setProperty('transition', 'none', 'important');
+          e.target.style.setProperty('max-width', '80vw', 'important');
         }
       }
     }, { passive: true, signal: runtime.controller.signal });
@@ -1840,34 +2014,89 @@ module.exports = class CollapsibleUI {
     document.body.addEventListener('mouseup', (e) => {
       // Handle right clicks
       if (e.button === 2) {
+        let target = null;
+
         // Reset members list width
         if (e.target.classList.contains(modules.members?.membersWrap)) {
           e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
           settings.membersListWidth = settings.defaultMembersListWidth;
           styles.buttons[constants.I_MEMBERS_LIST].init();
-          e.target.style.removeProperty('width');
+
+          target = e.target;
+        }
+
+        // Reset user profile width
+        if (e.target.classList.contains(modules.panel?.outer)) {
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          settings.userProfileWidth = settings.defaultUserProfileWidth;
+          styles.buttons[constants.I_USER_PROFILE].init();
+
+          target = e.target;
+        }
+
+        if (target) {
+          target.style.removeProperty('width');
 
           // Timeout to provide smooth transition
-          setTimeout(() => e.target.style.removeProperty('transition'), settings.transitionSpeed);
+          setTimeout(() => target.style.removeProperty('transition'), settings.transitionSpeed);
         }
       }
+
       // Handle left clicks
       else {
-        // Finish resizing the members list
+        let dragging = null;
         if (runtime.dragging) {
-          // Update static styling and remove dynamic styling
-          settings.membersListWidth = parseInt(runtime.dragging.style.width);
-          styles.buttons[constants.I_MEMBERS_LIST].init();
-          runtime.dragging.style.removeProperty('max-width');
-          runtime.dragging.style.removeProperty('width');
-
-          // Timeout to avoid transition flash
-          setTimeout(() => {
-            runtime.dragging.style.removeProperty('transition');
-            runtime.dragging = null;
-          }, settings.transitionSpeed);
+          dragging = runtime.dragging;
+          runtime.dragging = null;
         }
+        else return;
+
+        // Finish resizing the members list
+        if (dragging.classList.contains(modules.members?.membersWrap)) {
+          // Update static styling and remove dynamic styling
+          settings.membersListWidth = parseInt(dragging.style.width);
+          styles.buttons[constants.I_MEMBERS_LIST].init();
+        }
+
+        // Finish resizing the user profile
+        if (dragging.classList.contains(modules.panel?.outer)) {
+          // Update static styling and remove dynamic styling
+          settings.userProfileWidth = parseInt(dragging.style.width);
+          styles.buttons[constants.I_USER_PROFILE].init();
+        }
+
+        dragging.style.removeProperty('width');
+        dragging.style.removeProperty('max-width');
+        // Timeout to avoid transition flash
+        setTimeout(() => dragging.style.removeProperty('transition'), settings.transitionSpeed);
       }
+    }, { passive: true, signal: runtime.controller.signal });
+
+    document.body.addEventListener('mousemove', (e) => {
+      runtime.plugin.tickExpandOnHover(e.clientX, e.clientY);
+      runtime.plugin.tickCollapseSettings(e.clientX, e.clientY);
+      runtime.plugin.tickMessageInputCollapse(e.clientX, e.clientY);
+      runtime.plugin.tickCollapseToolbar(e.clientX, e.clientY, settings.collapseToolbar === 'all');
+
+      if (!runtime.dragging) return;
+
+      // Handle resizing members list
+      if (runtime.dragging.classList.contains(modules.members?.membersWrap)) {
+        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`);
+      }
+
+      // Handle resizing user profile
+      if (runtime.dragging.classList.contains(modules.panel?.outer)) {
+        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`);
+      }
+    }, { passive: true, signal: runtime.controller.signal });
+
+    document.body.addEventListener('mouseleave', (e) => {
+      runtime.plugin.tickExpandOnHover(NaN, NaN);
+    }, { passive: true, signal: runtime.controller.signal });
+
+    document.body.addEventListener('click', (e) => {
+      runtime.plugin.tickExpandOnHover(e.clientX, e.clientY);
     }, { passive: true, signal: runtime.controller.signal });
 
     document.body.addEventListener('keydown', (e) => {
@@ -1936,7 +2165,8 @@ module.exports = class CollapsibleUI {
       for (let i = 0; i < styles.buttons.length; i++) {
         if (!settings.collapseDisabledButtons && settings.buttonIndexes[i] === 0)
           continue;
-        if (settings.expandOnHoverEnabled[i] && (!settings.buttonsActive[i])) {
+
+        if (settings.expandOnHoverEnabled[i] && (!settings.buttonsActive[i] || (settings.sizeCollapse && window.matchMedia(styles.buttons[i].query)).matches)) {
           if (this.isNear(elements.index[i], settings.expandOnHoverFudgeFactor, x, y)) {
             if (runtime.collapsed[i]) {
               if (settings.floatingPanels) styles.buttons[i].float();
@@ -1944,7 +2174,12 @@ module.exports = class CollapsibleUI {
             }
           }
           else {
-            if (!runtime.collapsed[i]) this.collapseElementDynamic(i, true);
+            if (!runtime.collapsed[i]) {
+              if (elements.biteSizePanel) {
+                this.collapseElementDynamic(i, false);
+              }
+              else this.collapseElementDynamic(i, true);
+            }
           }
         }
       }
@@ -1978,14 +2213,16 @@ module.exports = class CollapsibleUI {
   // Update dynamic collapsed state of toolbar buttons
   tickCollapseToolbar = (x, y, full) => {
     if (settings.collapseToolbar) {
-      if (this.isNear(runtime.toolbar, settings.buttonCollapseFudgeFactor, x, y)) {
+      if (this.isNear(runtime.toolbar, settings.buttonCollapseFudgeFactor, x, y)
+        && !this.isNear(elements.forumPopout, 0, x, y)) {
         if (styles.toolbar.hidden) styles.toolbar.show();
       }
       else {
         if (!styles.toolbar.hidden) styles.toolbar.hide();
       }
       if (full) {
-        if (this.isNear(elements.toolbar, settings.buttonCollapseFudgeFactor, x, y)) {
+        if (this.isNear(elements.toolbar, settings.buttonCollapseFudgeFactor, x, y)
+          && !this.isNear(elements.forumPopout, 0, x, y)) {
           if (styles.toolbarFull.hidden) styles.toolbarFull.show();
         }
         else {
@@ -2010,17 +2247,22 @@ module.exports = class CollapsibleUI {
 
   // Update the dynamic collapsed state of an element
   collapseElementDynamic(index, collapsed) {
-    console.log(index);
     if (collapsed) {
-      runtime.api.DOM.addStyle(
-        `${styles.buttons[index]._toggle[0]}_dynamic`,
-        styles.buttons[index]._toggle[1],
-      );
+      if (settings.sizeCollapse && window.matchMedia(styles.buttons[index].query).matches)
+        runtime.api.DOM.removeStyle(styles.buttons[index]._queryToggle[0]);
+      else
+        runtime.api.DOM.addStyle(
+          `${styles.buttons[index]._toggle[0]}_dynamic`,
+          styles.buttons[index]._toggle[1],
+        );
     }
     else {
-      runtime.api.DOM.removeStyle(
-        `${styles.buttons[index]._toggle[0]}_dynamic`,
-      );
+      if (settings.sizeCollapse && window.matchMedia(styles.buttons[index].query).matches)
+        runtime.api.DOM.addStyle(...styles.buttons[index]._queryToggle);
+      else
+        runtime.api.DOM.removeStyle(
+          `${styles.buttons[index]._toggle[0]}_dynamic`,
+        );
     }
     runtime.collapsed[index] = collapsed;
   }

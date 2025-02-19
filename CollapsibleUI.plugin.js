@@ -75,7 +75,7 @@ const settings = {
   get sizeCollapse() { return this._sizeCollapse ?? (this._sizeCollapse = runtime.api.Data.load('size-collapse') ?? false); },
   set sizeCollapse(v) { runtime.api.Data.save('size-collapse', this._sizeCollapse = v); },
 
-  get sizeCollapseThreshold() { return this._sizeCollapseThreshold ?? (this._sizeCollapseThreshold = runtime.api.Data.load('size-collapse-threshold') ?? [500, 600, 950, 1000, 400, 200, 550, 400]); },
+  get sizeCollapseThreshold() { return this._sizeCollapseThreshold ?? (this._sizeCollapseThreshold = runtime.api.Data.load('size-collapse-threshold') ?? [500, 600, 950, 1200, 400, 200, 550, 400]); },
   set sizeCollapseThreshold(v) { runtime.api.Data.save('size-collapse-threshold', this._sizeCollapseThreshold = v); },
 
   get conditionalCollapse() { return this._conditionalCollapse ?? (this._conditionalCollapse = runtime.api.Data.load('conditional-collapse') ?? false); },
@@ -1421,7 +1421,6 @@ const styles = {
             max-height: 100% !important;
             height: 100% !important;
             right: 0 !important;
-            //background: var(--background-secondary-alt) !important;
           }
         `];
       },
@@ -1699,6 +1698,7 @@ const styles = {
       if (panel._clear) {
         panel.clear();
         panel.init();
+        if (!settings.buttonsActive[panel._index]) panel.toggle();
       }
     });
   },
@@ -2045,6 +2045,7 @@ module.exports = class CollapsibleUI {
       // Handle left clicks
       else {
         let dragging = null;
+        let target = null;
         if (runtime.dragging) {
           dragging = runtime.dragging;
           runtime.dragging = null;
@@ -2056,6 +2057,8 @@ module.exports = class CollapsibleUI {
           // Update static styling and remove dynamic styling
           settings.membersListWidth = parseInt(dragging.style.width);
           styles.buttons[constants.I_MEMBERS_LIST].init();
+
+          target = dragging;
         }
 
         // Finish resizing the user profile
@@ -2063,12 +2066,16 @@ module.exports = class CollapsibleUI {
           // Update static styling and remove dynamic styling
           settings.userProfileWidth = parseInt(dragging.style.width);
           styles.buttons[constants.I_USER_PROFILE].init();
+
+          target = dragging;
         }
 
-        dragging.style.removeProperty('width');
-        dragging.style.removeProperty('max-width');
-        // Timeout to avoid transition flash
-        setTimeout(() => dragging.style.removeProperty('transition'), settings.transitionSpeed);
+        if (target) {
+          target.style.removeProperty('width');
+          target.style.removeProperty('max-width');
+          // Timeout to avoid transition flash
+          setTimeout(() => target.style.removeProperty('transition'), settings.transitionSpeed);
+        }
       }
     }, { passive: true, signal: runtime.controller.signal });
 

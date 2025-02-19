@@ -111,20 +111,23 @@ const settings = {
   get buttonsActive() { return this._buttonsActive ?? (this._buttonsActive = runtime.api.Data.load('buttons-active') ?? [true, true, true, true, true, true, true, true]); },
   set buttonsActive(v) { runtime.api.Data.save('buttons-active', this._buttonsActive = v); },
 
-  get channelListWidth() { return this._channelListWidth ?? (this._channelListWidth = runtime.api.Data.load('channel-list-width') ?? 0); },
+  get channelListWidth() { return this._channelListWidth ?? (this._channelListWidth = runtime.api.Data.load('channel-list-width') ?? 240); },
   set channelListWidth(v) { runtime.api.Data.save('channel-list-width', this._channelListWidth = v); },
 
-  get membersListWidth() { return this._membersListWidth ?? (this._membersListWidth = runtime.api.Data.load('members-list-width') ?? 0); },
+  get membersListWidth() { return this._membersListWidth ?? (this._membersListWidth = runtime.api.Data.load('members-list-width') ?? 240); },
   set membersListWidth(v) { runtime.api.Data.save('members-list-width', this._membersListWidth = v); },
 
-  get userProfileWidth() { return this._userProfileWidth ?? (this._userProfileWidth = runtime.api.Data.load('user-profile-width') ?? 0); },
+  get userProfileWidth() { return this._userProfileWidth ?? (this._userProfileWidth = runtime.api.Data.load('user-profile-width') ?? 340); },
   set userProfileWidth(v) { runtime.api.Data.save('user-profile-width', this._userProfileWidth = v); },
 
-  get searchPanelWidth() { return this._searchPanelWidth ?? (this._searchPanelWidth = runtime.api.Data.load('search-panel-width') ?? 0); },
+  get searchPanelWidth() { return this._searchPanelWidth ?? (this._searchPanelWidth = runtime.api.Data.load('search-panel-width') ?? 418); },
   set searchPanelWidth(v) { runtime.api.Data.save('search-panel-width', this._searchPanelWidth = v); },
 
-  get forumPopoutWidth() { return this._forumPopoutWidth ?? (this._forumPopoutWidth = runtime.api.Data.load('forum-popout-width') ?? 0); },
+  get forumPopoutWidth() { return this._forumPopoutWidth ?? (this._forumPopoutWidth = runtime.api.Data.load('forum-popout-width') ?? 450); },
   set forumPopoutWidth(v) { runtime.api.Data.save('forum-popout-width', this._forumPopoutWidth = v); },
+
+  get activityPanelWidth() { return this._activityPanelWidth ?? (this._activityPanelWidth = runtime.api.Data.load('activity-panel-width') ?? 360); },
+  set activityPanelWidth(v) { runtime.api.Data.save('activity-panel-width', this._activityPanelWidth = v); },
 
   get defaultChannelListWidth() { return this._defaultChannelListWidth ?? (this._defaultChannelListWidth = runtime.api.Data.load('default-channel-list-width') ?? 240); },
   set defaultChannelListWidth(v) { runtime.api.Data.save('default-channel-list-width', this._defaultChannelListWidth = v); },
@@ -140,6 +143,9 @@ const settings = {
 
   get defaultForumPopoutWidth() { return this._defaultForumPopoutWidth ?? (this._defaultForumPopoutWidth = runtime.api.Data.load('default-forum-popout-width') ?? 450); },
   set defaultForumPopoutWidth(v) { runtime.api.Data.save('default-forum-popout-width', this._defaultForumPopoutWidth = v); },
+
+  get defaultActivityPanelWidth() { return this._defaultActivityPanelWidth ?? (this._defaultActivityPanelWidth = runtime.api.Data.load('default-activity-panel-width') ?? 360); },
+  set defaultActivityPanelWidth(v) { runtime.api.Data.save('default-activity-panel-width', this._defaultActivityPanelWidth = v); },
 };
 
 // Define plugin changelog and settings panel layout
@@ -159,7 +165,8 @@ const config = {
         'Expand on Hover is no longer a requirement for Size Collapse (though it is still recommended)',
         'Resizable panels can now be resized by clicking-and-dragging anywhere on the edge of the panel',
         'The activities panel in the friends list can now be resized',
-        'Plugin now relies on fewer webpack modules',
+        'The search/forum panels now float when floating panels is enabled',
+        'Hovered panels will no longer collapse while a right-click menu is open',
         'Fixed showing multiple update notifications if plugin is toggled without reloading Discord',
         'Fixed inconsistent Size Collapse when snapping window dimensions in Windows',
         'Fixed panels jumping open during transitions on some low-end devices',
@@ -167,6 +174,7 @@ const config = {
         'Improved out-of-the-box compatibility with other plugins',
         'Moved Unread DMs Badge feature to its own plugin',
         'Greatly increased plugin\'s overall performance',
+        'Small visual tweaks for UI consistency',
         'Updated settings panel layout',
         'THIS UPDATE RESETS MANY OF YOUR SETTINGS TO DEFAULT',
         'TO MINIMIZE BUGS, PLEASE DELETE THE FILE "CollapsibleUI.config.json" IN YOUR PLUGINS FOLDER',
@@ -442,6 +450,13 @@ const config = {
           name: 'Resizable Forum Popout',
           note: 'Resize the thread popup in forum channels by clicking-and-dragging the left edge. Right-click to reset width',
           get value() { return settings.forumPopoutWidth !== 0; },
+        },
+        {
+          type: 'switch',
+          id: 'resizable-activity-panel',
+          name: 'Resizable Activity Panel',
+          note: 'Resize the activity panel in the friends list by clicking-and-dragging the left edge. Right-click to reset width',
+          get value() { return settings.activityPanelWidth !== 0; },
         },
       ],
     },
@@ -765,6 +780,13 @@ const config = {
           name: 'Forum Popout - Default Width (px)',
           note: 'The width of the forum popout when not actively resized',
           get value() { return settings.defaultForumPopoutWidth; },
+        },
+        {
+          type: 'number',
+          id: 'defaultActivityPanelWidth',
+          name: 'Activity Panel - Default Width (px)',
+          note: 'The width of the activity panel when not actively resized',
+          get value() { return settings.defaultActivityPanelWidth; },
         },
       ],
     },
@@ -1098,6 +1120,8 @@ const constants = {
   I_WINDOW_BAR: 5,
   I_CALL_WINDOW: 6,
   I_USER_AREA: 7,
+  I_SEARCH_PANEL: 0,
+  I_FORUM_POPOUT: 1,
 };
 
 // Abstract webpack modules
@@ -1116,17 +1140,18 @@ const modules = {
   get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
   get layout() { return this._layout ?? (this._layout = runtime.api.Webpack.getByKeys('flex', 'horizontal', 'flexChild')); },
   get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton')); },
-  get floating() { return this._floating ?? (this._floating = runtime.api.Webpack.getByKeys('container', 'floating', 'chatTarget')); },
+  get popout() { return this._popout ?? (this._popout = runtime.api.Webpack.getByKeys('container', 'floating', 'chatTarget')); },
   get sidebar() { return this._sidebar ?? (this._sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded')); },
   get servers() { return this._servers ?? (this._servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'discoveryIcon')); },
   get effects() { return this._effects ?? (this._effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect')); },
+  get search() { return this._search ?? (this._search = runtime.api.Webpack.getByKeys('searchResultsWrap', 'stillIndexing', 'noResults')); },
+  get tooltip() { return this._tooltip ?? (this._tooltip = runtime.api.Webpack.getByKeys('menu', 'label', 'caret')); },
 };
 
 const elements = {
   get inviteToolbar() { return document.querySelector(`.${modules.social?.inviteToolbar}`); },
   get searchBar() { return document.querySelector(`.${modules.toolbar?.search}`); },
   get toolbar() { return document.querySelector(`.${modules.icons?.toolbar}`); },
-  get moreButton() { return document.querySelector(`.${modules.icons?.toolbar} [d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z"]`); },
   get membersList() { return document.querySelector(`.${modules.members?.membersWrap}`); },
   get userProfile() { return document.querySelector(`.${modules.panel?.inner}.${modules.panel?.panel}`); },
   get messageInput() { return document.querySelector(`.${modules.guilds?.form}`); },
@@ -1134,11 +1159,13 @@ const elements = {
   get callWindow() { return document.querySelector(`.${modules.callWindow?.wrapper}:not(.${modules.callWindow?.noChat})`); },
   get settingsContainer() { return document.querySelector(`.${modules.user?.container} .${modules.layout?.flex}`); },
   get messageInputContainer() { return document.querySelector(`.${modules.input?.buttons}`); },
-  get forumPopout() { return document.querySelector(`.${modules.floating?.floating}:not(.${modules.floating?.chatTarget.split(' ')[0]})`); },
+  get forumPopout() { return document.querySelector(`.${modules.popout?.floating}:not(.${modules.popout?.chatTarget.split(' ')[0]})`); },
   get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
   get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
   get serverList() { return document.querySelector(`.${modules.servers?.wrapper}`); },
   get channelList() { return document.querySelector(`.${modules.sidebar?.sidebar}`); },
+  get rightClickMenu() { return document.querySelector(`.${modules.tooltip?.menu}`); },
+  get popoutSpacer() { return document.querySelector(`div:not([class])[style^="min-width"]`); },
   get index() {
     return [
       this.serverList,
@@ -1174,13 +1201,15 @@ const runtime = {
     return this._observer ?? (this._observer = new MutationObserver((mutationList) => {
       mutationList.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node.classList?.contains(modules.panel?.outer)) {
+          if (node.classList?.contains(modules.panel?.outer)
+            || node.classList?.contains(modules.search?.searchResultsWrap)) {
             this.plugin.reloadToolbar();
             styles.reinit();
           }
         });
         mutation.removedNodes.forEach((node) => {
-          if (node.classList?.contains(modules.panel?.outer)) {
+          if (node.classList?.contains(modules.panel?.outer)
+            || node.classList?.contains(modules.search?.searchResultsWrap)) {
             this.plugin.reloadToolbar();
             styles.reinit();
           }
@@ -1218,12 +1247,12 @@ const styleFunctions = {
     this._toggled = !this._toggled;
   },
   float: function () {
-    runtime.api.DOM.addStyle(...this._float);
+    if (this._float) runtime.api.DOM.addStyle(...this._float);
   },
   clear: function () {
     runtime.api.DOM.removeStyle(this._init[0]);
-    runtime.api.DOM.removeStyle(this._toggle[0]);
-    runtime.api.DOM.removeStyle(this._float[0]);
+    if (this._toggle) runtime.api.DOM.removeStyle(this._toggle[0]);
+    if (this._float) runtime.api.DOM.removeStyle(this._float[0]);
     if (this._clear) this._clear();
     this._toggled = true;
   },
@@ -1287,9 +1316,9 @@ const styles = {
         return [`${runtime.meta.name}-membersList_init`, `
           .${modules.members?.membersWrap} {
             max-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
-            width: ${settings.membersListWidth || settings.defaultMembersListWidth}px;
+            width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
             min-width: 1px !important;
-            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
+            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, padding ${settings.transitionSpeed}ms;
             overflow: hidden !important;
             flex-basis: auto !important;
             min-height: 100% !important;
@@ -1326,6 +1355,8 @@ const styles = {
         return [`${runtime.meta.name}-membersList_toggle`, `
           .${modules.members?.membersWrap} {
             max-width: ${settings.collapseSize}px !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
           }
         `];
       },
@@ -1337,6 +1368,16 @@ const styles = {
             max-height: 100% !important;
             height: 100% !important;
             right: 0 !important;
+          }
+          .${modules.members?.membersWrap}:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.05);
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
           }
         `];
       },
@@ -1365,7 +1406,7 @@ const styles = {
         return [`${runtime.meta.name}-userProfile_init`, `
           .${modules.panel?.outer}.${modules.panel?.panel} {
             max-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
-            width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px;
+            width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
             min-width: 1px !important;
             transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
             overflow: hidden !important;
@@ -1421,6 +1462,16 @@ const styles = {
             max-height: 100% !important;
             height: 100% !important;
             right: 0 !important;
+          }
+          .${modules.panel?.outer}.${modules.panel?.panel}:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.05);
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
           }
         `];
       },
@@ -1482,9 +1533,6 @@ const styles = {
 
         `];
       },
-      get _float() {
-        return [`${runtime.meta.name}-windowBar_float`, ''];
-      },
       get query() { return ``; },
       get _queryToggle() {
         return [`${runtime.meta.name}-windowBar_queryToggle`, `
@@ -1504,9 +1552,6 @@ const styles = {
         return [`${runtime.meta.name}-callWindow_toggle`, `
 
         `];
-      },
-      get _float() {
-        return [`${runtime.meta.name}-callWindow_float`, ''];
       },
       get query() { return ``; },
       get _queryToggle() {
@@ -1528,14 +1573,157 @@ const styles = {
 
         `];
       },
-      get _float() {
-        return [`${runtime.meta.name}-userArea_float`, ''];
-      },
       get query() { return ``; },
       get _queryToggle() {
         return [`${runtime.meta.name}-userArea_queryToggle`, `
         
         `];
+      },
+      ...styleFunctions,
+    },
+  ],
+  resize: [
+    {
+      get _init() {
+        return [`${runtime.meta.name}-searchPanel_init`, `
+          .${modules.search?.searchResultsWrap} {
+            max-width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
+            width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
+            min-width: 1px !important;
+            overflow: hidden !important;
+          }
+
+          .${modules.search?.searchResultsWrap} > header > div:last-child {
+            justify-content: end !important;
+          }
+
+          ${(settings.searchPanelWidth)
+            ? `
+              .${modules.search?.searchResultsWrap}:before {
+                cursor: e-resize;
+                z-index: 200;
+                position: absolute;
+                content: "";
+                width: 8px;
+                height: 100%;
+                left: 0;
+              }
+            `
+            : ''}
+        `];
+      },
+      get _float() {
+        return [`${runtime.meta.name}-searchPanel_float`, `
+          .${modules.search?.searchResultsWrap} {
+            position: absolute !important;
+            z-index: 190 !important;
+            max-height: 100% !important;
+            height: 100% !important;
+            right: 0 !important;
+          }
+          .${modules.search?.searchResultsWrap}:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0, 0, 0, 0.05);
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+          }
+        `];
+      },
+      ...styleFunctions,
+    },
+    {
+      get _init() {
+        return [`${runtime.meta.name}-forumPopout_init`,
+          (elements.popoutSpacer)
+            ? `
+              .${modules.popout?.chatLayerWrapper},
+              div:not([class])[style^="min-width"] {
+                max-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
+                width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
+                min-width: 1px !important;
+                //overflow: hidden !important;
+              }
+              .${modules.popout?.resizeHandle} {
+                display: none !important;
+              }
+              .${modules.popout?.chatLayerWrapper} > * {
+                width: calc(100% - 8px) !important;
+              }
+              .${modules.guilds.threadSidebarOpen} {
+                flex-shrink: 999999999 !important;
+              }
+
+              ${(settings.forumPopoutWidth)
+                ? `
+                  .${modules.popout?.chatLayerWrapper}:before {
+                    cursor: e-resize;
+                    z-index: 200;
+                    position: absolute;
+                    content: "";
+                    width: 8px;
+                    height: 100%;
+                    left: 0;
+                  }
+                `
+                : ''}
+            `
+            : `
+              .${modules.popout?.floating}:not(.${modules.popout?.chatTarget.split(' ')[0]}) {
+                max-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
+                width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
+                min-width: 1px !important;
+                overflow: hidden !important;
+              }
+
+              .${modules.popout?.chatTarget.split(' ')[0]} {
+                display: none !important;
+              }
+
+              ${(settings.forumPopoutWidth)
+                ? `
+                  .${modules.popout?.floating}:not(.${modules.popout?.chatTarget.split(' ')[0]}):before {
+                    cursor: e-resize;
+                    z-index: 200;
+                    position: absolute;
+                    content: "";
+                    width: 8px;
+                    height: 100%;
+                    left: 0;
+                  }
+                `
+                : ''}
+            `];
+      },
+      get _float() {
+        return [`${runtime.meta.name}-forumPopout_float`,
+          (elements.popoutSpacer)
+            ? `
+              .${modules.popout?.chatLayerWrapper} {
+                z-index: 190 !important;
+                filter: drop-shadow(-8px 0px 0px var(--background-tertiary));
+              }
+              div:not([class])[style^="min-width"] {
+                display: none !important;
+              }
+              .${modules.popout?.chatLayerWrapper}:after {
+                content: "";
+                width: 32px;
+                height: 100%;
+                position: absolute;
+                z-index: -1;
+                top: 0;
+                left: 0;
+                transform: translateX(-32px) translateY(-8px);
+                border: 8px solid var(--background-tertiary);
+                border-radius: 16px;
+                clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+              }
+            `
+            : ''];
       },
       ...styleFunctions,
     },
@@ -1687,6 +1875,12 @@ const styles = {
       if (!settings.buttonsActive[i]) this.buttons[i].toggle();
     }
 
+    // Init resize styles
+    this.resize.forEach((panel) => {
+      panel.init();
+      if (settings.floatingPanels) panel.float();
+    });
+
     // Init collapse styles
     this.settings.init();
     this.messageInput.init();
@@ -1708,6 +1902,9 @@ const styles = {
 
     // Clear styles for each button
     this.buttons.forEach(panel => panel.clear());
+
+    // Clear resize styles
+    this.resize.forEach(panel => panel.clear());
 
     // Clear collapse styles
     this.settings.clear();
@@ -1833,6 +2030,9 @@ module.exports = class CollapsibleUI {
               case 'forum':
                 settings.forumPopoutWidth = value ? settings.defaultForumPopoutWidth : 0;
                 break;
+              case 'activity':
+                settings.activityPanelWidth = value ? settings.defaultActivityPanelWidth : 0;
+                break;
             }
             return;
           }
@@ -1916,17 +2116,14 @@ module.exports = class CollapsibleUI {
     // Insert the toolbar container into the correct spot
     try {
       if (elements.inviteToolbar || elements.searchBar) {
-        if (elements.moreButton)
-          elements.toolbar.insertBefore(toolbar, elements.moreButton.parentElement.parentElement);
-        else
-          elements.toolbar.insertBefore(toolbar, (elements.inviteToolbar)
-            ? elements.inviteToolbar.nextElementSibling
-            : elements.searchBar);
+        elements.toolbar.insertBefore(toolbar, (elements.inviteToolbar)
+          ? elements.inviteToolbar.nextElementSibling
+          : elements.searchBar);
       }
       else
         elements.toolbar.insertBefore(toolbar, elements.toolbar.childNodes[elements.toolbar.childNodes.length - 2]);
     }
-    catch {
+    catch (e) {
       elements.toolbar.appendChild(toolbar);
     }
 
@@ -1994,19 +2191,43 @@ module.exports = class CollapsibleUI {
       if (e.button === 0) {
         // Dynamically handle resizing members list
         if (e.target.classList.contains(modules.members?.membersWrap)) {
-          e.target.style.setProperty('width', `${settings.membersListWidth}px`);
+          e.target.style.setProperty('width', `${settings.membersListWidth}px`, 'important');
           runtime.dragging = e.target;
         }
 
         // Dynamically handle resizing user profile
         if (e.target.classList.contains(modules.panel?.outer)) {
-          e.target.style.setProperty('width', `${settings.userProfileWidth}px`);
+          e.target.style.setProperty('width', `${settings.userProfileWidth}px`, 'important');
           runtime.dragging = e.target;
         }
 
+        // Dynamically handle resizing search panel
+        if (e.target.classList.contains(modules.search?.searchResultsWrap)) {
+          e.target.style.setProperty('width', `${settings.searchPanelWidth}px`, 'important');
+          runtime.dragging = e.target;
+        }
+
+        // Dynamically handle resizing forum popout
+        if (elements.popoutSpacer) {
+          if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
+            e.target.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
+            elements.popoutSpacer.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
+            runtime.dragging = e.target;
+
+            elements.popoutSpacer.style.setProperty('transition', 'none', 'important');
+            elements.popoutSpacer.style.setProperty('max-width', '80vw', 'important');
+          }
+        }
+        else {
+          if (e.target.classList.contains(modules.popout?.floating) && !e.target.classList.contains(modules.popout?.chatTarget.split(' ')[0])) {
+            e.target.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
+            runtime.dragging = e.target;
+          }
+        }
+
         if (runtime.dragging) {
-          e.target.style.setProperty('transition', 'none', 'important');
-          e.target.style.setProperty('max-width', '80vw', 'important');
+          runtime.dragging.style.setProperty('transition', 'none', 'important');
+          runtime.dragging.style.setProperty('max-width', '80vw', 'important');
         }
       }
     }, { passive: true, signal: runtime.controller.signal });
@@ -2021,7 +2242,6 @@ module.exports = class CollapsibleUI {
           e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
           settings.membersListWidth = settings.defaultMembersListWidth;
           styles.buttons[constants.I_MEMBERS_LIST].init();
-
           target = e.target;
         }
 
@@ -2030,13 +2250,42 @@ module.exports = class CollapsibleUI {
           e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
           settings.userProfileWidth = settings.defaultUserProfileWidth;
           styles.buttons[constants.I_USER_PROFILE].init();
-
           target = e.target;
+        }
+
+        // Reset search panel width
+        if (e.target.classList.contains(modules.search?.searchResultsWrap)) {
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          settings.searchPanelWidth = settings.defaultSearchPanelWidth;
+          styles.resize[constants.I_SEARCH_PANEL].init();
+          target = e.target;
+        }
+
+        // Reset forum popout width
+        if (elements.popoutSpacer) {
+          if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
+            e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+            elements.popoutSpacer.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+            settings.forumPopoutWidth = settings.defaultForumPopoutWidth;
+            styles.resize[constants.I_FORUM_POPOUT].init();
+            target = e.target;
+
+            elements.popoutSpacer.style.removeProperty('width');
+            // Timeout to provide smooth transition
+            setTimeout(() => elements.popoutSpacer.style.removeProperty('transition'), settings.transitionSpeed);
+          }
+        }
+        else {
+          if (e.target.classList.contains(modules.popout?.floating) && !e.target.classList.contains(modules.popout?.chatTarget.split(' ')[0])) {
+            e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+            settings.forumPopoutWidth = settings.defaultForumPopoutWidth;
+            styles.resize[constants.I_FORUM_POPOUT].init();
+            target = e.target;
+          }
         }
 
         if (target) {
           target.style.removeProperty('width');
-
           // Timeout to provide smooth transition
           setTimeout(() => target.style.removeProperty('transition'), settings.transitionSpeed);
         }
@@ -2052,22 +2301,51 @@ module.exports = class CollapsibleUI {
         }
         else return;
 
+        // Clamp max width to 80vw
+        let width = parseInt(dragging.style.width);
+        if (width > window.innerWidth * 0.8)
+          width = window.innerWidth * 0.8;
+
         // Finish resizing the members list
         if (dragging.classList.contains(modules.members?.membersWrap)) {
-          // Update static styling and remove dynamic styling
-          settings.membersListWidth = parseInt(dragging.style.width);
+          settings.membersListWidth = width;
           styles.buttons[constants.I_MEMBERS_LIST].init();
-
           target = dragging;
         }
 
         // Finish resizing the user profile
         if (dragging.classList.contains(modules.panel?.outer)) {
-          // Update static styling and remove dynamic styling
-          settings.userProfileWidth = parseInt(dragging.style.width);
+          settings.userProfileWidth = width;
           styles.buttons[constants.I_USER_PROFILE].init();
-
           target = dragging;
+        }
+
+        // Finish resizing the search panel
+        if (dragging.classList.contains(modules.search?.searchResultsWrap)) {
+          settings.searchPanelWidth = width;
+          styles.resize[constants.I_SEARCH_PANEL].init();
+          target = dragging;
+        }
+
+        // Finish resizing the forum popout
+        if (elements.popoutSpacer) {
+          if (dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
+            settings.forumPopoutWidth = width;
+            styles.resize[constants.I_FORUM_POPOUT].init();
+            target = dragging;
+
+            elements.popoutSpacer.style.removeProperty('width');
+            elements.popoutSpacer.style.removeProperty('max-width');
+            // Timeout to avoid transition flash
+            setTimeout(() => elements.popoutSpacer.style.removeProperty('transition'), settings.transitionSpeed);
+          }
+        }
+        else {
+          if (dragging.classList.contains(modules.popout?.floating) && !dragging.classList.contains(modules.popout?.chatTarget.split(' ')[0])) {
+            settings.forumPopoutWidth = width;
+            styles.resize[constants.I_FORUM_POPOUT].init();
+            target = dragging;
+          }
         }
 
         if (target) {
@@ -2077,6 +2355,10 @@ module.exports = class CollapsibleUI {
           setTimeout(() => target.style.removeProperty('transition'), settings.transitionSpeed);
         }
       }
+
+      // Update expand on hover when the user clicks
+      // Timeout to provide smooth transition
+      setTimeout(() => runtime.plugin.tickExpandOnHover(e.clientX, e.clientY), settings.transitionSpeed);
     }, { passive: true, signal: runtime.controller.signal });
 
     document.body.addEventListener('mousemove', (e) => {
@@ -2087,23 +2369,21 @@ module.exports = class CollapsibleUI {
 
       if (!runtime.dragging) return;
 
-      // Handle resizing members list
-      if (runtime.dragging.classList.contains(modules.members?.membersWrap)) {
-        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`);
-      }
+      // Handle resizing members list/user profile/search panel/forum popout
+      if (runtime.dragging.classList.contains(modules.members?.membersWrap)
+        || runtime.dragging.classList.contains(modules.panel?.outer)
+        || runtime.dragging.classList.contains(modules.search?.searchResultsWrap)
+        || (runtime.dragging.classList.contains(modules.popout?.floating) && !runtime.dragging.classList.contains(modules.popout?.chatTarget.split(' ')[0])))
+        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
 
-      // Handle resizing user profile
-      if (runtime.dragging.classList.contains(modules.panel?.outer)) {
-        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`);
+      if (runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
+        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
+        elements.popoutSpacer.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
       }
     }, { passive: true, signal: runtime.controller.signal });
 
     document.body.addEventListener('mouseleave', (e) => {
       runtime.plugin.tickExpandOnHover(NaN, NaN);
-    }, { passive: true, signal: runtime.controller.signal });
-
-    document.body.addEventListener('click', (e) => {
-      runtime.plugin.tickExpandOnHover(e.clientX, e.clientY);
     }, { passive: true, signal: runtime.controller.signal });
 
     document.body.addEventListener('keydown', (e) => {
@@ -2182,7 +2462,8 @@ module.exports = class CollapsibleUI {
           }
           else {
             if (!runtime.collapsed[i]) {
-              if (elements.biteSizePanel) {
+              if (elements.biteSizePanel
+                || elements.rightClickMenu) {
                 this.collapseElementDynamic(i, false);
               }
               else this.collapseElementDynamic(i, true);

@@ -11,14 +11,16 @@
 * Expand on Hover is no longer a requirement for Size Collapse (though it is still recommended)
 * Resizable panels can now be resized by clicking-and-dragging anywhere on the edge of the panel
 * The activities panel in the friends list can now be resized
-* Plugin now relies on fewer webpack modules
+* The search/forum panels now float when floating panels is enabled
+* Hovered panels will no longer collapse while a right-click menu is open
 * Fixed showing multiple update notifications if plugin is toggled without reloading Discord
 * Fixed inconsistent Size Collapse when snapping window dimensions in Windows
 * Fixed panels jumping open during transitions on some low-end devices
 * Fixed forum popup resizing inconsistently with other UI elements
 * Improved out-of-the-box compatibility with other plugins
 * Moved Unread DMs Badge feature to its own plugin
-* Greatly increased plugin's overall performance
+* Greatly increased plugin\'s overall performance
+* Small visual tweaks for UI consistency
 * Updated settings panel layout
 
 ### v10.0.1:

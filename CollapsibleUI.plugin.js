@@ -1140,12 +1140,14 @@ const modules = {
   get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
   get layout() { return this._layout ?? (this._layout = runtime.api.Webpack.getByKeys('flex', 'horizontal', 'flexChild')); },
   get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton')); },
-  get popout() { return this._popout ?? (this._popout = runtime.api.Webpack.getByKeys('container', 'floating', 'chatTarget')); },
+  get popout() { return this._popout ?? (this._popout = runtime.api.Webpack.getByKeys('chatLayerWrapper', 'container', 'chatTarget')); },
   get sidebar() { return this._sidebar ?? (this._sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded')); },
   get servers() { return this._servers ?? (this._servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'discoveryIcon')); },
   get effects() { return this._effects ?? (this._effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect')); },
   get search() { return this._search ?? (this._search = runtime.api.Webpack.getByKeys('searchResultsWrap', 'stillIndexing', 'noResults')); },
   get tooltip() { return this._tooltip ?? (this._tooltip = runtime.api.Webpack.getByKeys('menu', 'label', 'caret')); },
+  get preview() { return this._preview ?? (this._preview = runtime.api.Webpack.getByKeys('popout', 'more', 'title', 'timestamp', 'name')); },
+  get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
 };
 
 const elements = {
@@ -1159,12 +1161,13 @@ const elements = {
   get callWindow() { return document.querySelector(`.${modules.callWindow?.wrapper}:not(.${modules.callWindow?.noChat})`); },
   get settingsContainer() { return document.querySelector(`.${modules.user?.container} .${modules.layout?.flex}`); },
   get messageInputContainer() { return document.querySelector(`.${modules.input?.buttons}`); },
-  get forumPopout() { return document.querySelector(`.${modules.popout?.floating}:not(.${modules.popout?.chatTarget.split(' ')[0]})`); },
+  get forumPopout() { return document.querySelector(`.${modules.popout?.chatLayerWrapper}`); },
   get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
   get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
   get serverList() { return document.querySelector(`.${modules.servers?.wrapper}`); },
   get channelList() { return document.querySelector(`.${modules.sidebar?.sidebar}`); },
   get rightClickMenu() { return document.querySelector(`.${modules.tooltip?.menu}`); },
+  get forumPreviewTooltip() { return document.querySelector(`.${modules.preview?.popout}`); },
   get popoutSpacer() { return document.querySelector(`div:not([class])[style^="min-width"]`); },
   get index() {
     return [
@@ -1289,23 +1292,94 @@ const styles = {
       _index: constants.I_CHANNEL_LIST,
       get _init() {
         return [`${runtime.meta.name}-channelList_init`, `
-        
+          :root {
+            --cui-channel-list-handle-offset: ${(settings.channelListWidth || settings.defaultChannelListWidth) - 12}px;
+            --cui-channel-list-handle-transition: left ${settings.transitionSpeed}ms;
+          }
+
+          .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
+            max-width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
+            width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
+            min-width: 1px !important;
+            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
+            min-height: 100% !important;
+            overflow: visible !important;
+          }
+          .${modules.sidebar?.sidebar} > * {
+            overflow: hidden !important;
+          }
+          .${modules.channels?.channel} {
+            max-width: 100% !important;
+          }
+          .${modules.user?.avatarWrapper} {
+            min-width: 32px !important;
+          }
+          ${(settings.channelListWidth)
+            ? `
+              .${modules.sidebar?.sidebar}:before {
+                cursor: e-resize;
+                z-index: 200;
+                position: absolute;
+                content: "";
+                width: 16px;
+                height: 100%;
+                left: var(--cui-channel-list-handle-offset);
+                transition: var(--cui-channel-list-handle-transition);
+              }
+            `
+            : ''}
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                ${this._toggle[1]}
+              }
+            `
+            : ''}
         `];
       },
       get _toggle() {
         return [`${runtime.meta.name}-channelList_toggle`, `
-        
+          .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
+            max-width: ${settings.collapseSize}px !important;
+          }
+          ${(settings.channelListWidth)
+            ? `
+              .${modules.sidebar?.sidebar}:before {
+                left: -4px;
+              }
+            `
+            : ''}
         `];
       },
       get _float() {
         return [`${runtime.meta.name}-channelList_float`, `
-        
+          .${modules.sidebar?.sidebar} {
+            position: absolute !important;
+            z-index: 190 !important;
+            max-height: 100% !important;
+            height: 100% !important;
+          }
         `];
       },
-      get query() { return ``; },
+      get query() { return `(max-width: ${settings.sizeCollapseThreshold[constants.I_CHANNEL_LIST]}px)`; },
       get _queryToggle() {
         return [`${runtime.meta.name}-channelList_queryToggle`, `
-        
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                .${modules.sidebar?.sidebar} {
+                  max-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
+                }
+                ${(settings.channelListWidth)
+                  ? `
+                    .${modules.sidebar?.sidebar}:before {
+                      left: ${(settings.channelListWidth || settings.defaultChannelListWidth) - 4}px;
+                    }
+                  `
+                  : ''}
+              }
+            `
+            : ''}
         `];
       },
       ...styleFunctions,
@@ -1319,8 +1393,6 @@ const styles = {
             width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
             min-width: 1px !important;
             transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, padding ${settings.transitionSpeed}ms;
-            overflow: hidden !important;
-            flex-basis: auto !important;
             min-height: 100% !important;
           }
           .${modules.members?.membersWrap} > * {
@@ -1336,9 +1408,9 @@ const styles = {
                 z-index: 200;
                 position: absolute;
                 content: "";
-                width: 8px;
+                width: 16px;
                 height: 100%;
-                left: 0;
+                left: -4px;
               }
             `
             : ''}
@@ -1409,8 +1481,6 @@ const styles = {
             width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
             min-width: 1px !important;
             transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
-            overflow: hidden !important;
-            flex-basis: auto !important;
             min-height: 100% !important;
           }
           .${modules.panel?.outer}.${modules.panel?.panel} > * {
@@ -1432,9 +1502,9 @@ const styles = {
                 z-index: 200;
                 position: absolute;
                 content: "";
-                width: 8px;
+                width: 16px;
                 height: 100%;
-                left: 0;
+                left: -4px;
               }
             `
             : ''}
@@ -1590,7 +1660,7 @@ const styles = {
             max-width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
             width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
             min-width: 1px !important;
-            overflow: hidden !important;
+            overflow: visible !important;
           }
 
           .${modules.search?.searchResultsWrap} > header > div:last-child {
@@ -1604,9 +1674,9 @@ const styles = {
                 z-index: 200;
                 position: absolute;
                 content: "";
-                width: 8px;
+                width: 16px;
                 height: 100%;
-                left: 0;
+                left: -4px;
               }
             `
             : ''}
@@ -1637,93 +1707,63 @@ const styles = {
     },
     {
       get _init() {
-        return [`${runtime.meta.name}-forumPopout_init`,
-          (elements.popoutSpacer)
+        return [`${runtime.meta.name}-forumPopout_init`, `
+          .${modules.popout?.chatLayerWrapper},
+          div:not([class])[style^="min-width"] {
+            max-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
+            width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
+            min-width: 1px !important;
+            z-index: 190 !important;
+            filter: drop-shadow(-8px 0px 0px var(--background-tertiary));
+          }
+          .${modules.popout?.resizeHandle} {
+            display: none !important;
+          }
+          .${modules.popout?.chatLayerWrapper} > * {
+            width: calc(100% - 8px) !important;
+          }
+          .${modules.guilds.threadSidebarOpen} {
+            flex-shrink: 999999999 !important;
+          }
+          .${modules.popout?.floating} {
+            filter: none !important;
+          }
+            
+          .${modules.popout?.chatLayerWrapper}:after {
+            content: "";
+            width: 32px;
+            height: 100%;
+            position: absolute;
+            z-index: -1;
+            top: 0;
+            left: 0;
+            transform: translateX(-32px) translateY(-8px);
+            border: 8px solid var(--background-tertiary);
+            border-radius: 16px;
+            clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
+          }
+
+          ${(settings.forumPopoutWidth)
             ? `
-              .${modules.popout?.chatLayerWrapper},
-              div:not([class])[style^="min-width"] {
-                max-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
-                width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
-                min-width: 1px !important;
-                //overflow: hidden !important;
+              .${modules.popout?.chatLayerWrapper}:before {
+                cursor: e-resize;
+                z-index: 200;
+                position: absolute;
+                content: "";
+                width: 16px;
+                height: 100%;
+                left: -4px;
               }
-              .${modules.popout?.resizeHandle} {
-                display: none !important;
-              }
-              .${modules.popout?.chatLayerWrapper} > * {
-                width: calc(100% - 8px) !important;
-              }
-              .${modules.guilds.threadSidebarOpen} {
-                flex-shrink: 999999999 !important;
-              }
-
-              ${(settings.forumPopoutWidth)
-                ? `
-                  .${modules.popout?.chatLayerWrapper}:before {
-                    cursor: e-resize;
-                    z-index: 200;
-                    position: absolute;
-                    content: "";
-                    width: 8px;
-                    height: 100%;
-                    left: 0;
-                  }
-                `
-                : ''}
             `
-            : `
-              .${modules.popout?.floating}:not(.${modules.popout?.chatTarget.split(' ')[0]}) {
-                max-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
-                width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
-                min-width: 1px !important;
-                overflow: hidden !important;
-              }
-
-              .${modules.popout?.chatTarget.split(' ')[0]} {
-                display: none !important;
-              }
-
-              ${(settings.forumPopoutWidth)
-                ? `
-                  .${modules.popout?.floating}:not(.${modules.popout?.chatTarget.split(' ')[0]}):before {
-                    cursor: e-resize;
-                    z-index: 200;
-                    position: absolute;
-                    content: "";
-                    width: 8px;
-                    height: 100%;
-                    left: 0;
-                  }
-                `
-                : ''}
-            `];
+            : ''}
+        `];
       },
       get _float() {
-        return [`${runtime.meta.name}-forumPopout_float`,
-          (elements.popoutSpacer)
-            ? `
-              .${modules.popout?.chatLayerWrapper} {
-                z-index: 190 !important;
-                filter: drop-shadow(-8px 0px 0px var(--background-tertiary));
-              }
-              div:not([class])[style^="min-width"] {
-                display: none !important;
-              }
-              .${modules.popout?.chatLayerWrapper}:after {
-                content: "";
-                width: 32px;
-                height: 100%;
-                position: absolute;
-                z-index: -1;
-                top: 0;
-                left: 0;
-                transform: translateX(-32px) translateY(-8px);
-                border: 8px solid var(--background-tertiary);
-                border-radius: 16px;
-                clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%);
-              }
-            `
-            : ''];
+        return [`${runtime.meta.name}-forumPopout_float`, `
+          div:not([class])[style^="min-width"] {
+            display: none !important;
+          }
+        `];
       },
       ...styleFunctions,
     },
@@ -1732,6 +1772,9 @@ const styles = {
     hidden: false,
     init: function () {
       runtime.api.DOM.addStyle(`${runtime.meta.name}-settings_init_col`, `
+        .${modules.user?.avatarWrapper} {
+          flex-grow: 1 !important;
+        }
         .${modules.user?.container} .${modules.layout?.flex} > *:not(:last-child) {
           transition: width ${settings.transitionSpeed}ms !important;
           overflow: hidden !important;
@@ -2189,6 +2232,13 @@ module.exports = class CollapsibleUI {
     document.body.addEventListener('mousedown', (e) => {
       // Handle left clicks
       if (e.button === 0) {
+        // Dynamically handle resizing channels list
+        if (e.target.classList.contains(modules.sidebar?.sidebar)) {
+          e.target.style.setProperty('width', `${settings.channelListWidth}px`, 'important');
+          document.querySelector(':root').style.setProperty('--cui-channel-list-handle-transition', 'none');
+          runtime.dragging = e.target;
+        }
+
         // Dynamically handle resizing members list
         if (e.target.classList.contains(modules.members?.membersWrap)) {
           e.target.style.setProperty('width', `${settings.membersListWidth}px`, 'important');
@@ -2208,21 +2258,13 @@ module.exports = class CollapsibleUI {
         }
 
         // Dynamically handle resizing forum popout
-        if (elements.popoutSpacer) {
-          if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
-            e.target.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
-            elements.popoutSpacer.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
-            runtime.dragging = e.target;
+        if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
+          e.target.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
+          elements.popoutSpacer?.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
+          runtime.dragging = e.target;
 
-            elements.popoutSpacer.style.setProperty('transition', 'none', 'important');
-            elements.popoutSpacer.style.setProperty('max-width', '80vw', 'important');
-          }
-        }
-        else {
-          if (e.target.classList.contains(modules.popout?.floating) && !e.target.classList.contains(modules.popout?.chatTarget.split(' ')[0])) {
-            e.target.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
-            runtime.dragging = e.target;
-          }
+          elements.popoutSpacer?.style.setProperty('transition', 'none', 'important');
+          elements.popoutSpacer?.style.setProperty('max-width', '80vw', 'important');
         }
 
         if (runtime.dragging) {
@@ -2236,6 +2278,14 @@ module.exports = class CollapsibleUI {
       // Handle right clicks
       if (e.button === 2) {
         let target = null;
+
+        // Reset channels list width
+        if (e.target.classList.contains(modules.sidebar?.sidebar)) {
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          settings.channelListWidth = settings.defaultChannelListWidth;
+          styles.buttons[constants.I_CHANNEL_LIST].init();
+          target = e.target;
+        }
 
         // Reset members list width
         if (e.target.classList.contains(modules.members?.membersWrap)) {
@@ -2262,26 +2312,16 @@ module.exports = class CollapsibleUI {
         }
 
         // Reset forum popout width
-        if (elements.popoutSpacer) {
-          if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
-            e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
-            elements.popoutSpacer.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
-            settings.forumPopoutWidth = settings.defaultForumPopoutWidth;
-            styles.resize[constants.I_FORUM_POPOUT].init();
-            target = e.target;
+        if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          elements.popoutSpacer?.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          settings.forumPopoutWidth = settings.defaultForumPopoutWidth;
+          styles.resize[constants.I_FORUM_POPOUT].init();
+          target = e.target;
 
-            elements.popoutSpacer.style.removeProperty('width');
-            // Timeout to provide smooth transition
-            setTimeout(() => elements.popoutSpacer.style.removeProperty('transition'), settings.transitionSpeed);
-          }
-        }
-        else {
-          if (e.target.classList.contains(modules.popout?.floating) && !e.target.classList.contains(modules.popout?.chatTarget.split(' ')[0])) {
-            e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
-            settings.forumPopoutWidth = settings.defaultForumPopoutWidth;
-            styles.resize[constants.I_FORUM_POPOUT].init();
-            target = e.target;
-          }
+          elements.popoutSpacer?.style.removeProperty('width');
+          // Timeout to provide smooth transition
+          setTimeout(() => elements.popoutSpacer?.style.removeProperty('transition'), settings.transitionSpeed);
         }
 
         if (target) {
@@ -2306,6 +2346,16 @@ module.exports = class CollapsibleUI {
         if (width > window.innerWidth * 0.8)
           width = window.innerWidth * 0.8;
 
+        // Finish resizing the channels list
+        if (dragging.classList.contains(modules.sidebar?.sidebar)) {
+          settings.channelListWidth = width;
+          console.log(settings.channelListWidth);
+          styles.buttons[constants.I_CHANNEL_LIST].init();
+          document.querySelector(':root').style.removeProperty('--cui-channel-list-handle-offset');
+          document.querySelector(':root').style.removeProperty('--cui-channel-list-handle-transition');
+          target = dragging;
+        }
+
         // Finish resizing the members list
         if (dragging.classList.contains(modules.members?.membersWrap)) {
           settings.membersListWidth = width;
@@ -2328,24 +2378,15 @@ module.exports = class CollapsibleUI {
         }
 
         // Finish resizing the forum popout
-        if (elements.popoutSpacer) {
-          if (dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
-            settings.forumPopoutWidth = width;
-            styles.resize[constants.I_FORUM_POPOUT].init();
-            target = dragging;
+        if (dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
+          settings.forumPopoutWidth = width;
+          styles.resize[constants.I_FORUM_POPOUT].init();
+          target = dragging;
 
-            elements.popoutSpacer.style.removeProperty('width');
-            elements.popoutSpacer.style.removeProperty('max-width');
-            // Timeout to avoid transition flash
-            setTimeout(() => elements.popoutSpacer.style.removeProperty('transition'), settings.transitionSpeed);
-          }
-        }
-        else {
-          if (dragging.classList.contains(modules.popout?.floating) && !dragging.classList.contains(modules.popout?.chatTarget.split(' ')[0])) {
-            settings.forumPopoutWidth = width;
-            styles.resize[constants.I_FORUM_POPOUT].init();
-            target = dragging;
-          }
+          elements.popoutSpacer?.style.removeProperty('width');
+          elements.popoutSpacer?.style.removeProperty('max-width');
+          // Timeout to avoid transition flash
+          setTimeout(() => elements.popoutSpacer?.style.removeProperty('transition'), settings.transitionSpeed);
         }
 
         if (target) {
@@ -2372,13 +2413,17 @@ module.exports = class CollapsibleUI {
       // Handle resizing members list/user profile/search panel/forum popout
       if (runtime.dragging.classList.contains(modules.members?.membersWrap)
         || runtime.dragging.classList.contains(modules.panel?.outer)
-        || runtime.dragging.classList.contains(modules.search?.searchResultsWrap)
-        || (runtime.dragging.classList.contains(modules.popout?.floating) && !runtime.dragging.classList.contains(modules.popout?.chatTarget.split(' ')[0])))
+        || runtime.dragging.classList.contains(modules.search?.searchResultsWrap))
         runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
+
+      if (runtime.dragging.classList.contains(modules.sidebar?.sidebar)) {
+        runtime.dragging.style.setProperty('width', `${e.clientX - runtime.dragging.getBoundingClientRect().left}px`, 'important');
+        document.querySelector(':root').style.setProperty('--cui-channel-list-handle-offset', `${e.clientX - runtime.dragging.getBoundingClientRect().left - 12}px`);
+      }
 
       if (runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
         runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
-        elements.popoutSpacer.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
+        elements.popoutSpacer?.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
       }
     }, { passive: true, signal: runtime.controller.signal });
 
@@ -2463,7 +2508,8 @@ module.exports = class CollapsibleUI {
           else {
             if (!runtime.collapsed[i]) {
               if (elements.biteSizePanel
-                || elements.rightClickMenu) {
+                || elements.rightClickMenu
+                || elements.forumPreviewTooltip) {
                 this.collapseElementDynamic(i, false);
               }
               else this.collapseElementDynamic(i, true);

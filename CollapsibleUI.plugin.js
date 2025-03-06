@@ -1300,8 +1300,8 @@ const styles = {
           .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
             max-width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
             width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
-            min-width: 1px !important;
-            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
+            min-width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
+            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms;
             min-height: 100% !important;
             overflow: visible !important;
           }
@@ -1391,8 +1391,8 @@ const styles = {
           .${modules.members?.membersWrap} {
             max-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
             width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
-            min-width: 1px !important;
-            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, padding ${settings.transitionSpeed}ms;
+            min-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
+            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms, padding ${settings.transitionSpeed}ms;
             min-height: 100% !important;
           }
           .${modules.members?.membersWrap} > * {
@@ -1479,8 +1479,8 @@ const styles = {
           .${modules.panel?.outer}.${modules.panel?.panel} {
             max-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
             width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
-            min-width: 1px !important;
-            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms;
+            min-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
+            transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms;
             min-height: 100% !important;
           }
           .${modules.panel?.outer}.${modules.panel?.panel} > * {
@@ -1659,7 +1659,7 @@ const styles = {
           .${modules.search?.searchResultsWrap} {
             max-width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
             width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
-            min-width: 1px !important;
+            min-width: ${settings.searchPanelWidth || settings.defaultSearchPanelWidth}px !important;
             overflow: visible !important;
           }
 
@@ -1712,7 +1712,7 @@ const styles = {
           div:not([class])[style^="min-width"] {
             max-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
             width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
-            min-width: 1px !important;
+            min-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px !important;
             z-index: 190 !important;
             filter: drop-shadow(-8px 0px 0px var(--background-tertiary));
           }
@@ -2232,44 +2232,22 @@ module.exports = class CollapsibleUI {
     document.body.addEventListener('mousedown', (e) => {
       // Handle left clicks
       if (e.button === 0) {
-        // Dynamically handle resizing channels list
-        if (e.target.classList.contains(modules.sidebar?.sidebar)) {
-          e.target.style.setProperty('width', `${settings.channelListWidth}px`, 'important');
+        // Dynamically handle resizing elements
+        if (e.target.classList.contains(modules.sidebar?.sidebar)
+          || e.target.classList.contains(modules.members?.membersWrap)
+          || e.target.classList.contains(modules.panel?.outer)
+          || e.target.classList.contains(modules.search?.searchResultsWrap)
+          || e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
+          e.target.style.setProperty('transition', 'none', 'important');
+
+          runtime.dragging = e.target;
+        }
+
+        if (e.target.classList.contains(modules.sidebar?.sidebar))
           document.querySelector(':root').style.setProperty('--cui-channel-list-handle-transition', 'none');
-          runtime.dragging = e.target;
-        }
 
-        // Dynamically handle resizing members list
-        if (e.target.classList.contains(modules.members?.membersWrap)) {
-          e.target.style.setProperty('width', `${settings.membersListWidth}px`, 'important');
-          runtime.dragging = e.target;
-        }
-
-        // Dynamically handle resizing user profile
-        if (e.target.classList.contains(modules.panel?.outer)) {
-          e.target.style.setProperty('width', `${settings.userProfileWidth}px`, 'important');
-          runtime.dragging = e.target;
-        }
-
-        // Dynamically handle resizing search panel
-        if (e.target.classList.contains(modules.search?.searchResultsWrap)) {
-          e.target.style.setProperty('width', `${settings.searchPanelWidth}px`, 'important');
-          runtime.dragging = e.target;
-        }
-
-        // Dynamically handle resizing forum popout
         if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
-          e.target.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
-          elements.popoutSpacer?.style.setProperty('width', `${settings.forumPopoutWidth}px`, 'important');
-          runtime.dragging = e.target;
-
           elements.popoutSpacer?.style.setProperty('transition', 'none', 'important');
-          elements.popoutSpacer?.style.setProperty('max-width', '80vw', 'important');
-        }
-
-        if (runtime.dragging) {
-          runtime.dragging.style.setProperty('transition', 'none', 'important');
-          runtime.dragging.style.setProperty('max-width', '80vw', 'important');
         }
       }
     }, { passive: true, signal: runtime.controller.signal });
@@ -2281,7 +2259,6 @@ module.exports = class CollapsibleUI {
 
         // Reset channels list width
         if (e.target.classList.contains(modules.sidebar?.sidebar)) {
-          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
           settings.channelListWidth = settings.defaultChannelListWidth;
           styles.buttons[constants.I_CHANNEL_LIST].init();
           target = e.target;
@@ -2289,7 +2266,6 @@ module.exports = class CollapsibleUI {
 
         // Reset members list width
         if (e.target.classList.contains(modules.members?.membersWrap)) {
-          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
           settings.membersListWidth = settings.defaultMembersListWidth;
           styles.buttons[constants.I_MEMBERS_LIST].init();
           target = e.target;
@@ -2297,7 +2273,6 @@ module.exports = class CollapsibleUI {
 
         // Reset user profile width
         if (e.target.classList.contains(modules.panel?.outer)) {
-          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
           settings.userProfileWidth = settings.defaultUserProfileWidth;
           styles.buttons[constants.I_USER_PROFILE].init();
           target = e.target;
@@ -2305,7 +2280,7 @@ module.exports = class CollapsibleUI {
 
         // Reset search panel width
         if (e.target.classList.contains(modules.search?.searchResultsWrap)) {
-          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms`, 'important');
           settings.searchPanelWidth = settings.defaultSearchPanelWidth;
           styles.resize[constants.I_SEARCH_PANEL].init();
           target = e.target;
@@ -2313,19 +2288,17 @@ module.exports = class CollapsibleUI {
 
         // Reset forum popout width
         if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
-          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
-          elements.popoutSpacer?.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms`, 'important');
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms`, 'important');
+          elements.popoutSpacer?.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms`, 'important');
           settings.forumPopoutWidth = settings.defaultForumPopoutWidth;
           styles.resize[constants.I_FORUM_POPOUT].init();
           target = e.target;
 
-          elements.popoutSpacer?.style.removeProperty('width');
           // Timeout to provide smooth transition
           setTimeout(() => elements.popoutSpacer?.style.removeProperty('transition'), settings.transitionSpeed);
         }
 
         if (target) {
-          target.style.removeProperty('width');
           // Timeout to provide smooth transition
           setTimeout(() => target.style.removeProperty('transition'), settings.transitionSpeed);
         }
@@ -2341,15 +2314,9 @@ module.exports = class CollapsibleUI {
         }
         else return;
 
-        // Clamp max width to 80vw
-        let width = parseInt(dragging.style.width);
-        if (width > window.innerWidth * 0.8)
-          width = window.innerWidth * 0.8;
-
         // Finish resizing the channels list
         if (dragging.classList.contains(modules.sidebar?.sidebar)) {
-          settings.channelListWidth = width;
-          console.log(settings.channelListWidth);
+          settings.channelListWidth = parseInt(dragging.style.width);
           styles.buttons[constants.I_CHANNEL_LIST].init();
           document.querySelector(':root').style.removeProperty('--cui-channel-list-handle-offset');
           document.querySelector(':root').style.removeProperty('--cui-channel-list-handle-transition');
@@ -2358,33 +2325,34 @@ module.exports = class CollapsibleUI {
 
         // Finish resizing the members list
         if (dragging.classList.contains(modules.members?.membersWrap)) {
-          settings.membersListWidth = width;
+          settings.membersListWidth = parseInt(dragging.style.width);
           styles.buttons[constants.I_MEMBERS_LIST].init();
           target = dragging;
         }
 
         // Finish resizing the user profile
         if (dragging.classList.contains(modules.panel?.outer)) {
-          settings.userProfileWidth = width;
+          settings.userProfileWidth = parseInt(dragging.style.width);
           styles.buttons[constants.I_USER_PROFILE].init();
           target = dragging;
         }
 
         // Finish resizing the search panel
         if (dragging.classList.contains(modules.search?.searchResultsWrap)) {
-          settings.searchPanelWidth = width;
+          settings.searchPanelWidth = parseInt(dragging.style.width);
           styles.resize[constants.I_SEARCH_PANEL].init();
           target = dragging;
         }
 
         // Finish resizing the forum popout
         if (dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
-          settings.forumPopoutWidth = width;
+          settings.forumPopoutWidth = parseInt(dragging.style.width);
           styles.resize[constants.I_FORUM_POPOUT].init();
           target = dragging;
 
           elements.popoutSpacer?.style.removeProperty('width');
           elements.popoutSpacer?.style.removeProperty('max-width');
+          elements.popoutSpacer?.style.removeProperty('min-width');
           // Timeout to avoid transition flash
           setTimeout(() => elements.popoutSpacer?.style.removeProperty('transition'), settings.transitionSpeed);
         }
@@ -2392,6 +2360,7 @@ module.exports = class CollapsibleUI {
         if (target) {
           target.style.removeProperty('width');
           target.style.removeProperty('max-width');
+          target.style.removeProperty('min-width');
           // Timeout to avoid transition flash
           setTimeout(() => target.style.removeProperty('transition'), settings.transitionSpeed);
         }
@@ -2410,20 +2379,33 @@ module.exports = class CollapsibleUI {
 
       if (!runtime.dragging) return;
 
+      // Clamp width to between 1px and 80vw
+      let width = runtime.dragging.classList.contains(modules.sidebar?.sidebar)
+        ? e.clientX - runtime.dragging.getBoundingClientRect().left
+        : runtime.dragging.getBoundingClientRect().right - e.clientX;
+      if (width > window.innerWidth * 0.8)
+        width = window.innerWidth * 0.8;
+      else if (width < 1)
+        width = 1;
+
       // Handle resizing members list/user profile/search panel/forum popout
       if (runtime.dragging.classList.contains(modules.members?.membersWrap)
         || runtime.dragging.classList.contains(modules.panel?.outer)
-        || runtime.dragging.classList.contains(modules.search?.searchResultsWrap))
-        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
-
-      if (runtime.dragging.classList.contains(modules.sidebar?.sidebar)) {
-        runtime.dragging.style.setProperty('width', `${e.clientX - runtime.dragging.getBoundingClientRect().left}px`, 'important');
-        document.querySelector(':root').style.setProperty('--cui-channel-list-handle-offset', `${e.clientX - runtime.dragging.getBoundingClientRect().left - 12}px`);
+        || runtime.dragging.classList.contains(modules.search?.searchResultsWrap)
+        || runtime.dragging.classList.contains(modules.sidebar?.sidebar)
+        || runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
+        runtime.dragging.style.setProperty('width', `${width}px`, 'important');
+        runtime.dragging.style.setProperty('max-width', `${width}px`, 'important');
+        runtime.dragging.style.setProperty('min-width', `${width}px`, 'important');
       }
 
+      if (runtime.dragging.classList.contains(modules.sidebar?.sidebar))
+        document.querySelector(':root').style.setProperty('--cui-channel-list-handle-offset', `${width - 12}px`);
+
       if (runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
-        runtime.dragging.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
-        elements.popoutSpacer?.style.setProperty('width', `${runtime.dragging.getBoundingClientRect().right - e.clientX}px`, 'important');
+        elements.popoutSpacer?.style.setProperty('width', `${width}px`, 'important');
+        elements.popoutSpacer?.style.setProperty('max-width', `${width}px`, 'important');
+        elements.popoutSpacer?.style.setProperty('min-width', `${width}px`, 'important');
       }
     }, { passive: true, signal: runtime.controller.signal });
 

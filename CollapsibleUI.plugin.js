@@ -15,6 +15,9 @@ const settings = {
   get transitionSpeed() { return this._transitionSpeed ?? (this._transitionSpeed = runtime.api.Data.load('transition-speed') ?? 200); },
   set transitionSpeed(v) { runtime.api.Data.save('transition-speed', this._transitionSpeed = v); },
 
+  get floatingPanels() { return this._floatingPanels ?? (this._floatingPanels = runtime.api.Data.load('floating-panels') ?? 'on-hover-exclude-server-list'); },
+  set floatingPanels(v) { runtime.api.Data.save('floating-panels', this._floatingPanels = v); },
+
   get collapseToolbar() { return this._collapseToolbar ?? (this._collapseToolbar = runtime.api.Data.load('collapse-toolbar') ?? 'cui'); },
   set collapseToolbar(v) { runtime.api.Data.save('collapse-toolbar', this._collapseToolbar = v); },
 
@@ -66,9 +69,6 @@ const settings = {
   get expandOnHover() { return this._expandOnHover ?? (this._expandOnHover = runtime.api.Data.load('expand-on-hover') ?? true); },
   set expandOnHover(v) { runtime.api.Data.save('expand-on-hover', this._expandOnHover = v); },
 
-  get floatingPanels() { return this._floatingPanels ?? (this._floatingPanels = runtime.api.Data.load('floating-panels') ?? true); },
-  set floatingPanels(v) { runtime.api.Data.save('floating-panels', this._floatingPanels = v); },
-
   get expandOnHoverEnabled() { return this._expandOnHoverEnabled ?? (this._expandOnHoverEnabled = runtime.api.Data.load('expand-on-hover-enabled') ?? [true, true, true, true, true, true, true, true]); },
   set expandOnHoverEnabled(v) { runtime.api.Data.save('expand-on-hover-enabled', this._expandOnHoverEnabled = v); },
 
@@ -107,6 +107,9 @@ const settings = {
 
   get windowBarHeight() { return this._windowBarHeight ?? (this._windowBarHeight = runtime.api.Data.load('window-bar-height') ?? 18); },
   set windowBarHeight(v) { runtime.api.Data.save('window-bar-height', this._windowBarHeight = v); },
+
+  get serverListWidth() { return this._serverListWidth ?? (this._serverListWidth = runtime.api.Data.load('server-list-width') ?? 72); },
+  set serverListWidth(v) { runtime.api.Data.save('server-list-width', this._serverListWidth = v); },
 
   get buttonsActive() { return this._buttonsActive ?? (this._buttonsActive = runtime.api.Data.load('buttons-active') ?? [true, true, true, true, true, true, true, true]); },
   set buttonsActive(v) { runtime.api.Data.save('buttons-active', this._buttonsActive = v); },
@@ -195,7 +198,7 @@ const config = {
       id: 'main-group',
       name: 'Main',
       collapsible: true,
-      shown: false,
+      shown: true,
       settings: [
         {
           type: 'number',
@@ -203,6 +206,35 @@ const config = {
           name: 'UI Transition Speed (ms)',
           note: 'Sets the speed of UI animations. Set to 0 to disable transitions',
           get value() { return settings.transitionSpeed; },
+        },
+        {
+          type: 'dropdown',
+          id: 'floatingPanels',
+          name: 'Floating Panels',
+          note: 'Expanded UI panels will float over other panels, instead of moving them out of the way',
+          get value() { return settings.floatingPanels; },
+          options: [
+            {
+              label: 'Never',
+              value: false,
+            },
+            {
+              label: 'On Hover',
+              value: 'on-hover',
+            },
+            {
+              label: 'On Hover (Exclude Server List)',
+              value: 'on-hover-exclude-server-list',
+            },
+            {
+              label: 'Always (Search/Forum Only)',
+              value: 'always-non-collapsible',
+            },
+            {
+              label: 'Always (All Panels)',
+              value: 'always',
+            },
+          ],
         },
         {
           type: 'dropdown',
@@ -476,13 +508,6 @@ const config = {
         },
         {
           type: 'switch',
-          id: 'floatingPanels',
-          name: 'Floating Panels',
-          note: 'Expanded UI panels will float over other panels, instead of moving them out of the way',
-          get value() { return settings.floatingPanels; },
-        },
-        {
-          type: 'switch',
           id: 'server-list-expand-on-hover',
           name: 'Server List',
           note: 'Server List expands on hover',
@@ -745,6 +770,13 @@ const config = {
           name: 'Window Bar - Height (px)',
           note: 'The height of the Window Bar when expanded',
           get value() { return settings.windowBarHeight; },
+        },
+        {
+          type: 'number',
+          id: 'serverListWidth',
+          name: 'Server List - Width (px)',
+          note: 'The width of the Server List when expanded',
+          get value() { return settings.serverListWidth; },
         },
         {
           type: 'number',
@@ -1128,21 +1160,18 @@ const constants = {
 const modules = {
   get members() { return this._members ?? (this._members = runtime.api.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon')); },
   get icons() { return this._icons ?? (this._icons = runtime.api.Webpack.getByKeys('selected', 'iconWrapper', 'clickable', 'icon')); },
-  get member() { return this._member ?? (this._member = runtime.api.Webpack.getByKeys('member', 'ownerIcon', 'activityText', 'clanTag')); },
   get dispatcher() { return this._dispatcher ?? (this._dispatcher = runtime.api.Webpack.getByKeys('dispatch', 'isDispatching')); },
   get social() { return this._social ?? (this._social = runtime.api.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend')); },
   get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'forumOrHome')); },
   get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('biteSize', 'fullSize', 'panel', 'outer', 'inner', 'overlay')); },
   get guilds() { return this._guilds ?? (this._guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby')); },
   get frame() { return this._frame ?? (this._frame = runtime.api.Webpack.getByKeys('typeMacOS', 'typeWindows', 'withBackgroundOverride')); },
-  get callWindow() { return this._callWindow ?? (this._callWindow = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer')); },
+  get calls() { return this._calls ?? (this._calls = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer')); },
   get threads() { return this._threads ?? (this._threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton')); },
   get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
-  get layout() { return this._layout ?? (this._layout = runtime.api.Webpack.getByKeys('flex', 'horizontal', 'flexChild')); },
   get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton')); },
   get popout() { return this._popout ?? (this._popout = runtime.api.Webpack.getByKeys('chatLayerWrapper', 'container', 'chatTarget')); },
   get sidebar() { return this._sidebar ?? (this._sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded')); },
-  get servers() { return this._servers ?? (this._servers = runtime.api.Webpack.getByKeys('wrapper', 'unreadMentionsIndicatorTop', 'discoveryIcon')); },
   get effects() { return this._effects ?? (this._effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect')); },
   get search() { return this._search ?? (this._search = runtime.api.Webpack.getByKeys('searchResultsWrap', 'stillIndexing', 'noResults')); },
   get tooltip() { return this._tooltip ?? (this._tooltip = runtime.api.Webpack.getByKeys('menu', 'label', 'caret')); },
@@ -1158,13 +1187,13 @@ const elements = {
   get userProfile() { return document.querySelector(`.${modules.panel?.inner}.${modules.panel?.panel}`); },
   get messageInput() { return document.querySelector(`.${modules.guilds?.form}`); },
   get windowBar() { return document.querySelector(`.${modules.frame?.typeWindows.split(' ')[2]}`); },
-  get callWindow() { return document.querySelector(`.${modules.callWindow?.wrapper}:not(.${modules.callWindow?.noChat})`); },
-  get settingsContainer() { return document.querySelector(`.${modules.user?.container} .${modules.layout?.flex}`); },
+  get callWindow() { return document.querySelector(`.${modules.calls?.wrapper}:not(.${modules.calls?.noChat})`); },
+  get settingsContainer() { return document.querySelector(`.${modules.user?.buttons}`); },
   get messageInputContainer() { return document.querySelector(`.${modules.input?.buttons}`); },
   get forumPopout() { return document.querySelector(`.${modules.popout?.chatLayerWrapper}`); },
   get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
   get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
-  get serverList() { return document.querySelector(`.${modules.servers?.wrapper}`); },
+  get serverList() { return document.querySelector(`.${modules.sidebar?.guilds}`); },
   get channelList() { return document.querySelector(`.${modules.sidebar?.sidebar}`); },
   get rightClickMenu() { return document.querySelector(`.${modules.tooltip?.menu}`); },
   get forumPreviewTooltip() { return document.querySelector(`.${modules.preview?.popout}`); },
@@ -1226,7 +1255,8 @@ const runtime = {
 const styleFunctions = {
   _toggled: true,
   init: function () {
-    runtime.api.DOM.addStyle(...this._init);
+    if (this._init) runtime.api.DOM.addStyle(...this._init);
+    if (this._float && settings.floatingPanels === 'always') runtime.api.DOM.addStyle(...this._float);
   },
   toggle: function () {
     if (!settings.collapseDisabledButtons && settings.buttonIndexes[this._index] === 0) {
@@ -1240,11 +1270,11 @@ const styleFunctions = {
     else {
       if (this._toggled) {
         runtime.api.DOM.addStyle(`${this._toggle[0]}_dynamic`, this._toggle[1]);
-        if (settings.floatingPanels) runtime.api.DOM.addStyle(...this._float);
+        if (this._float && settings.floatingPanels && settings.floatingPanels !== 'always') runtime.api.DOM.addStyle(...this._float);
       }
       else {
         runtime.api.DOM.removeStyle(`${this._toggle[0]}_dynamic`);
-        if (settings.floatingPanels) runtime.api.DOM.removeStyle(this._float[0]);
+        if (this._float && settings.floatingPanels && settings.floatingPanels !== 'always') runtime.api.DOM.removeStyle(this._float[0]);
       }
     }
     this._toggled = !this._toggled;
@@ -1253,7 +1283,7 @@ const styleFunctions = {
     if (this._float) runtime.api.DOM.addStyle(...this._float);
   },
   clear: function () {
-    runtime.api.DOM.removeStyle(this._init[0]);
+    if (this._init) runtime.api.DOM.removeStyle(this._init[0]);
     if (this._toggle) runtime.api.DOM.removeStyle(this._toggle[0]);
     if (this._float) runtime.api.DOM.removeStyle(this._float[0]);
     if (this._clear) this._clear();
@@ -1267,23 +1297,67 @@ const styles = {
       _index: constants.I_SERVER_LIST,
       get _init() {
         return [`${runtime.meta.name}-serverList_init`, `
-        
+          .${modules.sidebar?.guilds} {
+            transition: width ${settings.transitionSpeed}ms;
+          }
+          .${modules.sidebar?.base} {
+            transition: top ${settings.transitionSpeed}ms;
+          }
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                ${this._toggle[1]}
+              }
+            `
+            : ''}
         `];
       },
       get _toggle() {
         return [`${runtime.meta.name}-serverList_toggle`, `
-        
+          .${modules.sidebar?.guilds} {
+            width: ${settings.collapseSize}px !important;
+          }
+          .${modules.sidebar?.base} {
+            --server-container: 0px;
+          }
         `];
       },
       get _float() {
-        return [`${runtime.meta.name}-serverList_float`, `
-        
-        `];
+        return [`${runtime.meta.name}-serverList_float`,
+          (settings.floatingPanels === 'on-hover-exclude-server-list')
+            ? ''
+            : `
+              .${modules.sidebar?.guilds} {
+                position: absolute !important;
+                z-index: 191 !important;
+                min-height: 100% !important;
+                overflow-y: scroll !important;
+                ${runtime.api.Themes.isEnabled('Horizontal Server List')
+                  ? 'max-height: 100vw !important;'
+                  : 'max-height: 100% !important'}
+              }
+            `,
+        ];
       },
-      get query() { return ``; },
+      get query() {
+        return runtime.api.Themes.isEnabled('Horizontal Server List')
+          ? `(max-height: ${settings.sizeCollapseThreshold[constants.I_SERVER_LIST]}px)`
+          : `(max-width: ${settings.sizeCollapseThreshold[constants.I_SERVER_LIST]}px)`;
+      },
       get _queryToggle() {
         return [`${runtime.meta.name}-serverList_queryToggle`, `
-        
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                .${modules.sidebar?.guilds} {
+                  width: ${settings.serverListWidth}px !important;
+                }
+                .${modules.sidebar?.base} {
+                  --server-container: inherit;
+                }
+              }
+            `
+            : ''}
         `];
       },
       ...styleFunctions,
@@ -1341,6 +1415,8 @@ const styles = {
         return [`${runtime.meta.name}-channelList_toggle`, `
           .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
             max-width: ${settings.collapseSize}px !important;
+            width: ${settings.collapseSize}px !important;
+            min-width: ${settings.collapseSize}px !important;
           }
           ${(settings.channelListWidth)
             ? `
@@ -1367,8 +1443,10 @@ const styles = {
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
-                .${modules.sidebar?.sidebar} {
-                  max-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
+                .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
+                  max-width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
+                  width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
+                  min-width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
                 }
                 ${(settings.channelListWidth)
                   ? `
@@ -1427,6 +1505,8 @@ const styles = {
         return [`${runtime.meta.name}-membersList_toggle`, `
           .${modules.members?.membersWrap} {
             max-width: ${settings.collapseSize}px !important;
+            width: ${settings.collapseSize}px !important;
+            min-width: ${settings.collapseSize}px !important;
             padding-left: 0 !important;
             padding-right: 0 !important;
           }
@@ -1461,6 +1541,8 @@ const styles = {
               @media ${this.query} {
                 .${modules.members?.membersWrap} {
                   max-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
+                  width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
+                  min-width: ${settings.membersListWidth || settings.defaultMembersListWidth}px !important;
                 }
               }
             `
@@ -1521,6 +1603,8 @@ const styles = {
         return [`${runtime.meta.name}-userProfile_toggle`, `
           .${modules.panel?.outer}.${modules.panel?.panel} {
             max-width: ${settings.collapseSize}px !important;
+            width: ${settings.collapseSize}px !important;
+            min-width: ${settings.collapseSize}px !important;
           }
         `];
       },
@@ -1553,6 +1637,8 @@ const styles = {
               @media ${this.query} {
                 .${modules.panel?.outer}.${modules.panel?.panel} {
                   max-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
+                  width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
+                  min-width: ${settings.userProfileWidth || settings.defaultUserProfileWidth}px !important;
                 }
               }
             `
@@ -1775,7 +1861,7 @@ const styles = {
         .${modules.user?.avatarWrapper} {
           flex-grow: 1 !important;
         }
-        .${modules.user?.container} .${modules.layout?.flex} > *:not(:last-child) {
+        .${modules.user?.buttons} > *:not(:last-child) {
           transition: width ${settings.transitionSpeed}ms !important;
           overflow: hidden !important;
         }
@@ -1784,7 +1870,7 @@ const styles = {
     },
     hide: function () {
       runtime.api.DOM.addStyle(`${runtime.meta.name}-settings_hide_col`, `
-        .${modules.user?.container} .${modules.layout?.flex} > *:not(:last-child) {
+        .${modules.user?.buttons} > *:not(:last-child) {
           width: 0px !important;
         }
       `);
@@ -1895,6 +1981,11 @@ const styles = {
   init: function () {
     // Add root styles
     runtime.api.DOM.addStyle(`${runtime.meta.name}-root`, `
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+
       .cui-toolbar {
         align-items: right;
         display: flex;
@@ -1921,7 +2012,7 @@ const styles = {
     // Init resize styles
     this.resize.forEach((panel) => {
       panel.init();
-      if (settings.floatingPanels) panel.float();
+      if (settings.floatingPanels && settings.floatingPanels !== 'on-hover') panel.float();
     });
 
     // Init collapse styles
@@ -2483,7 +2574,8 @@ module.exports = class CollapsibleUI {
         if (settings.expandOnHoverEnabled[i] && (!settings.buttonsActive[i] || (settings.sizeCollapse && window.matchMedia(styles.buttons[i].query)).matches)) {
           if (this.isNear(elements.index[i], settings.expandOnHoverFudgeFactor, x, y)) {
             if (runtime.collapsed[i]) {
-              if (settings.floatingPanels) styles.buttons[i].float();
+              if (settings.floatingPanels && settings.floatingPanels !== 'always')
+                styles.buttons[i].float();
               this.collapseElementDynamic(i, false);
             }
           }
@@ -2564,8 +2656,12 @@ module.exports = class CollapsibleUI {
   // Update the dynamic collapsed state of an element
   collapseElementDynamic(index, collapsed) {
     if (collapsed) {
-      if (settings.sizeCollapse && window.matchMedia(styles.buttons[index].query).matches)
+      if (settings.sizeCollapse && window.matchMedia(styles.buttons[index].query).matches) {
         runtime.api.DOM.removeStyle(styles.buttons[index]._queryToggle[0]);
+        if (settings.floatingPanels && settings.floatingPanels !== 'always')
+          if (styles.buttons[index]._float)
+            setTimeout(() => runtime.api.DOM.removeStyle(styles.buttons[index]._float[0]), settings.transitionSpeed);
+      }
       else
         runtime.api.DOM.addStyle(
           `${styles.buttons[index]._toggle[0]}_dynamic`,
@@ -2576,9 +2672,7 @@ module.exports = class CollapsibleUI {
       if (settings.sizeCollapse && window.matchMedia(styles.buttons[index].query).matches)
         runtime.api.DOM.addStyle(...styles.buttons[index]._queryToggle);
       else
-        runtime.api.DOM.removeStyle(
-          `${styles.buttons[index]._toggle[0]}_dynamic`,
-        );
+        runtime.api.DOM.removeStyle(`${styles.buttons[index]._toggle[0]}_dynamic`);
     }
     runtime.collapsed[index] = collapsed;
   }

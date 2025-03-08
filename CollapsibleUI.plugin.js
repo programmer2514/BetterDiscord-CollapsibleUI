@@ -179,8 +179,6 @@ const config = {
         'Greatly increased plugin\'s overall performance',
         'Small visual tweaks for UI consistency',
         'Updated settings panel layout',
-        'THIS UPDATE RESETS MANY OF YOUR SETTINGS TO DEFAULT',
-        'TO MINIMIZE BUGS, PLEASE DELETE THE FILE "CollapsibleUI.config.json" IN YOUR PLUGINS FOLDER',
         'RE-WRITE MAY INTRODUCE REGRESSIONS - PLEASE REPORT ANY NEW ISSUES VIA GITHUB',
       ],
     },
@@ -1154,6 +1152,7 @@ const constants = {
   I_USER_AREA: 7,
   I_SEARCH_PANEL: 0,
   I_FORUM_POPOUT: 1,
+  I_ACTIVITY_PANEL: 2,
 };
 
 // Abstract webpack modules
@@ -1177,6 +1176,7 @@ const modules = {
   get tooltip() { return this._tooltip ?? (this._tooltip = runtime.api.Webpack.getByKeys('menu', 'label', 'caret')); },
   get preview() { return this._preview ?? (this._preview = runtime.api.Webpack.getByKeys('popout', 'more', 'title', 'timestamp', 'name')); },
   get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
+  get activity() { return this._activity ?? (this._activity = runtime.api.Webpack.getByKeys('itemCard', 'emptyCard', 'emptyText')); },
 };
 
 const elements = {
@@ -1198,6 +1198,7 @@ const elements = {
   get rightClickMenu() { return document.querySelector(`.${modules.tooltip?.menu}`); },
   get forumPreviewTooltip() { return document.querySelector(`.${modules.preview?.popout}`); },
   get popoutSpacer() { return document.querySelector(`div:not([class])[style^="min-width"]`); },
+  get bdPluginFolderButton() { return document.querySelector('button:has([d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"])'); },
   get index() {
     return [
       this.serverList,
@@ -1270,11 +1271,13 @@ const styleFunctions = {
     else {
       if (this._toggled) {
         runtime.api.DOM.addStyle(`${this._toggle[0]}_dynamic`, this._toggle[1]);
-        if (this._float && settings.floatingPanels && settings.floatingPanels !== 'always') runtime.api.DOM.addStyle(...this._float);
+        if (this._float && settings.floatingPanels && settings.floatingPanels !== 'always')
+          setTimeout(() => runtime.api.DOM.addStyle(...this._float), settings.transitionSpeed);
       }
       else {
         runtime.api.DOM.removeStyle(`${this._toggle[0]}_dynamic`);
-        if (this._float && settings.floatingPanels && settings.floatingPanels !== 'always') runtime.api.DOM.removeStyle(this._float[0]);
+        if (this._float && settings.floatingPanels && settings.floatingPanels !== 'always')
+          runtime.api.DOM.removeStyle(this._float[0]);
       }
     }
     this._toggled = !this._toggled;
@@ -1300,9 +1303,11 @@ const styles = {
           .${modules.sidebar?.guilds} {
             transition: width ${settings.transitionSpeed}ms;
           }
+
           .${modules.sidebar?.base} {
             transition: top ${settings.transitionSpeed}ms;
           }
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1310,17 +1315,18 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-serverList_toggle`, `
           .${modules.sidebar?.guilds} {
             width: ${settings.collapseSize}px !important;
           }
+
           .${modules.sidebar?.base} {
             --server-container: 0px;
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-serverList_float`,
@@ -1352,13 +1358,14 @@ const styles = {
                 .${modules.sidebar?.guilds} {
                   width: ${settings.serverListWidth}px !important;
                 }
+
                 .${modules.sidebar?.base} {
                   --server-container: inherit;
                 }
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1379,15 +1386,19 @@ const styles = {
             min-height: 100% !important;
             overflow: visible !important;
           }
+
           .${modules.sidebar?.sidebar} > * {
             overflow: hidden !important;
           }
+
           .${modules.channels?.channel} {
             max-width: 100% !important;
           }
+
           .${modules.user?.avatarWrapper} {
             min-width: 32px !important;
           }
+
           ${(settings.channelListWidth)
             ? `
               .${modules.sidebar?.sidebar}:before {
@@ -1402,6 +1413,7 @@ const styles = {
               }
             `
             : ''}
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1409,7 +1421,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-channelList_toggle`, `
@@ -1418,6 +1430,7 @@ const styles = {
             width: ${settings.collapseSize}px !important;
             min-width: ${settings.collapseSize}px !important;
           }
+
           ${(settings.channelListWidth)
             ? `
               .${modules.sidebar?.sidebar}:before {
@@ -1425,7 +1438,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-channelList_float`, `
@@ -1435,7 +1448,7 @@ const styles = {
             max-height: 100% !important;
             height: 100% !important;
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return `(max-width: ${settings.sizeCollapseThreshold[constants.I_CHANNEL_LIST]}px)`; },
       get _queryToggle() {
@@ -1448,6 +1461,7 @@ const styles = {
                   width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
                   min-width: ${settings.channelListWidth || settings.defaultChannelListWidth}px !important;
                 }
+
                 ${(settings.channelListWidth)
                   ? `
                     .${modules.sidebar?.sidebar}:before {
@@ -1458,7 +1472,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1473,12 +1487,15 @@ const styles = {
             transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms, padding ${settings.transitionSpeed}ms;
             min-height: 100% !important;
           }
+
           .${modules.members?.membersWrap} > * {
             width: 100% !important;
           }
+
           .${modules.members?.membersWrap} * {
             max-width: 100% !important;
           }
+
           ${(settings.membersListWidth)
             ? `
               .${modules.members?.membersWrap}:before {
@@ -1492,6 +1509,7 @@ const styles = {
               }
             `
             : ''}
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1499,7 +1517,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-membersList_toggle`, `
@@ -1510,7 +1528,7 @@ const styles = {
             padding-left: 0 !important;
             padding-right: 0 !important;
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-membersList_float`, `
@@ -1521,6 +1539,7 @@ const styles = {
             height: 100% !important;
             right: 0 !important;
           }
+
           .${modules.members?.membersWrap}:after {
             content: "";
             position: absolute;
@@ -1531,7 +1550,7 @@ const styles = {
             background: rgba(0, 0, 0, 0.05);
             border-top: 1px solid rgba(0, 0, 0, 0.15);
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return `(max-width: ${settings.sizeCollapseThreshold[constants.I_MEMBERS_LIST]}px)`; },
       get _queryToggle() {
@@ -1547,7 +1566,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1565,18 +1584,23 @@ const styles = {
             transition: max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms;
             min-height: 100% !important;
           }
+
           .${modules.panel?.outer}.${modules.panel?.panel} > * {
             width: 100% !important;
           }
+
           .${modules.panel?.outer}.${modules.panel?.panel} header > svg {
             min-width: 100% !important;
           }
+
           .${modules.panel?.outer}.${modules.panel?.panel} header > svg > mask > rect {
             width: 500% !important;
           }
+
           .${modules.panel?.outer}.${modules.panel?.panel} .${modules.effects?.effect} {
             min-height: 100% !important;
           }
+
           ${(settings.userProfileWidth)
             ? `
               .${modules.panel?.outer}.${modules.panel?.panel}:before {
@@ -1590,6 +1614,7 @@ const styles = {
               }
             `
             : ''}
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1597,7 +1622,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-userProfile_toggle`, `
@@ -1606,7 +1631,7 @@ const styles = {
             width: ${settings.collapseSize}px !important;
             min-width: ${settings.collapseSize}px !important;
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-userProfile_float`, `
@@ -1617,6 +1642,7 @@ const styles = {
             height: 100% !important;
             right: 0 !important;
           }
+
           .${modules.panel?.outer}.${modules.panel?.panel}:after {
             content: "";
             position: absolute;
@@ -1627,7 +1653,7 @@ const styles = {
             background: rgba(0, 0, 0, 0.05);
             border-top: 1px solid rgba(0, 0, 0, 0.15);
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return `(max-width: ${settings.sizeCollapseThreshold[constants.I_USER_PROFILE]}px)`; },
       get _queryToggle() {
@@ -1643,7 +1669,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       _clear: function () {
         document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.removeProperty('max-height');
@@ -1656,24 +1682,24 @@ const styles = {
       _index: constants.I_MESSAGE_INPUT,
       get _init() {
         return [`${runtime.meta.name}-messageInput_init`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-messageInput_toggle`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-messageInput_float`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return ``; },
       get _queryToggle() {
         return [`${runtime.meta.name}-messageInput_queryToggle`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1682,18 +1708,18 @@ const styles = {
       get _init() {
         return [`${runtime.meta.name}-windowBar_init`, `
 
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-windowBar_toggle`, `
 
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return ``; },
       get _queryToggle() {
         return [`${runtime.meta.name}-windowBar_queryToggle`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1702,18 +1728,18 @@ const styles = {
       get _init() {
         return [`${runtime.meta.name}-callWindow_init`, `
 
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-callWindow_toggle`, `
 
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return ``; },
       get _queryToggle() {
         return [`${runtime.meta.name}-callWindow_queryToggle`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1722,18 +1748,18 @@ const styles = {
       get _init() {
         return [`${runtime.meta.name}-userArea_init`, `
 
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _toggle() {
         return [`${runtime.meta.name}-userArea_toggle`, `
 
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get query() { return ``; },
       get _queryToggle() {
         return [`${runtime.meta.name}-userArea_queryToggle`, `
-        
-        `];
+
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1766,7 +1792,7 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-searchPanel_float`, `
@@ -1777,6 +1803,7 @@ const styles = {
             height: 100% !important;
             right: 0 !important;
           }
+
           .${modules.search?.searchResultsWrap}:after {
             content: "";
             position: absolute;
@@ -1787,7 +1814,7 @@ const styles = {
             background: rgba(0, 0, 0, 0.05);
             border-top: 1px solid rgba(0, 0, 0, 0.15);
           }
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1802,19 +1829,23 @@ const styles = {
             z-index: 190 !important;
             filter: drop-shadow(-8px 0px 0px var(--background-tertiary));
           }
+
           .${modules.popout?.resizeHandle} {
             display: none !important;
           }
+
           .${modules.popout?.chatLayerWrapper} > * {
             width: calc(100% - 8px) !important;
           }
+
           .${modules.guilds.threadSidebarOpen} {
             flex-shrink: 999999999 !important;
           }
+
           .${modules.popout?.floating} {
             filter: none !important;
           }
-            
+
           .${modules.popout?.chatLayerWrapper}:after {
             content: "";
             width: 32px;
@@ -1842,14 +1873,44 @@ const styles = {
               }
             `
             : ''}
-        `];
+        `.replace(/\s+/g, ' ')];
       },
       get _float() {
         return [`${runtime.meta.name}-forumPopout_float`, `
           div:not([class])[style^="min-width"] {
             display: none !important;
           }
-        `];
+        `.replace(/\s+/g, ' ')];
+      },
+      ...styleFunctions,
+    },
+    {
+      get _init() {
+        return [`${runtime.meta.name}-activityPanel_init`, `
+          .${modules.social?.nowPlayingColumn} {
+            max-width: ${settings.activityPanelWidth || settings.defaultActivityPanelWidth}px !important;
+            width: ${settings.activityPanelWidth || settings.defaultActivityPanelWidth}px !important;
+            min-width: ${settings.activityPanelWidth || settings.defaultActivityPanelWidth}px !important;
+          }
+
+          .${modules.activity?.itemCard} {
+            overflow: hidden !important;
+          }
+
+          ${(settings.activityPanelWidth)
+            ? `
+              .${modules.social?.nowPlayingColumn}:before {
+                cursor: e-resize;
+                z-index: 200;
+                position: absolute;
+                content: "";
+                width: 16px;
+                height: 100%;
+                transform: translateX(-4px);
+              }
+            `
+            : ''}
+        `.replace(/\s+/g, ' ')];
       },
       ...styleFunctions,
     },
@@ -1861,11 +1922,12 @@ const styles = {
         .${modules.user?.avatarWrapper} {
           flex-grow: 1 !important;
         }
+
         .${modules.user?.buttons} > *:not(:last-child) {
           transition: width ${settings.transitionSpeed}ms !important;
           overflow: hidden !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       if (settings.collapseSettings) this.hide();
     },
     hide: function () {
@@ -1873,7 +1935,7 @@ const styles = {
         .${modules.user?.buttons} > *:not(:last-child) {
           width: 0px !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       this.hidden = true;
     },
     show: function () {
@@ -1894,7 +1956,7 @@ const styles = {
           width: ${settings.messageInputButtonWidth}px !important;
           overflow: hidden !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       if (settings.messageInputCollapse) this.hide();
     },
     hide: function () {
@@ -1902,7 +1964,7 @@ const styles = {
         .${modules.input?.buttons} > *:not(:last-child) {
           width: 0px !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       this.hidden = true;
     },
     show: function () {
@@ -1923,7 +1985,7 @@ const styles = {
           width: 24px !important;
           overflow: hidden !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       if (settings.collapseToolbar) this.hide();
     },
     hide: function () {
@@ -1932,7 +1994,7 @@ const styles = {
           width: 0px !important;
           margin: 0px !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       this.hidden = true;
     },
     show: function () {
@@ -1953,7 +2015,7 @@ const styles = {
           max-width: ${settings.toolbarElementMaxWidth}px !important;
           overflow: hidden !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       if (settings.collapseToolbar === 'all') this.hide();
     },
     hide: function () {
@@ -1966,7 +2028,7 @@ const styles = {
         .${modules.icons?.toolbar} > *:not(:last-child) {
           max-width: 0px !important;
         }
-      `);
+      `.replace(/\s+/g, ' '));
       this.hidden = true;
     },
     show: function () {
@@ -1990,7 +2052,7 @@ const styles = {
         align-items: right;
         display: flex;
       }
-      
+
       .${modules.icons?.selected}:not([id*="cui"]):has([d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM18.44 17.27c.15.43.54.73 1 .73h1.06c.83 0 1.5-.67 1.5-1.5a7.5 7.5 0 0 0-6.5-7.43c-.55-.08-.99.38-1.1.92-.06.3-.15.6-.26.87-.23.58-.05 1.3.47 1.63a9.53 9.53 0 0 1 3.83 4.78ZM12.5 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM2 20.5a7.5 7.5 0 0 1 15 0c0 .83-.67 1.5-1.5 1.5a.2.2 0 0 1-.2-.16c-.2-.96-.56-1.87-.88-2.54-.1-.23-.42-.15-.42.1v2.1a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-.1-.32.67-.67 1.58-.88 2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 20.5Z"]),
       .${modules.icons?.selected}:not([id*="cui"]):has([d="M23 12.38c-.02.38-.45.58-.78.4a6.97 6.97 0 0 0-6.27-.08.54.54 0 0 1-.44 0 8.97 8.97 0 0 0-11.16 3.55c-.1.15-.1.35 0 .5.37.58.8 1.13 1.28 1.61.24.24.64.15.8-.15.19-.38.39-.73.58-1.02.14-.21.43-.1.4.15l-.19 1.96c-.02.19.07.37.23.47A8.96 8.96 0 0 0 12 21a.4.4 0 0 1 .38.27c.1.33.25.65.4.95.18.34-.02.76-.4.77L12 23a11 11 0 1 1 11-10.62ZM15.5 7.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"]) {
         display: none;
@@ -2001,7 +2063,7 @@ const styles = {
       .${modules.threads?.headerRow} {
         min-width: 0px !important;
       }
-    `);
+    `.replace(/\s+/g, ' '));
 
     // Init styles for each button
     for (var i = 0; i < this.buttons.length; i++) {
@@ -2012,7 +2074,8 @@ const styles = {
     // Init resize styles
     this.resize.forEach((panel) => {
       panel.init();
-      if (settings.floatingPanels && settings.floatingPanels !== 'on-hover') panel.float();
+      if (settings.floatingPanels === 'always' || settings.floatingPanels === 'always-non-collapsible')
+        panel.float();
     });
 
     // Init collapse styles
@@ -2059,6 +2122,23 @@ module.exports = class CollapsibleUI {
 
   // Initialize the plugin when it is enabled
   start = () => {
+    // Prevent load if plugin settings are old
+    if (runtime.api.Data.load('settings-version')) {
+      runtime.api.UI.showConfirmationModal('Fatal Error', `Your config file is incompatible with \
+        this version of CollapsibleUI.\n\nPlease go to your BetterDiscord \
+        plugins folder, delete the file \`CollapsibleUI.config.json\`, then \
+        restart Discord.`, {
+        danger: true,
+        confirmText: (elements.bdPluginFolderButton) ? 'Open Plugins Folder' : 'Okay',
+        onConfirm: () => elements.bdPluginFolderButton?.click(),
+      });
+
+      setTimeout(() => {
+        runtime.api.UI.showToast('CollapsibleUI: Invalid Config Detected!', { type: 'error' });
+        runtime.api.Plugins.disable(runtime.meta.name);
+      }, 250);
+    }
+
     // Notify user if plugin is outdated
     fetch('https://api.github.com/repos/programmer2514/BetterDiscord-CollapsibleUI/releases')
       .then(response => response.json())
@@ -2328,7 +2408,8 @@ module.exports = class CollapsibleUI {
           || e.target.classList.contains(modules.members?.membersWrap)
           || e.target.classList.contains(modules.panel?.outer)
           || e.target.classList.contains(modules.search?.searchResultsWrap)
-          || e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
+          || e.target.classList.contains(modules.popout?.chatLayerWrapper)
+          || e.target.classList.contains(modules.social?.nowPlayingColumn)) {
           e.target.style.setProperty('transition', 'none', 'important');
 
           runtime.dragging = e.target;
@@ -2374,6 +2455,14 @@ module.exports = class CollapsibleUI {
           e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms`, 'important');
           settings.searchPanelWidth = settings.defaultSearchPanelWidth;
           styles.resize[constants.I_SEARCH_PANEL].init();
+          target = e.target;
+        }
+
+        // Reset activity panel width
+        if (e.target.classList.contains(modules.social?.nowPlayingColumn)) {
+          e.target.style.setProperty('transition', `max-width ${settings.transitionSpeed}ms, width ${settings.transitionSpeed}ms, min-width ${settings.transitionSpeed}ms`, 'important');
+          settings.activityPanelWidth = settings.defaultActivityPanelWidth;
+          styles.resize[constants.I_ACTIVITY_PANEL].init();
           target = e.target;
         }
 
@@ -2435,6 +2524,13 @@ module.exports = class CollapsibleUI {
           target = dragging;
         }
 
+        // Finish resizing the activity panel
+        if (dragging.classList.contains(modules.social?.nowPlayingColumn)) {
+          settings.activityPanelWidth = parseInt(dragging.style.width);
+          styles.resize[constants.I_ACTIVITY_PANEL].init();
+          target = dragging;
+        }
+
         // Finish resizing the forum popout
         if (dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
           settings.forumPopoutWidth = parseInt(dragging.style.width);
@@ -2479,11 +2575,12 @@ module.exports = class CollapsibleUI {
       else if (width < 1)
         width = 1;
 
-      // Handle resizing members list/user profile/search panel/forum popout
+      // Handle resizing members list/user profile/search panel/activity panel/forum popout
       if (runtime.dragging.classList.contains(modules.members?.membersWrap)
         || runtime.dragging.classList.contains(modules.panel?.outer)
         || runtime.dragging.classList.contains(modules.search?.searchResultsWrap)
         || runtime.dragging.classList.contains(modules.sidebar?.sidebar)
+        || runtime.dragging.classList.contains(modules.social?.nowPlayingColumn)
         || runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
         runtime.dragging.style.setProperty('width', `${width}px`, 'important');
         runtime.dragging.style.setProperty('max-width', `${width}px`, 'important');

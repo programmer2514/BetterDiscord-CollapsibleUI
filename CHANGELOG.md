@@ -1,5 +1,14 @@
 # CollapsibleUI Patch Notes
 
+### v11.0.1:
+* Fixed cut-off Message Input on some themes
+* Fixed Message Input buttons not being spaced correctly with send message button enabled
+* Fixed emoji suggestions not showing in Message Input
+* Fixed incorrect Members List styling
+* Fixed Channel List offset while in fullscreen calls
+* Fixed incompatibility with GameActivityToggle and InvisibleTyping
+* Fixed numerical settings being incorrectly stored as strings
+
 ### v11.0.0:
 * Completely re-wrote plugin from the ground up for performance and stability
 * Greatly increased plugin\'s overall performance

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 11.0.0
+ * @version 11.0.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -167,39 +167,21 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '11.0.0',
+      title: '11.0.1',
       type: 'added',
       items: [
-        'Completely re-wrote plugin from the ground up for performance and stability',
-        'Greatly increased plugin\'s overall performance',
-        'Greatly decreased plugin\'s size on disk',
-        'Switched away from direct DOM manipulation wherever possible',
-        'Refactored style routines to reduce reliance on MutationObservers',
-        'Plugin now caches styles, settings, and webpack modules to decrease load times',
-        'Settings update routines have been changed to reduce the number of disk writes',
-        'Keyboard shortcuts can now be whatever you want and are not limited to standard patterns',
-        'Size Collapse has been rewritten using media queries and now does not affect button states',
-        'Expand on Hover is no longer a requirement for Size Collapse (though it is still recommended)',
-        'Resizable panels can now be resized by clicking-and-dragging anywhere on the edge of the panel',
-        'The activities panel, search panel, and forum popout can now be resized and collapsed',
-        'The floating panels setting has been reworked for increased customizability',
-        'Message bar is now capable of floating above other UI elements',
-        'Improved out-of-the-box compatibility with other plugins and themes',
-        'Hovered panels will no longer collapse while a right-click/popup menu is open',
-        'Removed locale labels other than English due to inaccurate translations',
-        'Moved Unread DMs Badge feature to its own plugin',
-        'Updated settings layout and added several new options',
-        'Several visual tweaks for UI consistency',
-        'Fixed showing multiple update notifications if plugin is toggled without reloading Discord',
-        'Fixed inconsistent Size Collapse when snapping window dimensions in Windows',
-        'Fixed panels jumping open during transitions on some low-end devices',
-        'Fixed forum popup resizing inconsistently with other UI elements',
-        'RE-WRITE MAY INTRODUCE REGRESSIONS - PLEASE REPORT ANY NEW ISSUES VIA GITHUB',
-        'IF YOU WOULD LIKE TO CONTRIBUTE A TRANSLATION FOR THIS PLUGIN, PLEASE OPEN A PULL REQUEST ON GITHUB',
+        'Fixed cut-off Message Input on some themes',
+        'Fixed Message Input buttons not being spaced correctly with send message button enabled',
+        'Fixed emoji suggestions not showing in Message Input',
+        'Fixed incorrect Members List styling',
+        'Fixed Channel List offset while in fullscreen calls',
+        'Fixed incompatibility with GameActivityToggle and InvisibleTyping',
+        'Fixed numerical settings being incorrectly stored as strings',
+        'SOME OF THESE ISSUES MAY PERSIST UNTIL CONFIG FILE IS DELETED',
       ],
     },
     {
-      title: '1.0.0 - 10.0.1',
+      title: '1.0.0 - 11.0.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1211,6 +1193,7 @@ const modules = {
   get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
   get activity() { return this._activity ?? (this._activity = runtime.api.Webpack.getByKeys('itemCard', 'emptyCard', 'emptyText')); },
   get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'divider', 'lastButton')); },
+  get game() { return this._game ?? (this._game = runtime.api.Webpack.getByKeys('openOnHover', 'userSection', 'thumbnail')); },
 };
 
 const elements = {
@@ -1222,8 +1205,8 @@ const elements = {
   get messageInput() { return document.querySelector(`.${modules.guilds?.form}`); },
   get windowBar() { return document.querySelector(`.${modules.frame?.titleBar}`); },
   get callWindow() { return document.querySelector(`.${modules.calls?.wrapper}:not(.${modules.calls?.noChat})`); },
-  get settingsContainer() { return document.querySelector(`.${modules.user?.buttons}`); },
-  get messageInputContainer() { return document.querySelector(`.${modules.input?.buttons}`); },
+  get settingsContainer() { return [...document.querySelectorAll(`.${modules.user?.buttons}`)].slice(-1)[0]; },
+  get messageInputContainer() { return [...document.querySelectorAll(`.${modules.input?.buttons}`)].slice(-1)[0]; },
   get forumPopout() { return document.querySelector(`.${modules.popout?.chatLayerWrapper}`); },
   get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
   get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
@@ -1466,6 +1449,10 @@ const styles = {
             overflow: visible !important;
           }
 
+          :fullscreen .${modules.sidebar?.sidebar} {
+            display: none !important;
+          }
+
           .${modules.sidebar?.sidebar} > * {
             overflow: hidden !important;
           }
@@ -1574,7 +1561,8 @@ const styles = {
             width: 100% !important;
           }
 
-          .${modules.members?.membersWrap} * {
+          .${modules.members?.member},
+          .${modules.game?.container} {
             max-width: 100% !important;
           }
 
@@ -1770,7 +1758,6 @@ const styles = {
         return this.__init ?? (this.__init = [`${runtime.meta.name}-messageInput_init`, `
           .${modules.guilds?.form} {
             max-height: calc(var(--custom-channel-textarea-text-area-max-height) + 24px) !important;
-            overflow: hidden !important;
             transition: max-height var(--cui-transition-speed) !important;
           }
             
@@ -1787,6 +1774,7 @@ const styles = {
         return this.__toggle ?? (this.__toggle = [`${runtime.meta.name}-messageInput_toggle`, `
           .${modules.guilds?.form}:not(:has([data-slate-string="true"])):not(:has([data-list-id="attachments"])) {
             max-height: var(--cui-collapse-size) !important;
+            overflow: hidden !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2334,8 +2322,8 @@ const styles = {
       init: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-messageInputButtons_init_col`, `
           .${modules.input?.buttons} > *:not(:last-child) {
-            transition: width var(--cui-transition-speed) !important;
-            width: ${settings.messageInputButtonWidth}px !important;
+            transition: max-width var(--cui-transition-speed) !important;
+            max-width: ${settings.messageInputButtonWidth}px !important;
             overflow: hidden !important;
           }
         `.replace(/\s+/g, ' '));
@@ -2344,7 +2332,7 @@ const styles = {
       hide: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-messageInputButtons_hide_col`, `
           .${modules.input?.buttons} > *:not(:last-child) {
-            width: 0px !important;
+            max-width: 0px !important;
           }
         `.replace(/\s+/g, ' '));
         this.hidden = true;
@@ -2623,7 +2611,7 @@ module.exports = class CollapsibleUI {
 
           // Update regular settings
           if (split.length === 1) {
-            settings[id] = value;
+            settings[id] = (typeof(value) === 'string' && !isNaN(value)) ? parseInt(value) : value;
             return;
           }
 

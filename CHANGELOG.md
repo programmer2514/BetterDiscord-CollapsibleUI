@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v11.0.2:
+* Added FullscreenToggle compatibility
+
 ### v11.0.1:
 * Fixed cut-off Message Input on some themes
 * Fixed Message Input buttons not being spaced correctly with send message button enabled

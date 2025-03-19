@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 11.0.1
+ * @version 11.0.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -167,21 +167,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '11.0.1',
+      title: '11.0.2',
       type: 'added',
       items: [
-        'Fixed cut-off Message Input on some themes',
-        'Fixed Message Input buttons not being spaced correctly with send message button enabled',
-        'Fixed emoji suggestions not showing in Message Input',
-        'Fixed incorrect Members List styling',
-        'Fixed Channel List offset while in fullscreen calls',
-        'Fixed incompatibility with GameActivityToggle and InvisibleTyping',
-        'Fixed numerical settings being incorrectly stored as strings',
-        'SOME OF THESE ISSUES MAY PERSIST UNTIL CONFIG FILE IS DELETED',
+        'Added FullscreenToggle compatibility',
       ],
     },
     {
-      title: '1.0.0 - 11.0.0',
+      title: '1.0.0 - 11.0.1',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1449,7 +1442,7 @@ const styles = {
             overflow: visible !important;
           }
 
-          :fullscreen .${modules.sidebar?.sidebar} {
+          :fullscreen:has(.${modules.sidebar?.hidden}) .${modules.sidebar?.sidebar} {
             display: none !important;
           }
 

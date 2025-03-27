@@ -1,7 +1,7 @@
 # CollapsibleUI for BetterDiscord
 A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular.
 
-#### [> Check out my other plugins <](https://github.com/programmer2514/BetterDiscord-Plugins)
+#### [> Check out my other add-ons <](https://github.com/programmer2514/BetterDiscord-Stuff)
 
 ![Plugin Preview](https://github.com/programmer2514/BetterDiscord-CollapsibleUI/assets/43104632/d7a9849e-13d4-41fe-9e34-0b8655bac670)
 

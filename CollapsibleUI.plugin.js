@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 11.0.2
+ * @version 12.0.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -99,7 +99,7 @@ const settings = {
   get buttonCollapseFudgeFactor() { return this._buttonCollapseFudgeFactor ?? (this._buttonCollapseFudgeFactor = runtime.api.Data.load('button-collapse-fudge-factor') ?? 10); },
   set buttonCollapseFudgeFactor(v) { runtime.api.Data.save('button-collapse-fudge-factor', this._buttonCollapseFudgeFactor = v); },
 
-  get expandOnHoverFudgeFactor() { return this._expandOnHoverFudgeFactor ?? (this._expandOnHoverFudgeFactor = runtime.api.Data.load('expand-on-hover-fudge-factor') ?? 30); },
+  get expandOnHoverFudgeFactor() { return this._expandOnHoverFudgeFactor ?? (this._expandOnHoverFudgeFactor = runtime.api.Data.load('expand-on-hover-fudge-factor') ?? 15); },
   set expandOnHoverFudgeFactor(v) { runtime.api.Data.save('expand-on-hover-fudge-factor', this._expandOnHoverFudgeFactor = v); },
 
   get messageInputButtonWidth() { return this._messageInputButtonWidth ?? (this._messageInputButtonWidth = runtime.api.Data.load('message-input-button-width') ?? 40); },
@@ -110,18 +110,6 @@ const settings = {
 
   get userAreaMaxHeight() { return this._userAreaMaxHeight ?? (this._userAreaMaxHeight = runtime.api.Data.load('user-area-max-height') ?? 420); },
   set userAreaMaxHeight(v) { runtime.api.Data.save('user-area-max-height', this._userAreaMaxHeight = v); },
-
-  get windowBarHeight() { return this._windowBarHeight ?? (this._windowBarHeight = runtime.api.Data.load('window-bar-height') ?? 18); },
-  set windowBarHeight(v) { runtime.api.Data.save('window-bar-height', this._windowBarHeight = v); },
-
-  get windowBarMarginTop() { return this._windowBarMarginTop ?? (this._windowBarMarginTop = runtime.api.Data.load('window-bar-margin-top') ?? 4); },
-  set windowBarMarginTop(v) { runtime.api.Data.save('window-bar-margin-top', this._windowBarMarginTop = v); },
-
-  get toolbarHeight() { return this._toolbarHeight ?? (this._toolbarHeight = runtime.api.Data.load('toolbar-height') ?? 48); },
-  set toolbarHeight(v) { runtime.api.Data.save('toolbar-height', this._toolbarHeight = v); },
-
-  get serverListWidth() { return this._serverListWidth ?? (this._serverListWidth = runtime.api.Data.load('server-list-width') ?? 72); },
-  set serverListWidth(v) { runtime.api.Data.save('server-list-width', this._serverListWidth = v); },
 
   get buttonsActive() { return this._buttonsActive ?? (this._buttonsActive = runtime.api.Data.load('buttons-active') ?? [true, true, true, true, true, true, true, true, true, true, true]); },
   set buttonsActive(v) { runtime.api.Data.save('buttons-active', this._buttonsActive = v); },
@@ -167,14 +155,17 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '11.0.2',
+      title: '12.0.0',
       type: 'added',
       items: [
-        'Added FullscreenToggle compatibility',
+        'Updated to work with Discord UI refresh (no longer works on old Discord UI)',
+        'Fixed call container buttons being cut off when window is too small',
+        'More visual tweaks for UI consistency',
+        'Removed obsolete advanced settings',
       ],
     },
     {
-      title: '1.0.0 - 11.0.1',
+      title: '1.0.0 - 11.0.2',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1038,34 +1029,6 @@ const config = {
         },
         {
           type: 'number',
-          id: 'windowBarHeight',
-          name: 'Window Bar - Height (px)',
-          note: 'The height of the Window Bar when expanded',
-          get value() { return settings.windowBarHeight; },
-        },
-        {
-          type: 'number',
-          id: 'windowBarMarginTop',
-          name: 'Window Bar - Top Margin (px)',
-          note: 'The top margin of the Window Bar when expanded',
-          get value() { return settings.windowBarMarginTop; },
-        },
-        {
-          type: 'number',
-          id: 'toolbarHeight',
-          name: 'Toolbar - Height (px)',
-          note: 'The height of the toolbar',
-          get value() { return settings.toolbarHeight; },
-        },
-        {
-          type: 'number',
-          id: 'serverListWidth',
-          name: 'Server List - Width (px)',
-          note: 'The width of the Server List when expanded',
-          get value() { return settings.serverListWidth; },
-        },
-        {
-          type: 'number',
           id: 'defaultChannelListWidth',
           name: 'Channel List - Default Width (px)',
           note: 'The width of the channel list when not actively resized',
@@ -1172,7 +1135,7 @@ const modules = {
   get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'forumOrHome')); },
   get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('biteSize', 'fullSize', 'panel', 'outer', 'inner', 'overlay')); },
   get guilds() { return this._guilds ?? (this._guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby')); },
-  get frame() { return this._frame ?? (this._frame = runtime.api.Webpack.getByKeys('typeMacOS', 'typeWindows', 'withBackgroundOverride')); },
+  get frame() { return this._frame ?? (this._frame = runtime.api.Webpack.getByKeys('bar', 'title', 'winButtons')); },
   get calls() { return this._calls ?? (this._calls = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer')); },
   get threads() { return this._threads ?? (this._threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton')); },
   get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
@@ -1185,8 +1148,10 @@ const modules = {
   get preview() { return this._preview ?? (this._preview = runtime.api.Webpack.getByKeys('popout', 'more', 'title', 'timestamp', 'name')); },
   get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
   get activity() { return this._activity ?? (this._activity = runtime.api.Webpack.getByKeys('itemCard', 'emptyCard', 'emptyText')); },
-  get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'divider', 'lastButton')); },
   get game() { return this._game ?? (this._game = runtime.api.Webpack.getByKeys('openOnHover', 'userSection', 'thumbnail')); },
+  get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'divider', 'lastButton')); },
+  get callButtons() { return this._callButtons ?? (this._callButtons = runtime.api.Webpack.getByKeys('controlButton', 'wrapper', 'buttonContainer')); },
+  get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('actionButtons', 'micTestButton', 'buttonIcon')); },
 };
 
 const elements = {
@@ -1196,7 +1161,7 @@ const elements = {
   get membersList() { return document.querySelector(`.${modules.members?.membersWrap}`); },
   get userProfile() { return document.querySelector(`.${modules.panel?.inner}.${modules.panel?.panel}`); },
   get messageInput() { return document.querySelector(`.${modules.guilds?.form}`); },
-  get windowBar() { return document.querySelector(`.${modules.frame?.titleBar}`); },
+  get windowBar() { return document.querySelector(`.${modules.frame?.bar}`); },
   get callWindow() { return document.querySelector(`.${modules.calls?.wrapper}:not(.${modules.calls?.noChat})`); },
   get settingsContainer() { return [...document.querySelectorAll(`.${modules.user?.buttons}`)].slice(-1)[0]; },
   get messageInputContainer() { return [...document.querySelectorAll(`.${modules.input?.buttons}`)].slice(-1)[0]; },
@@ -1204,7 +1169,7 @@ const elements = {
   get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
   get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
   get serverList() { return document.querySelector(`.${modules.sidebar?.guilds}`); },
-  get channelList() { return document.querySelector(`.${modules.sidebar?.sidebar}`); },
+  get channelList() { return document.querySelector(`.${modules.sidebar?.sidebarList}`); },
   get rightClickMenu() { return document.querySelector(`.${modules.tooltip?.menu}`); },
   get forumPreviewTooltip() { return document.querySelector(`.${modules.preview?.popout}`); },
   get bdPluginFolderButton() { return document.querySelector('button:has([d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"])'); },
@@ -1358,8 +1323,18 @@ const styles = {
       _index: constants.I_SERVER_LIST,
       get _init() {
         return this.__init ?? (this.__init = [`${runtime.meta.name}-serverList_init`, `
+          :root {
+            --cui-server-list-toggled: 1;
+          }
+
           .${modules.sidebar?.guilds} {
             transition: width var(--cui-transition-speed);
+            border-right: 1px solid var(--border-subtle) !important;
+            border-top: 1px solid var(--border-subtle) !important;
+          }
+          
+          .scroller_ef3116 {
+            padding-top: var(--space-xs) !important;
           }
 
           .${modules.sidebar?.base} {
@@ -1377,6 +1352,10 @@ const styles = {
       },
       get _toggle() {
         return this.__toggle ?? (this.__toggle = [`${runtime.meta.name}-serverList_toggle`, `
+          :root {
+            --cui-server-list-toggled: 0;
+          }
+
           .${modules.sidebar?.guilds} {
             width: var(--cui-collapse-size) !important;
           }
@@ -1388,11 +1367,16 @@ const styles = {
       },
       get _float() {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-serverList_float`, `
+          :root {
+            --cui-server-list-toggled: 0;
+          }
+            
           .${modules.sidebar?.guilds} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge-right);
-            z-index: 191 !important;
+            z-index: 192 !important;
             min-height: 100% !important;
+            height: 100% !important;
+            max-height: 100% !important;
             overflow-y: scroll !important;
             max-height: ${runtime.api.Themes.isEnabled('Horizontal Server List') ? '100vw' : '100%'} !important;
           }
@@ -1409,7 +1393,7 @@ const styles = {
             ? `
               @media ${this.query} {
                 .${modules.sidebar?.guilds} {
-                  width: ${settings.serverListWidth}px !important;
+                  width: var(--custom-guild-list-width) !important;
                 }
 
                 .${modules.sidebar?.base} {
@@ -1431,36 +1415,48 @@ const styles = {
           :root {
             --cui-channel-list-handle-offset: calc(var(--cui-channel-list-width) - 12px);
             --cui-channel-list-handle-transition: left var(--cui-transition-speed);
+            --cui-channel-list-toggled: 1;
           }
 
-          .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
+          .${modules.sidebar?.sidebarList} {
             max-width: var(--cui-channel-list-width) !important;
             width: var(--cui-channel-list-width) !important;
             min-width: var(--cui-channel-list-width) !important;
             transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
             min-height: 100% !important;
             overflow: visible !important;
+            border-right: 1px solid var(--border-subtle) !important;
+            border-left: none !important;
+            border-radius: 0 !important;
           }
 
-          :fullscreen:has(.${modules.sidebar?.hidden}) .${modules.sidebar?.sidebar} {
+          .${modules.sidebar?.sidebarList} > * {
+            overflow: hidden !important;
+            margin-left: 0 !important;
+          }
+
+          .${modules.sidebar?.sidebarResizeHandle} {
             display: none !important;
           }
 
-          .${modules.sidebar?.sidebar} > * {
-            overflow: hidden !important;
+          .${modules.sidebar?.sidebar} {
+            overflow: visible !important;
+            border: none !important;
+          }
+
+          .${modules.guilds?.subtitleContainer},
+          .${modules.guilds?.content},
+          .${modules.social?.tabBody} {
+            border-left: none !important;
           }
 
           .${modules.channels?.channel} {
             max-width: 100% !important;
           }
 
-          .${modules.user?.avatarWrapper} {
-            min-width: 32px !important;
-          }
-
           ${(settings.channelListWidth)
             ? `
-              .${modules.sidebar?.sidebar}:before {
+              .${modules.sidebar?.sidebarList}:before {
                 cursor: e-resize;
                 z-index: 200;
                 position: absolute;
@@ -1484,7 +1480,11 @@ const styles = {
       },
       get _toggle() {
         return this.__toggle ?? (this.__toggle = [`${runtime.meta.name}-channelList_toggle`, `
-          .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
+          :root {
+            --cui-channel-list-toggled: 0;
+          }
+
+          .${modules.sidebar?.sidebarList} {
             max-width: var(--cui-collapse-size) !important;
             width: var(--cui-collapse-size) !important;
             min-width: var(--cui-collapse-size) !important;
@@ -1492,7 +1492,7 @@ const styles = {
 
           ${(settings.channelListWidth)
             ? `
-              .${modules.sidebar?.sidebar}:before {
+              .${modules.sidebar?.sidebarList}:before {
                 left: -4px;
               }
             `
@@ -1501,9 +1501,8 @@ const styles = {
       },
       get _float() {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-channelList_float`, `
-          .${modules.sidebar?.sidebar} {
+          .${modules.sidebar?.sidebarList} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge-right);
             z-index: 190 !important;
             max-height: 100% !important;
             height: 100% !important;
@@ -1516,7 +1515,11 @@ const styles = {
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
-                .${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar}.${modules.sidebar?.sidebar} {
+                :root {
+                  --cui-channel-list-toggled: 1;
+                }
+
+                .${modules.sidebar?.sidebarList} {
                   max-width: var(--cui-channel-list-width) !important;
                   width: var(--cui-channel-list-width) !important;
                   min-width: var(--cui-channel-list-width) !important;
@@ -1524,7 +1527,7 @@ const styles = {
 
                 ${(settings.channelListWidth)
             ? `
-                    .${modules.sidebar?.sidebar}:before {
+                    .${modules.sidebar?.sidebarList}:before {
                       left: calc(var(--cui-channel-list-width) - 4px);
                     }
                   `
@@ -1597,21 +1600,11 @@ const styles = {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-membersList_float`, `
           .${modules.members?.membersWrap} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge-left);
             z-index: 190 !important;
             max-height: 100% !important;
             height: 100% !important;
             right: 0 !important;
-          }
-
-          .${modules.members?.membersWrap}:after {
-            content: "";
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            box-shadow: var(--shadow-ledge);
+            border-left: 1px solid var(--border-subtle) !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -1648,6 +1641,7 @@ const styles = {
             min-width: var(--cui-user-profile-width) !important;
             transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
             min-height: 100% !important;
+            border-left: 1px solid var(--border-subtle) !important;
           }
 
           .${modules.panel?.outer}.${modules.panel?.panel} > * {
@@ -1702,21 +1696,10 @@ const styles = {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-userProfile_float`, `
           .${modules.panel?.outer}.${modules.panel?.panel} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge-left);
             z-index: 190 !important;
             max-height: 100% !important;
             height: 100% !important;
             right: 0 !important;
-          }
-
-          .${modules.panel?.outer}.${modules.panel?.panel}:after {
-            content: "";
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            box-shadow: var(--shadow-ledge);
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -1804,8 +1787,15 @@ const styles = {
       _index: constants.I_WINDOW_BAR,
       get _init() {
         return this.__init ?? (this.__init = [`${runtime.meta.name}-windowBar_init`, `
-          .${modules.frame?.titleBar} {
-            transition: height var(--cui-transition-speed), margin-top var(--cui-transition-speed) !important;
+          .${modules.frame?.bar} {
+            min-height: var(--custom-app-top-bar-height) !important;
+            height: var(--custom-app-top-bar-height) !important;
+            max-height: var(--custom-app-top-bar-height) !important;
+            transition: min-height var(--cui-transition-speed), height var(--cui-transition-speed), max-height var(--cui-transition-speed) !important;
+          }
+
+          .${modules.sidebar?.base} {
+            transition: grid-template-rows var(--cui-transition-speed) !important;
           }
             
           ${(settings.sizeCollapse)
@@ -1819,42 +1809,34 @@ const styles = {
       },
       get _toggle() {
         return this.__toggle ?? (this.__toggle = [`${runtime.meta.name}-windowBar_toggle`, `
-          .${modules.frame?.titleBar} {
+          .${modules.frame?.bar} {
             overflow: hidden !important;
+            min-height: var(--cui-collapse-size) !important;
             height: var(--cui-collapse-size) !important;
-            margin-top: 0 !important;
-            padding-top: 0 !important;
+            max-height: var(--cui-collapse-size) !important;
+            --custom-app-top-bar-height: calc(24px + var(--space-sm));
           }
 
-          .${modules.frame?.wordmark} {
-            display: none !important;
+          .${modules.sidebar?.base} {
+            --custom-app-top-bar-height: var(--cui-collapse-size);
           }
         `.replace(/\s+/g, ' ')]);
       },
       get _float() {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-windowBar_float`, `
-          .${modules.frame?.titleBar} {
+          .${modules.frame?.bar} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge);
+            top: 0 !important;
             left: 0 !important;
             right: 0 !important;
-            top: 0 !important;
             background: var(--background-tertiary) !important;
+            z-index: 200 !important;
+            --custom-app-top-bar-height: calc(24px + var(--space-sm));
+            border-bottom: 1px solid var(--border-subtle) !important;
           }
 
-          .${modules.frame?.titleBar}:before {
-            content: "";
-            position: absolute;
-            top: -${settings.windowBarMarginTop}px;
-            left: 0;
-            right: 0;
-            height: ${settings.windowBarMarginTop}px;
-            background: var(--background-tertiary);
-            z-index: -1;
-          }
-
-          .${modules.frame?.wordmark} {
-            transform: translateY(-${settings.windowBarMarginTop}px) !important;
+          .${modules.sidebar?.base} {
+            --custom-app-top-bar-height: var(--cui-collapse-size);
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -1864,13 +1846,14 @@ const styles = {
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
-                .${modules.frame?.titleBar} {
-                  height: ${settings.windowBarHeight}px !important;
-                  margin-top: ${settings.windowBarMarginTop}px !important;
+                .${modules.frame?.bar} {
+                  min-height: var(--custom-app-top-bar-height) !important;
+                  height: var(--custom-app-top-bar-height) !important;
+                  max-height: var(--custom-app-top-bar-height) !important;
                 }
 
-                .${modules.frame?.wordmark} {
-                  display: initial !important;
+                .${modules.sidebar?.base} {
+                  --custom-app-top-bar-height: calc(24px + var(--space-sm));
                 }
               }
             `
@@ -1924,8 +1907,17 @@ const styles = {
       get _init() {
         return this.__init ?? (this.__init = [`${runtime.meta.name}-userArea_init`, `
           .${modules.sidebar?.panels} {
-            transition: max-height var(--cui-transition-speed) !important;
+            transition: max-height var(--cui-transition-speed), width var(--cui-transition-speed), border var(--cui-transition-speed) !important;
             max-height: ${settings.userAreaMaxHeight}px !important;
+            overflow: hidden !important;
+            width: calc((var(--cui-channel-list-width) * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled)) - (var(--space-xs) * 2)) !important;
+            border-left-width: clamp(0px, calc(1px * (var(--cui-server-list-toggled) + var(--cui-channel-list-toggled))), 1px) !important;
+            border-right-width: clamp(0px, calc(1px * (var(--cui-server-list-toggled) + var(--cui-channel-list-toggled))), 1px) !important;
+            z-index: 191 !important;
+          }
+
+          .${modules.userAreaButtons?.actionButtons} button {
+            padding: 0 !important;
           }
             
           ${(settings.sizeCollapse)
@@ -1941,6 +1933,8 @@ const styles = {
         return this.__toggle ?? (this.__toggle = [`${runtime.meta.name}-userArea_toggle`, `
           .${modules.sidebar?.panels} {
             max-height: var(--cui-collapse-size) !important;
+            border-top-width: 0px !important;
+            border-bottom-width: 0px !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -1949,6 +1943,8 @@ const styles = {
         return this.__queryToggle ?? (this.__queryToggle = [`${runtime.meta.name}-userArea_queryToggle`, `
           .${modules.sidebar?.panels} {
             max-height: ${settings.userAreaMaxHeight}px !important;
+            border-top-width: 1px !important;
+            border-bottom-width: 1px !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2000,21 +1996,10 @@ const styles = {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-searchPanel_float`, `
           .${modules.search?.searchResultsWrap} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge-left);
             z-index: 190 !important;
             max-height: 100% !important;
             height: 100% !important;
             right: 0 !important;
-          }
-
-          .${modules.search?.searchResultsWrap}:after {
-            content: "";
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            box-shadow: var(--shadow-ledge);
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2051,15 +2036,6 @@ const styles = {
             z-index: 190 !important;
             top: var(--cui-forum-panel-top) !important;
             height: calc(100% - var(--cui-forum-panel-top)) !important;
-            box-shadow: var(--shadow-ledge-left);
-          }
-
-          .${modules.toolbar?.forumOrHome} {
-            --__header-bar-background: var(--background-primary);
-          }
-
-          .${modules.popout?.chatLayerWrapper} .${modules.icons?.container} {
-            --__header-bar-background: var(--background-secondary);
           }
 
           div:not([class])[style^="min-width"],
@@ -2086,6 +2062,17 @@ const styles = {
             margin-right: 8px !important;
           }
 
+          div:has(> .${modules.callButtons?.wrapper}) {
+            flex-shrink: 0 !important;
+            max-width: 100% !important;
+          }
+
+          .${modules.callButtons?.wrapper},
+          .${modules.callButtons?.wrapper} > * {
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+          }
+
           .${modules.guilds?.content},
           .${modules.calls?.noChat} {
             --width: var(--cui-forum-popout-width);
@@ -2101,23 +2088,11 @@ const styles = {
             width: var(--width);
             min-width: var(--width);
             transition: var(--transition);
-            margin-left: 2px !important;
           }
 
           .${modules.popout?.floating} {
             filter: none !important;
             border-left: none !important;
-          }
-
-          .${modules.popout?.chatLayerWrapper}:after {
-            content: "";
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            z-index: 200;
-            box-shadow: var(--shadow-ledge);
           }
 
           ${(settings.forumPopoutWidth)
@@ -2194,15 +2169,6 @@ const styles = {
             display: initial !important;
           }
 
-          .${modules.social?.nowPlayingColumn} > aside {
-            background: inherit !important;
-          }
-
-          .${modules.social?.nowPlayingColumn} > aside > div {
-            border-left: none !important;
-            margin-left: 0 !important;
-          }
-
           .${modules.activity?.itemCard} {
             overflow: hidden !important;
           }
@@ -2235,21 +2201,10 @@ const styles = {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-activityPanel_float`, `
           .${modules.social?.nowPlayingColumn} {
             position: absolute !important;
-            box-shadow: var(--shadow-ledge-left);
             z-index: 190 !important;
             right: 0 !important;
             height: 100% !important;
             max-height: 100% !important;
-          }
-
-          .${modules.social?.nowPlayingColumn}:after {
-            content: "";
-            position: absolute;
-            top: -1px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            box-shadow: var(--shadow-ledge);
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2347,14 +2302,17 @@ const styles = {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-toolbarButtons_init_col`, `
           .cui-toolbar > *:not(:last-child) {
             transition: width var(--cui-transition-speed) !important;
-            width: 24px !important;
+            width: var(--space-32) !important;
             overflow: hidden !important;
           }
         `.replace(/\s+/g, ' '));
-        if (settings.collapseToolbar) this.hide();
+        if (settings.collapseToolbar == 'cui') this.hide();
       },
       hide: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-toolbarButtons_hide_col`, `
+          .cui-toolbar {
+            gap: 0 !important;
+          }
           .cui-toolbar > *:not(:last-child) {
             width: 0px !important;
             margin: 0px !important;
@@ -2413,11 +2371,6 @@ const styles = {
   init: function () {
     // Add root styles
     runtime.api.DOM.addStyle(`${runtime.meta.name}-root`, `
-      :root {
-        --shadow-ledge-left: -2px 0 0 0 hsl(none 0% 0%/0.05), -1.5px 0 0 0 hsl(none 0% 0%/0.05), -1px 0 0 0 hsl(none 0% 0%/0.16);
-        --shadow-ledge-right: 2px 0 0 0 hsl(none 0% 0%/0.05), 1.5px 0 0 0 hsl(none 0% 0%/0.05), 1px 0 0 0 hsl(none 0% 0%/0.16);
-      }
-
       ::-webkit-scrollbar {
         width: 0px;
         background: transparent;
@@ -2426,6 +2379,8 @@ const styles = {
       .cui-toolbar {
         align-items: right;
         display: flex;
+        gap: var(--space-xs);
+        transition: gap var(--cui-transition-speed) !important;
       }
 
       .${modules.icons?.iconWrapper}:not([id*="cui"]):has([d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM18.44 17.27c.15.43.54.73 1 .73h1.06c.83 0 1.5-.67 1.5-1.5a7.5 7.5 0 0 0-6.5-7.43c-.55-.08-.99.38-1.1.92-.06.3-.15.6-.26.87-.23.58-.05 1.3.47 1.63a9.53 9.53 0 0 1 3.83 4.78ZM12.5 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM2 20.5a7.5 7.5 0 0 1 15 0c0 .83-.67 1.5-1.5 1.5a.2.2 0 0 1-.2-.16c-.2-.96-.56-1.87-.88-2.54-.1-.23-.42-.15-.42.1v2.1a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-.1-.32.67-.67 1.58-.88 2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 20.5Z"]),
@@ -2467,7 +2422,7 @@ const styles = {
         --cui-forum-popout-width: ${settings.forumPopoutWidth || settings.defaultForumPopoutWidth}px;
         --cui-activity-panel-width: ${settings.activityPanelWidth || settings.defaultActivityPanelWidth}px;
 
-        --cui-forum-panel-top: ${(elements.noChat) ? 0 : settings.toolbarHeight}px;
+        --cui-forum-panel-top: ${(elements.noChat) ? '0px' : 'var(--custom-channel-header-height)'};
       }
     `.replace(/\s+/g, ' '));
   },
@@ -2509,7 +2464,7 @@ module.exports = class CollapsibleUI {
   // Initialize the plugin when it is enabled
   start = () => {
     // Prevent load if plugin settings are old
-    if (runtime.api.Data.load('settings-version')) {
+    if (runtime.api.Data.load('window-bar-height')) {
       runtime.api.UI.showConfirmationModal('Fatal Error', `Your config file is incompatible with \
         this version of CollapsibleUI.\n\nPlease go to your BetterDiscord \
         plugins folder, delete the file \`CollapsibleUI.config.json\`, then \
@@ -2794,7 +2749,7 @@ module.exports = class CollapsibleUI {
       // Handle left clicks
       if (e.button === 0) {
         // Dynamically handle resizing elements
-        if (e.target.classList.contains(modules.sidebar?.sidebar)
+        if (e.target.classList.contains(modules.sidebar?.sidebarList)
           || e.target.classList.contains(modules.members?.membersWrap)
           || e.target.classList.contains(modules.panel?.outer)
           || e.target.classList.contains(modules.search?.searchResultsWrap)
@@ -2805,8 +2760,11 @@ module.exports = class CollapsibleUI {
           runtime.dragging = e.target;
         }
 
-        if (e.target.classList.contains(modules.sidebar?.sidebar))
+        if (e.target.classList.contains(modules.sidebar?.sidebarList)) {
           document.querySelector(':root').style.setProperty('--cui-channel-list-handle-transition', 'none');
+          elements.userArea?.style.setProperty('transition', 'none', 'important');
+        }
+
         if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
           elements.chatWrapper?.style.setProperty('--transition', 'none');
           elements.noChat?.style.setProperty('--transition', 'none');
@@ -2820,7 +2778,7 @@ module.exports = class CollapsibleUI {
         let target = null;
 
         // Reset channels list width
-        if (e.target.classList.contains(modules.sidebar?.sidebar)) {
+        if (e.target.classList.contains(modules.sidebar?.sidebarList)) {
           settings.channelListWidth = settings.defaultChannelListWidth;
           target = e.target;
         }
@@ -2876,11 +2834,14 @@ module.exports = class CollapsibleUI {
         else return;
 
         // Finish resizing the channels list
-        if (dragging.classList.contains(modules.sidebar?.sidebar)) {
+        if (dragging.classList.contains(modules.sidebar?.sidebarList)) {
           settings.channelListWidth = parseInt(dragging.style.width);
           document.querySelector(':root').style.removeProperty('--cui-channel-list-handle-offset');
           document.querySelector(':root').style.removeProperty('--cui-channel-list-handle-transition');
           target = dragging;
+          elements.userArea?.style.removeProperty('width');
+          // Timeout to avoid transition flash
+          setTimeout(() => elements.userArea?.style.removeProperty('transition'), settings.transitionSpeed);
         }
 
         // Finish resizing the members list
@@ -2945,20 +2906,20 @@ module.exports = class CollapsibleUI {
 
       if (!runtime.dragging) return;
 
-      // Clamp width to between 1px and 80vw
-      let width = runtime.dragging.classList.contains(modules.sidebar?.sidebar)
+      // Clamp width to between 101px and 50vw
+      let width = runtime.dragging.classList.contains(modules.sidebar?.sidebarList)
         ? e.clientX - runtime.dragging.getBoundingClientRect().left
         : runtime.dragging.getBoundingClientRect().right - e.clientX;
-      if (width > window.innerWidth * 0.8)
-        width = window.innerWidth * 0.8;
-      else if (width < 1)
-        width = 1;
+      if (width > window.innerWidth * 0.5)
+        width = window.innerWidth * 0.5;
+      else if (width < 101)
+        width = 101;
 
       // Handle resizing members list/user profile/search panel/activity panel/forum popout
       if (runtime.dragging.classList.contains(modules.members?.membersWrap)
         || runtime.dragging.classList.contains(modules.panel?.outer)
         || runtime.dragging.classList.contains(modules.search?.searchResultsWrap)
-        || runtime.dragging.classList.contains(modules.sidebar?.sidebar)
+        || runtime.dragging.classList.contains(modules.sidebar?.sidebarList)
         || runtime.dragging.classList.contains(modules.social?.nowPlayingColumn)
         || runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
         runtime.dragging.style.setProperty('width', `${width}px`, 'important');
@@ -2966,8 +2927,10 @@ module.exports = class CollapsibleUI {
         runtime.dragging.style.setProperty('min-width', `${width}px`, 'important');
       }
 
-      if (runtime.dragging.classList.contains(modules.sidebar?.sidebar))
+      if (runtime.dragging.classList.contains(modules.sidebar?.sidebarList)) {
         document.querySelector(':root').style.setProperty('--cui-channel-list-handle-offset', `${width - 12}px`);
+        elements.userArea?.style.setProperty('width', `calc((${width}px * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled)) - (var(--space-xs) * 2))`, 'important');
+      }
 
       if (runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
         elements.chatWrapper?.style.setProperty('--width', `${width}px`);
@@ -3098,13 +3061,6 @@ module.exports = class CollapsibleUI {
   // Update dynamic collapsed state of toolbar buttons
   tickCollapseToolbar = (x, y, full) => {
     if (settings.collapseToolbar) {
-      if (this.isNear(runtime.toolbar, settings.buttonCollapseFudgeFactor, x, y)
-        && !this.isNear(elements.forumPopout, 0, x, y)) {
-        if (styles.buttons[constants.I_TOOLBAR_BUTTONS].hidden) styles.buttons[constants.I_TOOLBAR_BUTTONS].show();
-      }
-      else {
-        if (!styles.buttons[constants.I_TOOLBAR_BUTTONS].hidden) styles.buttons[constants.I_TOOLBAR_BUTTONS].hide();
-      }
       if (full) {
         if (this.isNear(elements.toolbar, settings.buttonCollapseFudgeFactor, x, y)
           && !this.isNear(elements.forumPopout, 0, x, y)) {
@@ -3112,6 +3068,15 @@ module.exports = class CollapsibleUI {
         }
         else {
           if (!styles.buttons[constants.I_TOOLBAR_FULL].hidden) styles.buttons[constants.I_TOOLBAR_FULL].hide();
+        }
+      }
+      else {
+        if (this.isNear(runtime.toolbar, settings.buttonCollapseFudgeFactor, x, y)
+          && !this.isNear(elements.forumPopout, 0, x, y)) {
+          if (styles.buttons[constants.I_TOOLBAR_BUTTONS].hidden) styles.buttons[constants.I_TOOLBAR_BUTTONS].show();
+        }
+        else {
+          if (!styles.buttons[constants.I_TOOLBAR_BUTTONS].hidden) styles.buttons[constants.I_TOOLBAR_BUTTONS].hide();
         }
       }
     }
@@ -3126,6 +3091,9 @@ module.exports = class CollapsibleUI {
     let left = box.left - distance;
     let right = box.right + distance;
     let bottom = box.bottom + distance;
+
+    if (element.classList.contains(`${modules.frame?.bar}`))
+      right = window.innerWidth + distance;
 
     return (x > left && x < right && y > top && y < bottom);
   };

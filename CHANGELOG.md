@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v12.0.0:
+* Updated to work with Discord UI refresh (no longer works on old Discord UI)
+* Fixed call container buttons being cut off when window is too small
+* More visual tweaks for UI consistency
+* Removed obsolete advanced settings
+
 ### v11.0.2:
 * Added FullscreenToggle compatibility
 

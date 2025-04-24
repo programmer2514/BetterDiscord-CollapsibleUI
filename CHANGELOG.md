@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v12.1.0:
+* Fixed for latest Discord version
+* Fixed user settings overlapping user profile picture when channel list is collapsed
+* Fixed Horizontal Server List compatibility
+* Removed static class references
+
 ### v12.0.0:
 * Updated to work with Discord UI refresh (no longer works on old Discord UI)
 * Fixed call container buttons being cut off when window is too small

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.0.0
+ * @version 12.1.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,17 +155,17 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.0.0',
+      title: '12.1.0',
       type: 'added',
       items: [
-        'Updated to work with Discord UI refresh (no longer works on old Discord UI)',
-        'Fixed call container buttons being cut off when window is too small',
-        'More visual tweaks for UI consistency',
-        'Removed obsolete advanced settings',
+        'Fixed for latest Discord version',
+        'Fixed user settings overlapping user profile picture when channel list is collapsed',
+        'Fixed Horizontal Server List compatibility',
+        'Removed static class references',
       ],
     },
     {
-      title: '1.0.0 - 11.0.2',
+      title: '1.0.0 - 12.0.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1133,7 +1133,7 @@ const modules = {
   get dispatcher() { return this._dispatcher ?? (this._dispatcher = runtime.api.Webpack.getByKeys('dispatch', 'isDispatching')); },
   get social() { return this._social ?? (this._social = runtime.api.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend')); },
   get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'forumOrHome')); },
-  get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('biteSize', 'fullSize', 'panel', 'outer', 'inner', 'overlay')); },
+  get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('outer', 'inner', 'overlay')); },
   get guilds() { return this._guilds ?? (this._guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby')); },
   get frame() { return this._frame ?? (this._frame = runtime.api.Webpack.getByKeys('bar', 'title', 'winButtons')); },
   get calls() { return this._calls ?? (this._calls = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer')); },
@@ -1152,6 +1152,7 @@ const modules = {
   get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'divider', 'lastButton')); },
   get callButtons() { return this._callButtons ?? (this._callButtons = runtime.api.Webpack.getByKeys('controlButton', 'wrapper', 'buttonContainer')); },
   get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('actionButtons', 'micTestButton', 'buttonIcon')); },
+  get scroller() { return this._scroller ?? (this._scroller = runtime.api.Webpack.getByKeys('wrapper', 'scroller', 'discoveryIcon')); },
 };
 
 const elements = {
@@ -1159,14 +1160,14 @@ const elements = {
   get searchBar() { return document.querySelector(`.${modules.toolbar?.search}`); },
   get toolbar() { return document.querySelector(`.${modules.icons?.toolbar}`); },
   get membersList() { return document.querySelector(`.${modules.members?.membersWrap}`); },
-  get userProfile() { return document.querySelector(`.${modules.panel?.inner}.${modules.panel?.panel}`); },
+  get userProfile() { return document.querySelector(`.${modules.guilds?.content} .${modules.panel?.inner}`); },
   get messageInput() { return document.querySelector(`.${modules.guilds?.form}`); },
   get windowBar() { return document.querySelector(`.${modules.frame?.bar}`); },
   get callWindow() { return document.querySelector(`.${modules.calls?.wrapper}:not(.${modules.calls?.noChat})`); },
   get settingsContainer() { return [...document.querySelectorAll(`.${modules.user?.buttons}`)].slice(-1)[0]; },
   get messageInputContainer() { return [...document.querySelectorAll(`.${modules.input?.buttons}`)].slice(-1)[0]; },
   get forumPopout() { return document.querySelector(`.${modules.popout?.chatLayerWrapper}`); },
-  get biteSizePanel() { return document.querySelector(`.${modules.panel?.outer}.${modules.panel?.biteSize}`); },
+  get biteSizePanel() { return document.querySelector(`[role="dialog"] .${modules.panel?.outer}`); },
   get userArea() { return document.querySelector(`.${modules.sidebar?.panels}`); },
   get serverList() { return document.querySelector(`.${modules.sidebar?.guilds}`); },
   get channelList() { return document.querySelector(`.${modules.sidebar?.sidebarList}`); },
@@ -1333,12 +1334,12 @@ const styles = {
             border-top: 1px solid var(--border-subtle) !important;
           }
           
-          .scroller_ef3116 {
+          .${modules.scroller?.scroller} {
             padding-top: var(--space-xs) !important;
           }
 
-          .${modules.sidebar?.base} {
-            transition: top var(--cui-transition-speed);
+          .${modules.sidebar?.content} {
+            transition: margin-top var(--cui-transition-speed);
           }
 
           ${(settings.sizeCollapse)
@@ -1358,10 +1359,11 @@ const styles = {
 
           .${modules.sidebar?.guilds} {
             width: var(--cui-collapse-size) !important;
+            border: 0 !important;
           }
 
-          .${modules.sidebar?.base} {
-            --server-container: 0px;
+          .${modules.sidebar?.content} {
+            margin-top: 0px !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -1635,7 +1637,7 @@ const styles = {
         document.querySelector(`.${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '500%');
         document.querySelector(`.${modules.panel?.outer} header > svg`)?.removeAttribute('viewBox');
         return this.__init ?? (this.__init = [`${runtime.meta.name}-userProfile_init`, `
-          .${modules.panel?.outer}.${modules.panel?.panel} {
+          .${modules.guilds?.content} .${modules.panel?.outer} {
             max-width: var(--cui-user-profile-width) !important;
             width: var(--cui-user-profile-width) !important;
             min-width: var(--cui-user-profile-width) !important;
@@ -1644,25 +1646,25 @@ const styles = {
             border-left: 1px solid var(--border-subtle) !important;
           }
 
-          .${modules.panel?.outer}.${modules.panel?.panel} > * {
+          .${modules.guilds?.content} .${modules.panel?.outer} > * {
             width: 100% !important;
           }
 
-          .${modules.panel?.outer}.${modules.panel?.panel} header > svg {
+          .${modules.guilds?.content} .${modules.panel?.outer} header > svg {
             min-width: 100% !important;
           }
 
-          .${modules.panel?.outer}.${modules.panel?.panel} header > svg > mask > rect {
+          .${modules.guilds?.content} .${modules.panel?.outer} header > svg > mask > rect {
             width: 500% !important;
           }
 
-          .${modules.panel?.outer}.${modules.panel?.panel} .${modules.effects?.effect} {
+          .${modules.guilds?.content} .${modules.panel?.outer} .${modules.effects?.effect} {
             min-height: 100% !important;
           }
 
           ${(settings.userProfileWidth)
             ? `
-              .${modules.panel?.outer}.${modules.panel?.panel}:before {
+              .${modules.guilds?.content} .${modules.panel?.outer}:before {
                 cursor: e-resize;
                 z-index: 200;
                 position: absolute;
@@ -1685,7 +1687,7 @@ const styles = {
       },
       get _toggle() {
         return this.__toggle ?? (this.__toggle = [`${runtime.meta.name}-userProfile_toggle`, `
-          .${modules.panel?.outer}.${modules.panel?.panel} {
+          .${modules.guilds?.content} .${modules.panel?.outer} {
             max-width: var(--cui-collapse-size) !important;
             width: var(--cui-collapse-size) !important;
             min-width: var(--cui-collapse-size) !important;
@@ -1694,7 +1696,7 @@ const styles = {
       },
       get _float() {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-userProfile_float`, `
-          .${modules.panel?.outer}.${modules.panel?.panel} {
+          .${modules.guilds?.content} .${modules.panel?.outer} {
             position: absolute !important;
             z-index: 190 !important;
             max-height: 100% !important;
@@ -1709,7 +1711,7 @@ const styles = {
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
-                .${modules.panel?.outer}.${modules.panel?.panel} {
+                .${modules.guilds?.content} .${modules.panel?.outer} {
                   max-width: var(--cui-user-profile-width) !important;
                   width: var(--cui-user-profile-width) !important;
                   min-width: var(--cui-user-profile-width) !important;
@@ -1720,9 +1722,9 @@ const styles = {
         `.replace(/\s+/g, ' ')]);
       },
       _clear: function () {
-        document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.removeProperty('max-height');
-        document.querySelector(`.${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '100%');
-        document.querySelector(`.${modules.panel?.outer} header > svg`)?.setAttribute('viewBox', `0 0 ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minWidth)} ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minHeight)}`);
+        document.querySelector(`.${modules.guilds?.content} .${modules.panel?.outer} header > svg`)?.style.removeProperty('max-height');
+        document.querySelector(`.${modules.guilds?.content} .${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '100%');
+        document.querySelector(`.${modules.guilds?.content} .${modules.panel?.outer} header > svg`)?.setAttribute('viewBox', `0 0 ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minWidth)} ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minHeight)}`);
       },
       ...styleFunctions,
     },
@@ -1910,9 +1912,9 @@ const styles = {
             transition: max-height var(--cui-transition-speed), width var(--cui-transition-speed), border var(--cui-transition-speed) !important;
             max-height: ${settings.userAreaMaxHeight}px !important;
             overflow: hidden !important;
-            width: calc((var(--cui-channel-list-width) * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled)) - (var(--space-xs) * 2)) !important;
-            border-left-width: clamp(0px, calc(1px * (var(--cui-server-list-toggled) + var(--cui-channel-list-toggled))), 1px) !important;
-            border-right-width: clamp(0px, calc(1px * (var(--cui-server-list-toggled) + var(--cui-channel-list-toggled))), 1px) !important;
+            width: calc((var(--cui-channel-list-width) * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled) * var(--cui-compat-hsl)) - (var(--space-xs) * 2)) !important;
+            border-left-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl)) + var(--cui-channel-list-toggled))), 1px) !important;
+            border-right-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl)) + var(--cui-channel-list-toggled))), 1px) !important;
             z-index: 191 !important;
           }
 
@@ -2238,8 +2240,12 @@ const styles = {
           .${modules.user?.avatarWrapper} {
             flex-grow: 1 !important;
           }
+
+          .${modules.user?.buttons} {
+            transform: translateX(calc((1 - var(--cui-channel-list-toggled)) * 1000000000px));
+          }
   
-          .${modules.user?.buttons} > *:not(:last-child) {
+          .${modules.user?.buttons} > *:not(:nth-last-child(2)):not(.gameActivityToggleButton_fd3fb5) {
             transition: width var(--cui-transition-speed) !important;
             overflow: hidden !important;
           }
@@ -2248,7 +2254,7 @@ const styles = {
       },
       hide: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-settingsButtons_hide_col`, `
-          .${modules.user?.buttons} > *:not(:last-child) {
+          .${modules.user?.buttons} > *:not(:nth-last-child(2)):not(.gameActivityToggleButton_fd3fb5) {
             width: 0px !important;
           }
         `.replace(/\s+/g, ' '));
@@ -2350,7 +2356,7 @@ const styles = {
         if (document.querySelector('.public-DraftEditor-content').querySelector('[data-text="true"]').innerHTML) return;
 
         runtime.api.DOM.addStyle(`${runtime.meta.name}-toolbarFull_hide_col`, `
-          .${modules.icons?.toolbar} > *:not(:last-child) {
+          .${modules.icons?.toolbar} > *:not(:nth-last-child(2)) {
             max-width: 0px !important;
           }
         `.replace(/\s+/g, ' '));
@@ -2423,6 +2429,8 @@ const styles = {
         --cui-activity-panel-width: ${settings.activityPanelWidth || settings.defaultActivityPanelWidth}px;
 
         --cui-forum-panel-top: ${(elements.noChat) ? '0px' : 'var(--custom-channel-header-height)'};
+
+        --cui-compat-hsl: ${(runtime.api.Themes.isEnabled('Horizontal Server List')) ? 0 : 1};
       }
     `.replace(/\s+/g, ' '));
   },
@@ -3037,7 +3045,7 @@ module.exports = class CollapsibleUI {
   // Update dynamic collapsed state of user settings buttons
   tickCollapseSettings = (x, y) => {
     if (settings.collapseSettings) {
-      if (this.isNear(elements.settingsContainer, settings.buttonCollapseFudgeFactor, x, y)) {
+      if (this.isNear(elements.settingsContainer, settings.buttonCollapseFudgeFactor, x, y) && !(document.querySelector(`#${runtime.meta.name}-channelList_toggle_dynamic`))) {
         if (styles.buttons[constants.I_SETTINGS_BUTTONS].hidden) styles.buttons[constants.I_SETTINGS_BUTTONS].show();
       }
       else {

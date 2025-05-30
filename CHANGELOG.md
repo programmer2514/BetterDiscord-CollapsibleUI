@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v12.2.1:
+* Fixed a tiny visual inconsistency
+
 ### v12.2.0:
 * Added UIRefreshRefresh compatibility
 * Fixed visual glitch when collapsing forum popout

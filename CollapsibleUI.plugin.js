@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.2.0
+ * @version 12.2.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,15 +155,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.2.0',
+      title: '12.2.1',
       type: 'added',
       items: [
-        'Added UIRefreshRefresh compatibility',
-        'Fixed visual glitch when collapsing forum popout',
+        'Fixed a tiny visual inconsistency',
       ],
     },
     {
-      title: '1.0.0 - 12.1.1',
+      title: '1.0.0 - 12.2.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1333,7 +1332,7 @@ const styles = {
           }
           
           .${modules.scroller?.tree} {
-            padding-top: var(--space-sm) !important;
+            padding-top: var(--space-xs) !important;
           }
 
           .${modules.sidebar?.content} {

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.1.0
+ * @version 12.1.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,17 +155,17 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.1.0',
+      title: '12.1.1',
       type: 'added',
       items: [
-        'Fixed for latest Discord version',
-        'Fixed user settings overlapping user profile picture when channel list is collapsed',
-        'Fixed Horizontal Server List compatibility',
-        'Removed static class references',
+        'Prevented hiding members list/user profile buttons while they are collapsed',
+        'Fixed crash when trying to collapse all toolbar buttons',
+        'Fixed size collapse not working on some elements',
+        'Fixed several minor styling issues',
       ],
     },
     {
-      title: '1.0.0 - 12.0.0',
+      title: '1.0.0 - 12.1.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1331,7 +1331,7 @@ const styles = {
           .${modules.sidebar?.guilds} {
             transition: width var(--cui-transition-speed);
             border-right: 1px solid var(--border-subtle) !important;
-            border-top: 1px solid var(--border-subtle) !important;
+            border-top: 1px solid var(--app-border-frame) !important;
           }
           
           .${modules.scroller?.scroller} {
@@ -1816,7 +1816,7 @@ const styles = {
             min-height: var(--cui-collapse-size) !important;
             height: var(--cui-collapse-size) !important;
             max-height: var(--cui-collapse-size) !important;
-            --custom-app-top-bar-height: calc(24px + var(--space-sm));
+            --custom-app-top-bar-height: calc(24px + var(--space-8));
           }
 
           .${modules.sidebar?.base} {
@@ -1833,8 +1833,8 @@ const styles = {
             right: 0 !important;
             background: var(--background-tertiary) !important;
             z-index: 200 !important;
-            --custom-app-top-bar-height: calc(24px + var(--space-sm));
-            border-bottom: 1px solid var(--border-subtle) !important;
+            --custom-app-top-bar-height: calc(24px + var(--space-8));
+            border-bottom: 1px solid var(--app-border-frame) !important;
           }
 
           .${modules.sidebar?.base} {
@@ -1872,6 +1872,12 @@ const styles = {
         return this.__init ?? (this.__init = [`${runtime.meta.name}-callWindow_init`, `
           .${modules.calls?.wrapper}:not(.${modules.calls?.noChat}) {
             transition: min-height var(--cui-transition-speed), max-height var(--cui-transition-speed) !important;
+          }
+
+          .${modules.calls?.wrapper}:not(.${modules.calls?.noChat}) > .${modules.calls?.callContainer} {
+            border-left: none !important;
+            border-top: none !important;
+            border-bottom: 1px solid var(--border-subtle) !important;
           }
             
           ${(settings.sizeCollapse)
@@ -1964,6 +1970,7 @@ const styles = {
             min-width: var(--cui-search-panel-width) !important;
             transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
             overflow: visible !important;
+            border-left: 1px solid var(--border-subtle) !important;
           }
 
           .${modules.search?.searchResultsWrap} > header > div:last-child {
@@ -1980,6 +1987,14 @@ const styles = {
                 width: 16px;
                 height: 100%;
                 left: -4px;
+              }
+            `
+            : ''}
+
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                ${this._toggle[1]}
               }
             `
             : ''}
@@ -2045,6 +2060,11 @@ const styles = {
             display: none !important;
           }
 
+          .${modules.popout?.container} {
+            border-top: 1px solid var(--border-subtle) !important;
+            border-left: 1px solid var(--border-subtle) !important;
+          }
+
           .${modules.popout?.chatLayerWrapper} > * {
             width: 100% !important;
             border-radius: 0 !important;
@@ -2107,6 +2127,14 @@ const styles = {
                 width: 16px;
                 height: 100%;
                 left: -4px;
+              }
+            `
+            : ''}
+
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                ${this._toggle[1]}
               }
             `
             : ''}
@@ -2185,6 +2213,14 @@ const styles = {
                 width: 16px;
                 height: 100%;
                 transform: translateX(-4px);
+              }
+            `
+            : ''}
+            
+          ${(settings.sizeCollapse)
+            ? `
+              @media ${this.query} {
+                ${this._toggle[1]}
               }
             `
             : ''}
@@ -2341,7 +2377,7 @@ const styles = {
       hidden: false,
       init: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-toolbarFull_init_col`, `
-          .${modules.icons?.toolbar} > *:not(:last-child) {
+          .${modules.guilds?.title} .${modules.icons?.toolbar} > *:not(:last-child) {
             transition: max-width var(--cui-transition-speed) !important;
             max-width: ${settings.toolbarElementMaxWidth}px !important;
             overflow: hidden !important;
@@ -2353,10 +2389,10 @@ const styles = {
         // Keep expanded while typing in search bar
         // Why is this classname not handled the same by Discord as other elements??
         if (document.querySelector('.public-DraftEditor-content[aria-expanded="true"]')) return;
-        if (document.querySelector('.public-DraftEditor-content').querySelector('[data-text="true"]').innerHTML) return;
+        if (document.querySelector('.public-DraftEditor-content')?.querySelector('[data-text="true"]')?.innerHTML) return;
 
         runtime.api.DOM.addStyle(`${runtime.meta.name}-toolbarFull_hide_col`, `
-          .${modules.icons?.toolbar} > *:not(:nth-last-child(2)) {
+          .${modules.guilds?.title} .${modules.icons?.toolbar} > *:not(:last-child) {
             max-width: 0px !important;
           }
         `.replace(/\s+/g, ' '));
@@ -2389,8 +2425,8 @@ const styles = {
         transition: gap var(--cui-transition-speed) !important;
       }
 
-      .${modules.icons?.iconWrapper}:not([id*="cui"]):has([d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM18.44 17.27c.15.43.54.73 1 .73h1.06c.83 0 1.5-.67 1.5-1.5a7.5 7.5 0 0 0-6.5-7.43c-.55-.08-.99.38-1.1.92-.06.3-.15.6-.26.87-.23.58-.05 1.3.47 1.63a9.53 9.53 0 0 1 3.83 4.78ZM12.5 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM2 20.5a7.5 7.5 0 0 1 15 0c0 .83-.67 1.5-1.5 1.5a.2.2 0 0 1-.2-.16c-.2-.96-.56-1.87-.88-2.54-.1-.23-.42-.15-.42.1v2.1a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-.1-.32.67-.67 1.58-.88 2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 20.5Z"]),
-      .${modules.icons?.iconWrapper}:not([id*="cui"]):has([d="M23 12.38c-.02.38-.45.58-.78.4a6.97 6.97 0 0 0-6.27-.08.54.54 0 0 1-.44 0 8.97 8.97 0 0 0-11.16 3.55c-.1.15-.1.35 0 .5.37.58.8 1.13 1.28 1.61.24.24.64.15.8-.15.19-.38.39-.73.58-1.02.14-.21.43-.1.4.15l-.19 1.96c-.02.19.07.37.23.47A8.96 8.96 0 0 0 12 21a.4.4 0 0 1 .38.27c.1.33.25.65.4.95.18.34-.02.76-.4.77L12 23a11 11 0 1 1 11-10.62ZM15.5 7.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"]) {
+      .${modules.icons?.iconWrapper}.${modules.icons?.selected}:not([id*="cui"]):has([d="M14.5 8a3 3 0 1 0-2.7-4.3c-.2.4.06.86.44 1.12a5 5 0 0 1 2.14 3.08c.01.06.06.1.12.1ZM18.44 17.27c.15.43.54.73 1 .73h1.06c.83 0 1.5-.67 1.5-1.5a7.5 7.5 0 0 0-6.5-7.43c-.55-.08-.99.38-1.1.92-.06.3-.15.6-.26.87-.23.58-.05 1.3.47 1.63a9.53 9.53 0 0 1 3.83 4.78ZM12.5 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM2 20.5a7.5 7.5 0 0 1 15 0c0 .83-.67 1.5-1.5 1.5a.2.2 0 0 1-.2-.16c-.2-.96-.56-1.87-.88-2.54-.1-.23-.42-.15-.42.1v2.1a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-2.1c0-.25-.31-.33-.42-.1-.32.67-.67 1.58-.88 2.54a.2.2 0 0 1-.2.16A1.5 1.5 0 0 1 2 20.5Z"]),
+      .${modules.icons?.iconWrapper}.${modules.icons?.selected}:not([id*="cui"]):has([d="M23 12.38c-.02.38-.45.58-.78.4a6.97 6.97 0 0 0-6.27-.08.54.54 0 0 1-.44 0 8.97 8.97 0 0 0-11.16 3.55c-.1.15-.1.35 0 .5.37.58.8 1.13 1.28 1.61.24.24.64.15.8-.15.19-.38.39-.73.58-1.02.14-.21.43-.1.4.15l-.19 1.96c-.02.19.07.37.23.47A8.96 8.96 0 0 0 12 21a.4.4 0 0 1 .38.27c.1.33.25.65.4.95.18.34-.02.76-.4.77L12 23a11 11 0 1 1 11-10.62ZM15.5 7.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"]) {
         display: none;
       }
 

@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v12.1.1:
+* Prevented hiding members list/user profile buttons while they are collapsed
+* Fixed crash when trying to collapse all toolbar buttons
+* Fixed size collapse not working on some elements
+* Fixed several minor styling issues
+
 ### v12.1.0:
 * Fixed for latest Discord version
 * Fixed user settings overlapping user profile picture when channel list is collapsed

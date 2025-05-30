@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.1.1
+ * @version 12.2.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,17 +155,15 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.1.1',
+      title: '12.2.0',
       type: 'added',
       items: [
-        'Prevented hiding members list/user profile buttons while they are collapsed',
-        'Fixed crash when trying to collapse all toolbar buttons',
-        'Fixed size collapse not working on some elements',
-        'Fixed several minor styling issues',
+        'Added UIRefreshRefresh compatibility',
+        'Fixed visual glitch when collapsing forum popout',
       ],
     },
     {
-      title: '1.0.0 - 12.1.0',
+      title: '1.0.0 - 12.1.1',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1334,8 +1332,8 @@ const styles = {
             border-top: 1px solid var(--app-border-frame) !important;
           }
           
-          .${modules.scroller?.scroller} {
-            padding-top: var(--space-xs) !important;
+          .${modules.scroller?.tree} {
+            padding-top: var(--space-sm) !important;
           }
 
           .${modules.sidebar?.content} {
@@ -1454,6 +1452,10 @@ const styles = {
 
           .${modules.channels?.channel} {
             max-width: 100% !important;
+          }
+
+          .${modules.icons?.container} {
+            border-left: 0 !important;
           }
 
           ${(settings.channelListWidth)
@@ -1643,6 +1645,9 @@ const styles = {
             min-width: var(--cui-user-profile-width) !important;
             transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
             min-height: 100% !important;
+          }
+          
+          .${modules.guilds?.content} .${modules.panel?.outer} .${modules.panel?.inner} {
             border-left: 1px solid var(--border-subtle) !important;
           }
 
@@ -2053,6 +2058,9 @@ const styles = {
             z-index: 190 !important;
             top: var(--cui-forum-panel-top) !important;
             height: calc(100% - var(--cui-forum-panel-top)) !important;
+            max-height: 100% !important;
+            overflow: hidden !important;
+            --uirr-forum-panel-width: var(--cui-forum-popout-width);
           }
 
           div:not([class])[style^="min-width"],
@@ -2146,6 +2154,7 @@ const styles = {
             max-width: var(--cui-collapse-size) !important;
             width: var(--cui-collapse-size) !important;
             min-width: var(--cui-collapse-size) !important;
+            --uirr-forum-panel-width: var(--cui-collapse-size);
           }
 
           .${modules.guilds?.content}:after,
@@ -2812,6 +2821,7 @@ module.exports = class CollapsibleUI {
         if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
           elements.chatWrapper?.style.setProperty('--transition', 'none');
           elements.noChat?.style.setProperty('--transition', 'none');
+          e.target.childNodes.forEach(e => e.style.setProperty('transition', 'none'));
         }
       }
     }, { passive: true, signal: runtime.controller.signal });
@@ -2919,6 +2929,8 @@ module.exports = class CollapsibleUI {
 
           elements.chatWrapper?.style.removeProperty('--width');
           elements.noChat?.style.removeProperty('--width');
+          target.style.removeProperty('--uirr-forum-panel-width');
+          target.childNodes.forEach(e => e.style.removeProperty('transition'));
           // Timeout to avoid transition flash
           setTimeout(() => {
             elements.chatWrapper?.style.removeProperty('--transition');
@@ -2979,6 +2991,7 @@ module.exports = class CollapsibleUI {
       if (runtime.dragging.classList.contains(modules.popout?.chatLayerWrapper)) {
         elements.chatWrapper?.style.setProperty('--width', `${width}px`);
         elements.noChat?.style.setProperty('--width', `${width}px`);
+        runtime.dragging.style.setProperty('--uirr-forum-panel-width', `${width}px`);
       }
     }, { passive: true, signal: runtime.controller.signal });
 

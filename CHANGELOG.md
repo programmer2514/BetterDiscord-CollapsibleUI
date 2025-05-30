@@ -1,5 +1,9 @@
 # CollapsibleUI Patch Notes
 
+### v12.2.0:
+* Added UIRefreshRefresh compatibility
+* Fixed visual glitch when collapsing forum popout
+
 ### v12.1.1:
 * Prevented hiding members list/user profile buttons while they are collapsed
 * Fixed crash when trying to collapse all toolbar buttons

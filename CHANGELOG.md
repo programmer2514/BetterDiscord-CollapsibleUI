@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v12.2.2:
+* Fixed leftover spacing when collapsing button groups
+
 ### v12.2.1:
 * Fixed a tiny visual inconsistency
 

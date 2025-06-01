@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.2.1
+ * @version 12.2.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,14 +155,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.2.1',
+      title: '12.2.2',
       type: 'added',
       items: [
-        'Fixed a tiny visual inconsistency',
+        'Fixed leftover spacing when collapsing button groups',
       ],
     },
     {
-      title: '1.0.0 - 12.2.0',
+      title: '1.0.0 - 12.2.1',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1330,7 +1330,7 @@ const styles = {
             border-right: 1px solid var(--border-subtle) !important;
             border-top: 1px solid var(--app-border-frame) !important;
           }
-          
+
           .${modules.scroller?.tree} {
             padding-top: var(--space-xs) !important;
           }
@@ -1369,7 +1369,7 @@ const styles = {
           :root {
             --cui-server-list-toggled: 0;
           }
-            
+
           .${modules.sidebar?.guilds} {
             position: absolute !important;
             z-index: 192 !important;
@@ -1645,7 +1645,7 @@ const styles = {
             transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
             min-height: 100% !important;
           }
-          
+
           .${modules.guilds?.content} .${modules.panel?.outer} .${modules.panel?.inner} {
             border-left: 1px solid var(--border-subtle) !important;
           }
@@ -1742,7 +1742,7 @@ const styles = {
             max-height: calc(var(--custom-channel-textarea-text-area-max-height) + 24px) !important;
             transition: max-height var(--cui-transition-speed) !important;
           }
-            
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1803,7 +1803,7 @@ const styles = {
           .${modules.sidebar?.base} {
             transition: grid-template-rows var(--cui-transition-speed) !important;
           }
-            
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1883,7 +1883,7 @@ const styles = {
             border-top: none !important;
             border-bottom: 1px solid var(--border-subtle) !important;
           }
-            
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -1931,7 +1931,7 @@ const styles = {
           .${modules.userAreaButtons?.actionButtons} button {
             padding: 0 !important;
           }
-            
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -2224,7 +2224,7 @@ const styles = {
               }
             `
             : ''}
-            
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -2286,9 +2286,10 @@ const styles = {
           }
 
           .${modules.user?.buttons} {
+            transition: gap var(--cui-transition-speed) !important;
             transform: translateX(calc((1 - var(--cui-channel-list-toggled)) * 1000000000px));
           }
-  
+
           .${modules.user?.buttons} > *:not(:nth-last-child(2)):not(.gameActivityToggleButton_fd3fb5) {
             transition: width var(--cui-transition-speed) !important;
             overflow: hidden !important;
@@ -2298,6 +2299,10 @@ const styles = {
       },
       hide: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-settingsButtons_hide_col`, `
+          .${modules.user?.buttons} {
+            gap: 0px !important;
+          }
+
           .${modules.user?.buttons} > *:not(:nth-last-child(2)):not(.gameActivityToggleButton_fd3fb5) {
             width: 0px !important;
           }
@@ -2319,6 +2324,10 @@ const styles = {
       hidden: false,
       init: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-messageInputButtons_init_col`, `
+          .${modules.input?.buttons} {
+            transition: gap var(--cui-transition-speed) !important;
+          }
+
           .${modules.input?.buttons} > *:not(:last-child) {
             transition: max-width var(--cui-transition-speed) !important;
             max-width: ${settings.messageInputButtonWidth}px !important;
@@ -2329,6 +2338,10 @@ const styles = {
       },
       hide: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-messageInputButtons_hide_col`, `
+          .${modules.input?.buttons} {
+            gap: 0px !important;
+          }
+
           .${modules.input?.buttons} > *:not(:last-child) {
             max-width: 0px !important;
           }

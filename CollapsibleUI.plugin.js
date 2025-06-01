@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.2.2
+ * @version 12.2.3
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,14 +155,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.2.2',
+      title: '12.2.3',
       type: 'added',
       items: [
-        'Fixed leftover spacing when collapsing button groups',
+        'Fixed user profile compatibility issue with FullscreenToggle plugin',
       ],
     },
     {
-      title: '1.0.0 - 12.2.1',
+      title: '1.0.0 - 12.2.2',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1922,9 +1922,9 @@ const styles = {
             transition: max-height var(--cui-transition-speed), width var(--cui-transition-speed), border var(--cui-transition-speed) !important;
             max-height: ${settings.userAreaMaxHeight}px !important;
             overflow: hidden !important;
-            width: calc((var(--cui-channel-list-width) * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled) * var(--cui-compat-hsl)) - (var(--space-xs) * 2)) !important;
-            border-left-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl)) + var(--cui-channel-list-toggled))), 1px) !important;
-            border-right-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl)) + var(--cui-channel-list-toggled))), 1px) !important;
+            width: calc((var(--cui-channel-list-width) * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) - (var(--space-xs) * 2)) !important;
+            border-left-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled))), 1px) !important;
+            border-right-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled))), 1px) !important;
             z-index: 191 !important;
           }
 

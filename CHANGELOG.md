@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v12.2.3:
+* Fixed user profile compatibility issue with FullscreenToggle plugin
+
 ### v12.2.2:
 * Fixed leftover spacing when collapsing button groups
 

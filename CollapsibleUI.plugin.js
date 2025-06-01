@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.2.3
+ * @version 12.2.4
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,14 +155,16 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.2.3',
+      title: '12.2.4',
       type: 'added',
       items: [
-        'Fixed user profile compatibility issue with FullscreenToggle plugin',
+        'Fixed user area being cut off',
+        'Fixed a small visual glitch caused by collapsing the channel list',
+        'Improved UIRefreshRefresh compatibility',
       ],
     },
     {
-      title: '1.0.0 - 12.2.2',
+      title: '1.0.0 - 12.2.3',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1327,7 +1329,7 @@ const styles = {
 
           .${modules.sidebar?.guilds} {
             transition: width var(--cui-transition-speed);
-            border-right: 1px solid var(--border-subtle) !important;
+            border-right: calc(1px * var(--cui-channel-list-toggled)) solid var(--border-subtle) !important;
             border-top: 1px solid var(--app-border-frame) !important;
           }
 
@@ -1932,6 +1934,15 @@ const styles = {
             padding: 0 !important;
           }
 
+          ${(runtime.api.Themes.isEnabled('UI Refresh Refresh'))
+            ? `
+              .${modules.user?.avatar} {
+                transition: transform var(--cui-transition-speed) !important;
+                transform: translateX(calc(-4px * (1 - var(--cui-channel-list-toggled))));
+              }
+            `
+            : ''}
+
           ${(settings.sizeCollapse)
             ? `
               @media ${this.query} {
@@ -2434,6 +2445,10 @@ const styles = {
   init: function () {
     // Add root styles
     runtime.api.DOM.addStyle(`${runtime.meta.name}-root`, `
+      :root {
+        --fst-server-list-collapsed: 0;
+      }
+
       ::-webkit-scrollbar {
         width: 0px;
         background: transparent;

@@ -1,5 +1,10 @@
 # CollapsibleUI Patch Notes
 
+### v12.2.4:
+* Fixed user area being cut off
+* Fixed a small visual glitch caused by collapsing the channel list
+* Improved UIRefreshRefresh compatibility
+
 ### v12.2.3:
 * Fixed user profile compatibility issue with FullscreenToggle plugin
 

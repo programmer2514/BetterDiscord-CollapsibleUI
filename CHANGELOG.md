@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v12.3.0:
+* Widened the available size range of resizable elements
+* Fixed Quest popup being cut off
+* Fixed broken Webpack modules
+* Updated CSS variables
+
 ### v12.2.4:
 * Fixed user area being cut off
 * Fixed a small visual glitch caused by collapsing the channel list

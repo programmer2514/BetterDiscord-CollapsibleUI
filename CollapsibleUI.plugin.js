@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.2.4
+ * @version 12.3.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,16 +155,17 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.2.4',
+      title: '12.3.0',
       type: 'added',
       items: [
-        'Fixed user area being cut off',
-        'Fixed a small visual glitch caused by collapsing the channel list',
-        'Improved UIRefreshRefresh compatibility',
+        'Widened the available size range of resizable elements',
+        'Fixed Quest popup being cut off',
+        'Fixed broken Webpack modules',
+        'Updated CSS variables',
       ],
     },
     {
-      title: '1.0.0 - 12.2.3',
+      title: '1.0.0 - 12.2.4',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1131,14 +1132,14 @@ const modules = {
   get icons() { return this._icons ?? (this._icons = runtime.api.Webpack.getByKeys('selected', 'iconWrapper', 'clickable', 'icon')); },
   get dispatcher() { return this._dispatcher ?? (this._dispatcher = runtime.api.Webpack.getByKeys('dispatch', 'isDispatching')); },
   get social() { return this._social ?? (this._social = runtime.api.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend')); },
-  get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'forumOrHome')); },
+  get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'downloadArrow')); },
   get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('outer', 'inner', 'overlay')); },
   get guilds() { return this._guilds ?? (this._guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby')); },
   get frame() { return this._frame ?? (this._frame = runtime.api.Webpack.getByKeys('bar', 'title', 'winButtons')); },
   get calls() { return this._calls ?? (this._calls = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer')); },
   get threads() { return this._threads ?? (this._threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton')); },
   get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
-  get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'accessoryBar', 'emojiButton')); },
+  get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'attachButton', 'emojiButton')); },
   get popout() { return this._popout ?? (this._popout = runtime.api.Webpack.getByKeys('chatLayerWrapper', 'container', 'chatTarget')); },
   get sidebar() { return this._sidebar ?? (this._sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded')); },
   get effects() { return this._effects ?? (this._effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect')); },
@@ -1148,7 +1149,7 @@ const modules = {
   get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
   get activity() { return this._activity ?? (this._activity = runtime.api.Webpack.getByKeys('itemCard', 'emptyCard', 'emptyText')); },
   get game() { return this._game ?? (this._game = runtime.api.Webpack.getByKeys('openOnHover', 'userSection', 'thumbnail')); },
-  get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'divider', 'lastButton')); },
+  get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'speaker', 'last', 'lastButton')); },
   get callButtons() { return this._callButtons ?? (this._callButtons = runtime.api.Webpack.getByKeys('controlButton', 'wrapper', 'buttonContainer')); },
   get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('actionButtons', 'micTestButton', 'buttonIcon')); },
   get scroller() { return this._scroller ?? (this._scroller = runtime.api.Webpack.getByKeys('wrapper', 'scroller', 'discoveryIcon')); },
@@ -1837,7 +1838,7 @@ const styles = {
             top: 0 !important;
             left: 0 !important;
             right: 0 !important;
-            background: var(--background-tertiary) !important;
+            background: var(--bg-base-tertiary) !important;
             z-index: 200 !important;
             --custom-app-top-bar-height: calc(24px + var(--space-8));
             border-bottom: 1px solid var(--app-border-frame) !important;
@@ -1923,10 +1924,10 @@ const styles = {
           .${modules.sidebar?.panels} {
             transition: max-height var(--cui-transition-speed), width var(--cui-transition-speed), border var(--cui-transition-speed) !important;
             max-height: ${settings.userAreaMaxHeight}px !important;
-            overflow: hidden !important;
             width: calc((var(--cui-channel-list-width) * var(--cui-channel-list-toggled)) + (var(--custom-guild-list-width) * var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) - (var(--space-xs) * 2)) !important;
             border-left-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled))), 1px) !important;
             border-right-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled))), 1px) !important;
+            opacity: clamp(0, calc((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled)), 1) !important;
             z-index: 191 !important;
           }
 
@@ -1958,6 +1959,7 @@ const styles = {
             max-height: var(--cui-collapse-size) !important;
             border-top-width: 0px !important;
             border-bottom-width: 0px !important;
+            overflow: hidden !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -1968,6 +1970,7 @@ const styles = {
             max-height: ${settings.userAreaMaxHeight}px !important;
             border-top-width: 1px !important;
             border-bottom-width: 1px !important;
+            overflow: visible !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2471,6 +2474,10 @@ const styles = {
       .${modules.threads?.headerRow} {
         min-width: 0px !important;
       }
+
+      .${modules.sidebar?.sidebarList} {
+        container-type: unset !important;
+      }
     `.replace(/\s+/g, ' '));
 
     // Init panel styles
@@ -2619,6 +2626,7 @@ module.exports = class CollapsibleUI {
 
     runtime.observer.disconnect();
 
+    // Terminate the plugin
     this.terminate();
     runtime.api.Logger.info('Disabled');
   };
@@ -2993,10 +3001,10 @@ module.exports = class CollapsibleUI {
       let width = runtime.dragging.classList.contains(modules.sidebar?.sidebarList)
         ? e.clientX - runtime.dragging.getBoundingClientRect().left
         : runtime.dragging.getBoundingClientRect().right - e.clientX;
-      if (width > window.innerWidth * 0.5)
-        width = window.innerWidth * 0.5;
-      else if (width < 101)
-        width = 101;
+      if (width > window.innerWidth * 0.6)
+        width = window.innerWidth * 0.6;
+      else if (width < 80)
+        width = 80;
 
       // Handle resizing members list/user profile/search panel/activity panel/forum popout
       if (runtime.dragging.classList.contains(modules.members?.membersWrap)

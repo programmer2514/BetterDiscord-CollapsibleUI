@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v12.3.1:
+* Added BetterAnimations compatibility
+
 ### v12.3.0:
 * Widened the available size range of resizable elements
 * Fixed Quest popup being cut off

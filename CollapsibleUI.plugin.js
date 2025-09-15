@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.3.0
+ * @version 12.3.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,17 +155,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.3.0',
+      title: '12.3.1',
       type: 'added',
       items: [
-        'Widened the available size range of resizable elements',
-        'Fixed Quest popup being cut off',
-        'Fixed broken Webpack modules',
-        'Updated CSS variables',
+        'Added BetterAnimations compatibility',
       ],
     },
     {
-      title: '1.0.0 - 12.2.4',
+      title: '1.0.0 - 12.3.0',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1226,6 +1223,14 @@ const runtime = {
             || node.classList?.contains(modules.popout?.chatLayerWrapper)) {
             this.plugin.partialReload();
           }
+
+          if (runtime.api.Plugins.isEnabled('BetterAnimations')) {
+            node.classList?.forEach((className) => {
+              if (className.startsWith('BA__')) {
+                this.plugin.partialReload();
+              }
+            });
+          }
         });
         mutation.removedNodes.forEach((node) => {
           if (node.classList?.contains(modules.panel?.outer)
@@ -1233,7 +1238,23 @@ const runtime = {
             || node.classList?.contains(modules.popout?.chatLayerWrapper)) {
             this.plugin.partialReload();
           }
+
+          if (runtime.api.Plugins.isEnabled('BetterAnimations')) {
+            node.classList?.forEach((className) => {
+              if (className.startsWith('BA__')) {
+                this.plugin.partialReload();
+              }
+            });
+          }
         });
+
+        if (runtime.api.Plugins.isEnabled('BetterAnimations')) {
+          mutation.target.classList.forEach((className) => {
+            if (className.startsWith('BA__')) {
+              this.plugin.partialReload();
+            }
+          });
+        }
       });
     }));
   },
@@ -2136,6 +2157,11 @@ const styles = {
           .${modules.popout?.floating} {
             filter: none !important;
             border-left: none !important;
+          }
+
+          .BA__sidebar {
+            position: static !important;
+            z-index: 1000000 !important;
           }
 
           ${(settings.forumPopoutWidth)

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.3.1
+ * @version 12.3.2
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,14 +155,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.3.1',
+      title: '12.3.2',
       type: 'added',
       items: [
-        'Added BetterAnimations compatibility',
+        'Fixed profile panel visual glitches on resize',
       ],
     },
     {
-      title: '1.0.0 - 12.3.0',
+      title: '1.0.0 - 12.3.1',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1150,6 +1150,7 @@ const modules = {
   get callButtons() { return this._callButtons ?? (this._callButtons = runtime.api.Webpack.getByKeys('controlButton', 'wrapper', 'buttonContainer')); },
   get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('actionButtons', 'micTestButton', 'buttonIcon')); },
   get scroller() { return this._scroller ?? (this._scroller = runtime.api.Webpack.getByKeys('wrapper', 'scroller', 'discoveryIcon')); },
+  get profileWrappers() { return this._profileWrappers ?? (this._profileWrappers = runtime.api.Webpack.getByKeys('header', 'footerButton', 'widgetBreadcrumb', 'wishlistBreadcrumb')); },
 };
 
 const elements = {
@@ -1658,11 +1659,16 @@ const styles = {
     {
       _index: constants.I_USER_PROFILE,
       get _init() {
-        if (document.querySelector(`.${modules.panel?.outer} header > svg`)) document.querySelector(`.${modules.panel?.outer} header > svg`).style.maxHeight = document.querySelector(`.${modules.panel?.outer} header > svg`).style.minHeight;
-        document.querySelector(`.${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '500%');
-        document.querySelector(`.${modules.panel?.outer} header > svg`)?.removeAttribute('viewBox');
+        let panelPath = `.${modules.guilds?.content} .${modules.panel?.outer}`;
+        let headerPath = `${panelPath} .${modules.profileWrappers?.header}`;
+
+        if (document.querySelector(`${headerPath} > svg`))
+          document.querySelector(`${headerPath} > svg`).style.maxHeight = document.querySelector(`${headerPath} > svg`).style.minHeight;
+        document.querySelector(`${headerPath} > svg > mask > rect`)?.setAttribute('width', '500%');
+        document.querySelector(`${headerPath} > svg`)?.removeAttribute('viewBox');
+
         return this.__init ?? (this.__init = [`${runtime.meta.name}-userProfile_init`, `
-          .${modules.guilds?.content} .${modules.panel?.outer} {
+          ${panelPath} {
             max-width: var(--cui-user-profile-width) !important;
             width: var(--cui-user-profile-width) !important;
             min-width: var(--cui-user-profile-width) !important;
@@ -1670,29 +1676,29 @@ const styles = {
             min-height: 100% !important;
           }
 
-          .${modules.guilds?.content} .${modules.panel?.outer} .${modules.panel?.inner} {
+          ${panelPath} .${modules.panel?.inner} {
             border-left: 1px solid var(--border-subtle) !important;
           }
 
-          .${modules.guilds?.content} .${modules.panel?.outer} > * {
+          ${panelPath} > * {
             width: 100% !important;
           }
 
-          .${modules.guilds?.content} .${modules.panel?.outer} header > svg {
+          ${headerPath} > svg {
             min-width: 100% !important;
           }
 
-          .${modules.guilds?.content} .${modules.panel?.outer} header > svg > mask > rect {
+          ${headerPath} > svg > mask > rect {
             width: 500% !important;
           }
 
-          .${modules.guilds?.content} .${modules.panel?.outer} .${modules.effects?.effect} {
+          ${panelPath} .${modules.effects?.effect} {
             min-height: 100% !important;
           }
 
           ${(settings.userProfileWidth)
             ? `
-              .${modules.guilds?.content} .${modules.panel?.outer}:before {
+              ${panelPath}:before {
                 cursor: e-resize;
                 z-index: 200;
                 position: absolute;
@@ -1750,9 +1756,11 @@ const styles = {
         `.replace(/\s+/g, ' ')]);
       },
       _clear: function () {
-        document.querySelector(`.${modules.guilds?.content} .${modules.panel?.outer} header > svg`)?.style.removeProperty('max-height');
-        document.querySelector(`.${modules.guilds?.content} .${modules.panel?.outer} header > svg > mask > rect`)?.setAttribute('width', '100%');
-        document.querySelector(`.${modules.guilds?.content} .${modules.panel?.outer} header > svg`)?.setAttribute('viewBox', `0 0 ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minWidth)} ${parseInt(document.querySelector(`.${modules.panel?.outer} header > svg`)?.style.minHeight)}`);
+        let headerPath = `.${modules.guilds?.content} .${modules.panel?.outer} .${modules.profileWrappers?.header}`;
+
+        document.querySelector(`${headerPath} > svg`)?.style.removeProperty('max-height');
+        document.querySelector(`${headerPath} > svg > mask > rect`)?.setAttribute('width', '100%');
+        document.querySelector(`${headerPath} > svg`)?.setAttribute('viewBox', `0 0 ${parseInt(document.querySelector(`${headerPath} > svg`)?.style.minWidth)} ${parseInt(document.querySelector(`${headerPath} > svg`)?.style.minHeight)}`);
       },
       ...styleFunctions,
     },

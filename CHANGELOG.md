@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v12.3.2:
+* Fixed profile panel visual glitches on resize
+
 ### v12.3.1:
 * Added BetterAnimations compatibility
 

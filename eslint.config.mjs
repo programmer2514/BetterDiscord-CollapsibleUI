@@ -24,7 +24,7 @@ export default [
       },
     },
   },
-  stylistic.configs['recommended-flat'],
+  stylistic.configs['recommended'],
   {
     plugins: {
       '@stylistic': stylistic,

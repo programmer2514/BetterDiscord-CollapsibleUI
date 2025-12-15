@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v12.3.3:
+* Fixed plugin crash on Discord startup
+* Fixed profile panel styling issue
+* Fixed inconsistent toolbar injection
+* Minor performance improvements
+
 ### v12.3.2:
 * Fixed profile panel visual glitches on resize
 

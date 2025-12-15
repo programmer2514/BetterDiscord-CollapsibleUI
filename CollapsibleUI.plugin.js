@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.3.2
+ * @version 12.3.3
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,14 +155,17 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.3.2',
+      title: '12.3.3',
       type: 'added',
       items: [
-        'Fixed profile panel visual glitches on resize',
+        'Fixed plugin crash on Discord startup',
+        'Fixed profile panel styling issue',
+        'Fixed inconsistent toolbar injection',
+        'Minor performance improvements',
       ],
     },
     {
-      title: '1.0.0 - 12.3.1',
+      title: '1.0.0 - 12.3.2',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1146,11 +1149,10 @@ const modules = {
   get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
   get activity() { return this._activity ?? (this._activity = runtime.api.Webpack.getByKeys('itemCard', 'emptyCard', 'emptyText')); },
   get game() { return this._game ?? (this._game = runtime.api.Webpack.getByKeys('openOnHover', 'userSection', 'thumbnail')); },
-  get callIcons() { return this._callIcons ?? (this._callIcons = runtime.api.Webpack.getByKeys('button', 'speaker', 'last', 'lastButton')); },
   get callButtons() { return this._callButtons ?? (this._callButtons = runtime.api.Webpack.getByKeys('controlButton', 'wrapper', 'buttonContainer')); },
-  get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('actionButtons', 'micTestButton', 'buttonIcon')); },
+  get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('krispLogo', 'actionButtons', 'buttonIcon')); },
   get scroller() { return this._scroller ?? (this._scroller = runtime.api.Webpack.getByKeys('wrapper', 'scroller', 'discoveryIcon')); },
-  get profileWrappers() { return this._profileWrappers ?? (this._profileWrappers = runtime.api.Webpack.getByKeys('header', 'footerButton', 'widgetBreadcrumb', 'wishlistBreadcrumb')); },
+  get profileWrappers() { return this._profileWrappers ?? (this._profileWrappers = runtime.api.Webpack.getByKeys('header', 'footerButton', 'backdrop', 'wishlistBreadcrumb')); },
 };
 
 const elements = {
@@ -1203,7 +1205,8 @@ const runtime = {
   toolbar: null,
   dragging: null,
   interval: null,
-  threadsLoaded: false,
+  loaded: Object.fromEntries(Object.keys(modules).filter(key => !key.startsWith('_')).map(key => [key, false])),
+  allModulesLoaded: false,
   collapsed: [false, false, false, false, false, false, false, false, false, false, false],
   keys: new Set(),
   lastKeypress: Date.now(),
@@ -1217,46 +1220,53 @@ const runtime = {
   // Scans for changes that require a toolbar/style reload
   get observer() {
     return this._observer ?? (this._observer = new MutationObserver((mutationList) => {
-      mutationList.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.classList?.contains(modules.panel?.outer)
+      for (let mutation of mutationList) {
+        for (let node of mutation.addedNodes) {
+          if ((node.nodeName === 'ASIDE')
             || node.classList?.contains(modules.search?.searchResultsWrap)
-            || node.classList?.contains(modules.popout?.chatLayerWrapper)) {
+            || node.classList?.contains(modules.popout?.chatLayerWrapper)
+            || node.classList?.contains(modules.calls?.wrapper)) {
             this.plugin.partialReload();
+            return;
           }
 
           if (runtime.api.Plugins.isEnabled('BetterAnimations')) {
-            node.classList?.forEach((className) => {
+            for (let className of node.classList ?? []) {
               if (className.startsWith('BA__')) {
                 this.plugin.partialReload();
+                return;
               }
-            });
+            }
           }
-        });
-        mutation.removedNodes.forEach((node) => {
-          if (node.classList?.contains(modules.panel?.outer)
+        }
+        for (let node of mutation.removedNodes) {
+          if ((node.nodeName === 'ASIDE')
             || node.classList?.contains(modules.search?.searchResultsWrap)
-            || node.classList?.contains(modules.popout?.chatLayerWrapper)) {
+            || node.classList?.contains(modules.popout?.chatLayerWrapper)
+            || node.classList?.contains(modules.calls?.wrapper)) {
             this.plugin.partialReload();
+            return;
           }
 
           if (runtime.api.Plugins.isEnabled('BetterAnimations')) {
-            node.classList?.forEach((className) => {
+            for (let className of node.classList ?? []) {
               if (className.startsWith('BA__')) {
                 this.plugin.partialReload();
+                return;
               }
-            });
+            }
           }
-        });
+        }
 
         if (runtime.api.Plugins.isEnabled('BetterAnimations')) {
-          mutation.target.classList.forEach((className) => {
+          for (let className of mutation.target.classList) {
             if (className.startsWith('BA__')) {
               this.plugin.partialReload();
+              return;
             }
-          });
+          }
         }
-      });
+      }
     }));
   },
 };
@@ -2128,12 +2138,6 @@ const styles = {
             border-radius: 0 !important;
           }
 
-          .${modules.callIcons?.button},
-          .${modules.callIcons?.lastButton} {
-            margin-left: 8px !important;
-            margin-right: 8px !important;
-          }
-
           div:has(> .${modules.callButtons?.wrapper}) {
             flex-shrink: 0 !important;
             max-width: 100% !important;
@@ -2521,7 +2525,7 @@ const styles = {
     }
 
     // Init button group styles
-    this.buttons.forEach(group => group.init());
+    for (let group of this.buttons) group.init();
 
     // Init dynamic styles
     this.update();
@@ -2550,13 +2554,13 @@ const styles = {
 
   // Remove and re-add some element styles
   reinit: function () {
-    this.collapse.forEach((panel) => {
+    for (let panel of this.collapse) {
       if (panel._clear) {
         panel.clear();
         panel.init();
         if (!settings.buttonsActive[panel._index]) panel.toggle();
       }
-    });
+    }
   },
 
   // Remove all added element styles
@@ -2566,10 +2570,10 @@ const styles = {
     runtime.api.DOM.removeStyle(`${runtime.meta.name}-vars`);
 
     // Clear panel styles
-    this.collapse.forEach(panel => panel.clear());
+    for (let panel of this.collapse) panel.clear();
 
     // Clear button group styles
-    this.buttons.forEach(group => group.clear());
+    for (let group of this.buttons) group.clear();
   },
 };
 
@@ -2773,7 +2777,7 @@ module.exports = class CollapsibleUI {
   // Terminate the plugin
   terminate = () => {
     styles.clear();
-    runtime.toolbar.remove();
+    runtime.toolbar?.remove();
   };
 
   // Reload the plugin
@@ -2785,7 +2789,7 @@ module.exports = class CollapsibleUI {
   // Reload the toolbar after a short delay
   reloadToolbar = () => {
     setTimeout(() => {
-      runtime.toolbar.remove();
+      runtime.toolbar?.remove();
       this.createToolbarContainer();
     }, 250);
   };
@@ -2806,25 +2810,27 @@ module.exports = class CollapsibleUI {
     // Insert the toolbar container into the correct spot
     try {
       if (elements.inviteToolbar || elements.searchBar) {
-        elements.toolbar.insertBefore(toolbar, (elements.inviteToolbar)
-          ? elements.inviteToolbar.nextElementSibling
+        elements.toolbar?.insertBefore(toolbar, (elements.inviteToolbar)
+          ? elements.inviteToolbar?.nextElementSibling
           : elements.searchBar);
       }
       else
-        elements.toolbar.insertBefore(toolbar, elements.toolbar.childNodes[elements.toolbar.childNodes.length - 2]);
+        elements.toolbar?.insertBefore(toolbar, elements.toolbar?.childNodes[elements.toolbar?.childNodes.length - 2]);
     }
     catch (e) {
-      elements.toolbar.appendChild(toolbar);
+      elements.toolbar?.appendChild(toolbar);
     }
 
     // Get toolbar container reference
     runtime.toolbar = document.querySelector('.cui-toolbar');
 
     // Insert toolbar buttons
-    for (var i = 1; i <= settings.buttonIndexes.length; i++) {
-      for (var j = 0; j < settings.buttonIndexes.length; j++) {
-        if (i === settings.buttonIndexes[j] && elements.index[j])
-          this.createToolbarButton(j);
+    if (runtime.toolbar) {
+      for (var i = 1; i <= settings.buttonIndexes.length; i++) {
+        for (var j = 0; j < settings.buttonIndexes.length; j++) {
+          if (i === settings.buttonIndexes[j] && elements.index[j])
+            this.createToolbarButton(j);
+        }
       }
     }
   };
@@ -2861,7 +2867,7 @@ module.exports = class CollapsibleUI {
   // Toggles the button at the specified index
   toggleButton = (index) => {
     styles.collapse[index].toggle();
-    runtime.toolbar.querySelector(`#cui-icon-${index}`)?.classList.toggle(modules.icons?.selected);
+    runtime.toolbar?.querySelector(`#cui-icon-${index}`)?.classList.toggle(modules.icons?.selected);
     this.updateSettingsArray('buttonsActive', index, !settings.buttonsActive[index]);
   };
 
@@ -2890,7 +2896,7 @@ module.exports = class CollapsibleUI {
         if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
           elements.chatWrapper?.style.setProperty('--transition', 'none');
           elements.noChat?.style.setProperty('--transition', 'none');
-          e.target.childNodes.forEach(e => e.style.setProperty('transition', 'none'));
+          for (let e of e.target.childNodes) e.style.setProperty('transition', 'none');
         }
       }
     }, { passive: true, signal: runtime.controller.signal });
@@ -2999,7 +3005,7 @@ module.exports = class CollapsibleUI {
           elements.chatWrapper?.style.removeProperty('--width');
           elements.noChat?.style.removeProperty('--width');
           target.style.removeProperty('--uirr-forum-panel-width');
-          target.childNodes.forEach(e => e.style.removeProperty('transition'));
+          for (let e of target.childNodes) e.style.removeProperty('transition');
           // Timeout to avoid transition flash
           setTimeout(() => {
             elements.chatWrapper?.style.removeProperty('--transition');
@@ -3093,10 +3099,16 @@ module.exports = class CollapsibleUI {
   // Add intervals to periodically check for changes
   addIntervals = () => {
     runtime.interval = setInterval(() => {
-      // Wait for lazy-loaded threads module
-      if ((!runtime.threadsLoaded) && modules.threads) {
-        runtime.threadsLoaded = true;
-        runtime.api.Logger.info('Loaded threads module');
+      // Wait for lazy-loaded modules and load them as they become available
+      let modulesLoaded = [];
+      for (const module of Object.keys(runtime.loaded)) {
+        if (!runtime.loaded[module] && modules[module]) {
+          runtime.loaded[module] = true;
+          modulesLoaded.push(module);
+        }
+      }
+      if (modulesLoaded.length > 0) {
+        runtime.api.Logger.info(`Loaded new module${modulesLoaded.length > 1 ? 's' : ''}: ${modulesLoaded.join(', ')}`);
         this.reload();
       }
 

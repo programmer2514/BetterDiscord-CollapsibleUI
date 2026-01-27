@@ -2633,7 +2633,7 @@ module.exports = class CollapsibleUI {
     }
 
     // Subscribe dispatchers and listeners
-    modules.dispatcher.subscribe('LAYER_POP', this.reload);
+    modules.dispatcher?.subscribe('LAYER_POP', this.reload); // Temp change to get fix recent Discord Update https://github.com/programmer2514/BetterDiscord-CollapsibleUI/issues/203
 
     this.addListeners();
     this.addIntervals();
@@ -2655,7 +2655,7 @@ module.exports = class CollapsibleUI {
     if (runtime.notice) runtime.notice(true);
 
     // Unsubscribe dispatchers and listeners
-    modules.dispatcher.unsubscribe('LAYER_POP', this.reload);
+    modules.dispatcher?.unsubscribe('LAYER_POP', this.reload); // Temp change to get fix recent Discord Update https://github.com/programmer2514/BetterDiscord-CollapsibleUI/issues/203
 
     runtime.controller.abort();
 

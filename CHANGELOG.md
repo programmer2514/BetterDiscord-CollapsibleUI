@@ -1,5 +1,11 @@
 # CollapsibleUI Patch Notes
 
+### v12.3.4:
+* Fixed plugin crash on Discord startup
+* Fixed collapsing user settings buttons
+* Fixed plugin reload on settings change
+* Fixed user area blocking upload button when channel list is collapsed
+
 ### v12.3.3:
 * Fixed plugin crash on Discord startup
 * Fixed profile panel styling issue

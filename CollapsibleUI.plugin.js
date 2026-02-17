@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.3.3
+ * @version 12.3.4
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,17 +155,17 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.3.3',
+      title: '12.3.4',
       type: 'added',
       items: [
         'Fixed plugin crash on Discord startup',
-        'Fixed profile panel styling issue',
-        'Fixed inconsistent toolbar injection',
-        'Minor performance improvements',
+        'Fixed collapsing user settings buttons',
+        'Fixed plugin reload on settings change',
+        'Fixed user area blocking upload button when channel list is collapsed',
       ],
     },
     {
-      title: '1.0.0 - 12.3.2',
+      title: '1.0.0 - 12.3.3',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1130,7 +1130,6 @@ const constants = {
 const modules = {
   get members() { return this._members ?? (this._members = runtime.api.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon')); },
   get icons() { return this._icons ?? (this._icons = runtime.api.Webpack.getByKeys('selected', 'iconWrapper', 'clickable', 'icon')); },
-  get dispatcher() { return this._dispatcher ?? (this._dispatcher = runtime.api.Webpack.getByKeys('dispatch', 'isDispatching')); },
   get social() { return this._social ?? (this._social = runtime.api.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend')); },
   get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'downloadArrow')); },
   get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('outer', 'inner', 'overlay')); },
@@ -1245,6 +1244,13 @@ const runtime = {
             || node.classList?.contains(modules.popout?.chatLayerWrapper)
             || node.classList?.contains(modules.calls?.wrapper)) {
             this.plugin.partialReload();
+            return;
+          }
+
+          // Reload when an overlay window is closed
+          // This seems to need to be hard-coded
+          if (node.classList?.contains('layer_bc663c')) {
+            this.plugin.reload();
             return;
           }
 
@@ -1968,6 +1974,7 @@ const styles = {
             border-right-width: clamp(0px, calc(1px * ((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled))), 1px) !important;
             opacity: clamp(0, calc((var(--cui-server-list-toggled) * var(--cui-compat-hsl) * (1 - var(--fst-server-list-collapsed))) + var(--cui-channel-list-toggled)), 1) !important;
             z-index: 191 !important;
+            overflow: hidden !important;
           }
 
           .${modules.userAreaButtons?.actionButtons} button {
@@ -2342,7 +2349,7 @@ const styles = {
             transform: translateX(calc((1 - var(--cui-channel-list-toggled)) * 1000000000px));
           }
 
-          .${modules.user?.buttons} > *:not(:nth-last-child(2)):not(.gameActivityToggleButton_fd3fb5) {
+          .${modules.user?.buttons} > *:not(:last-child):not(.gameActivityToggleButton_fd3fb5) {
             transition: width var(--cui-transition-speed) !important;
             overflow: hidden !important;
           }
@@ -2355,7 +2362,7 @@ const styles = {
             gap: 0px !important;
           }
 
-          .${modules.user?.buttons} > *:not(:nth-last-child(2)):not(.gameActivityToggleButton_fd3fb5) {
+          .${modules.user?.buttons} > *:not(:last-child):not(.gameActivityToggleButton_fd3fb5) {
             width: 0px !important;
           }
         `.replace(/\s+/g, ' '));
@@ -2632,9 +2639,7 @@ module.exports = class CollapsibleUI {
       runtime.api.Data.save('version', runtime.meta.version);
     }
 
-    // Subscribe dispatchers and listeners
-    modules.dispatcher.subscribe('LAYER_POP', this.reload);
-
+    // Subscribe intervals and listeners
     this.addListeners();
     this.addIntervals();
 
@@ -2654,9 +2659,7 @@ module.exports = class CollapsibleUI {
     // If an update notice was shown, clear it
     if (runtime.notice) runtime.notice(true);
 
-    // Unsubscribe dispatchers and listeners
-    modules.dispatcher.unsubscribe('LAYER_POP', this.reload);
-
+    // Unsubscribe intervals and listeners
     runtime.controller.abort();
 
     clearInterval(runtime.interval);

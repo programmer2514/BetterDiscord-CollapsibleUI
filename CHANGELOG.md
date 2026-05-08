@@ -1,5 +1,8 @@
 # CollapsibleUI Patch Notes
 
+### v12.3.5:
+* Fixed performance issues
+
 ### v12.3.4:
 * Fixed plugin crash on Discord startup
 * Fixed collapsing user settings buttons

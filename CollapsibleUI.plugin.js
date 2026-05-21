@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.3.4
+ * @version 12.3.5
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -1126,33 +1126,61 @@ const constants = {
   I_TOOLBAR_FULL: 3,
 };
 
-// Abstract webpack modules
-const modules = {
-  get members() { return this._members ?? (this._members = runtime.api.Webpack.getByKeys('membersWrap', 'hiddenMembers', 'roleIcon')); },
-  get icons() { return this._icons ?? (this._icons = runtime.api.Webpack.getByKeys('selected', 'iconWrapper', 'clickable', 'icon')); },
-  get social() { return this._social ?? (this._social = runtime.api.Webpack.getByKeys('inviteToolbar', 'peopleColumn', 'addFriend')); },
-  get toolbar() { return this._toolbar ?? (this._toolbar = runtime.api.Webpack.getByKeys('updateIconForeground', 'search', 'downloadArrow')); },
-  get panel() { return this._panel ?? (this._panel = runtime.api.Webpack.getByKeys('outer', 'inner', 'overlay')); },
-  get guilds() { return this._guilds ?? (this._guilds = runtime.api.Webpack.getByKeys('chatContent', 'noChat', 'parentChannelName', 'linkedLobby')); },
-  get frame() { return this._frame ?? (this._frame = runtime.api.Webpack.getByKeys('bar', 'title', 'winButtons')); },
-  get calls() { return this._calls ?? (this._calls = runtime.api.Webpack.getByKeys('wrapper', 'fullScreen', 'callContainer')); },
-  get threads() { return this._threads ?? (this._threads = runtime.api.Webpack.getByKeys('uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton')); },
-  get user() { return this._user ?? (this._user = runtime.api.Webpack.getByKeys('avatar', 'nameTag', 'customStatus', 'emoji', 'buttons')); },
-  get input() { return this._input ?? (this._input = runtime.api.Webpack.getByKeys('channelTextArea', 'attachButton', 'emojiButton')); },
-  get popout() { return this._popout ?? (this._popout = runtime.api.Webpack.getByKeys('chatLayerWrapper', 'container', 'chatTarget')); },
-  get sidebar() { return this._sidebar ?? (this._sidebar = runtime.api.Webpack.getByKeys('sidebar', 'activityPanel', 'sidebarListRounded')); },
-  get effects() { return this._effects ?? (this._effects = runtime.api.Webpack.getByKeys('profileEffects', 'hovered', 'effect')); },
-  get search() { return this._search ?? (this._search = runtime.api.Webpack.getByKeys('searchResultsWrap', 'stillIndexing', 'noResults')); },
-  get tooltip() { return this._tooltip ?? (this._tooltip = runtime.api.Webpack.getByKeys('menu', 'label', 'caret')); },
-  get preview() { return this._preview ?? (this._preview = runtime.api.Webpack.getByKeys('popout', 'more', 'title', 'timestamp', 'name')); },
-  get channels() { return this._channels ?? (this._channels = runtime.api.Webpack.getByKeys('channel', 'closeIcon', 'dm')); },
-  get activity() { return this._activity ?? (this._activity = runtime.api.Webpack.getByKeys('itemCard', 'emptyCard', 'emptyText')); },
-  get game() { return this._game ?? (this._game = runtime.api.Webpack.getByKeys('openOnHover', 'userSection', 'thumbnail')); },
-  get callButtons() { return this._callButtons ?? (this._callButtons = runtime.api.Webpack.getByKeys('controlButton', 'wrapper', 'buttonContainer')); },
-  get userAreaButtons() { return this._userAreaButtons ?? (this._userAreaButtons = runtime.api.Webpack.getByKeys('krispLogo', 'actionButtons', 'buttonIcon')); },
-  get scroller() { return this._scroller ?? (this._scroller = runtime.api.Webpack.getByKeys('wrapper', 'scroller', 'discoveryIcon')); },
-  get profileWrappers() { return this._profileWrappers ?? (this._profileWrappers = runtime.api.Webpack.getByKeys('header', 'footerButton', 'backdrop', 'wishlistBreadcrumb')); },
+// Key sets for all required webpack modules
+const MODULE_KEY_SETS = {
+  members:       ['membersWrap', 'hiddenMembers', 'roleIcon'],
+  icons:         ['selected', 'iconWrapper', 'clickable', 'icon'],
+  social:        ['inviteToolbar', 'peopleColumn', 'addFriend'],
+  toolbar:       ['updateIconForeground', 'search', 'downloadArrow'],
+  panel:         ['outer', 'inner', 'overlay'],
+  guilds:        ['chatContent', 'noChat', 'parentChannelName', 'linkedLobby'],
+  frame:         ['bar', 'title', 'winButtons'],
+  calls:         ['wrapper', 'fullScreen', 'callContainer'],
+  threads:       ['uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton'],
+  user:          ['avatar', 'nameTag', 'customStatus', 'emoji', 'buttons'],
+  input:         ['channelTextArea', 'attachButton', 'emojiButton'],
+  popout:        ['chatLayerWrapper', 'container', 'chatTarget'],
+  sidebar:       ['sidebar', 'activityPanel', 'sidebarListRounded'],
+  effects:       ['profileEffects', 'hovered', 'effect'],
+  search:        ['searchResultsWrap', 'stillIndexing', 'noResults'],
+  tooltip:       ['menu', 'label', 'caret'],
+  preview:       ['popout', 'more', 'title', 'timestamp', 'name'],
+  channels:      ['channel', 'closeIcon', 'dm'],
+  activity:      ['itemCard', 'emptyCard', 'emptyText'],
+  game:          ['openOnHover', 'userSection', 'thumbnail'],
+  callButtons:   ['controlButton', 'wrapper', 'buttonContainer'],
+  userAreaButtons: ['krispLogo', 'actionButtons', 'buttonIcon'],
+  scroller:      ['wrapper', 'scroller', 'discoveryIcon'],
+  profileWrappers: ['header', 'footerButton', 'backdrop', 'wishlistBreadcrumb'],
 };
+
+// getBulk walks the webpack module cache once for all queries together.
+function bulkResolveModules() {
+  const names = Object.keys(MODULE_KEY_SETS);
+  const queries = names.map(name => ({
+    filter: runtime.api.Webpack.Filters.byKeys(...MODULE_KEY_SETS[name]),
+  }));
+  const resolved = runtime.api.Webpack.getBulk(...queries);
+  return Object.fromEntries(names.map((name, i) => [name, resolved[i]]));
+}
+
+// Abstract webpack modules
+const _moduleCache = { _resolved: false, _data: {} };
+const modules = new Proxy(_moduleCache, {
+  get(target, prop) {
+    if (prop.startsWith('_')) return target[prop];
+    if (!target._resolved) {
+      target._data = bulkResolveModules();
+      target._resolved = true;
+    }
+    return target._data[prop];
+  },
+  set(target, prop, value) {
+    if (prop.startsWith('_')) { target[prop] = value; return true; }
+    target._data[prop] = value;
+    return true;
+  },
+});
 
 const elements = {
   get inviteToolbar() { return document.querySelector(`.${modules.social?.inviteToolbar}`); },
@@ -1204,7 +1232,7 @@ const runtime = {
   toolbar: null,
   dragging: null,
   interval: null,
-  loaded: Object.fromEntries(Object.keys(modules).filter(key => !key.startsWith('_')).map(key => [key, false])),
+  loaded: Object.fromEntries(Object.keys(MODULE_KEY_SETS).map(key => [key, false])),
   allModulesLoaded: false,
   collapsed: [false, false, false, false, false, false, false, false, false, false, false],
   keys: new Set(),
@@ -3225,18 +3253,16 @@ module.exports = class CollapsibleUI {
 
   // Check if the cursor is within the given distance of an element
   isNear = (element, distance, x, y) => {
-    let box = element?.getBoundingClientRect();
-    if (!box) return false;
-
-    let top = box.top - distance;
-    let left = box.left - distance;
-    let right = box.right + distance;
-    let bottom = box.bottom + distance;
-
-    if (element.classList.contains(`${modules.frame?.bar}`))
-      right = window.innerWidth + distance;
-
-    return (x > left && x < right && y > top && y < bottom);
+    if (!element) return false;
+	
+    const rect = element.getBoundingClientRect();
+    const frameBar = modules.frame?.bar;
+    const top    = rect.top    - distance;
+    const left   = rect.left   - distance;
+    const right  = (frameBar && element.classList.contains(frameBar) ? window.innerWidth : rect.right) + distance;
+    const bottom = rect.bottom + distance;
+	
+    return x >= left && x <= right && y >= top && y <= bottom;
   };
 
   // Update the dynamic collapsed state of an element

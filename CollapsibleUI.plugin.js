@@ -155,17 +155,14 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.3.4',
+      title: '12.3.5',
       type: 'added',
       items: [
-        'Fixed plugin crash on Discord startup',
-        'Fixed collapsing user settings buttons',
-        'Fixed plugin reload on settings change',
-        'Fixed user area blocking upload button when channel list is collapsed',
+        'Fixed performance issues',
       ],
     },
     {
-      title: '1.0.0 - 12.3.3',
+      title: '1.0.0 - 12.3.4',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',

@@ -1128,9 +1128,9 @@ const MODULE_KEY_SETS = {
   members:       ['membersWrap', 'hiddenMembers', 'roleIcon'],
   icons:         ['selected', 'iconWrapper', 'clickable', 'icon'],
   social:        ['inviteToolbar', 'peopleColumn', 'addFriend'],
-  toolbar:       ['updateIconForeground', 'search', 'downloadArrow'],
+  toolbar:       ['search', 'searchBar', 'focused'],
   panel:         ['outer', 'inner', 'overlay'],
-  guilds:        ['chatContent', 'noChat', 'parentChannelName', 'linkedLobby'],
+  guilds:        ['chatContent', 'noChat', 'parentChannelName'],
   frame:         ['bar', 'title', 'winButtons'],
   calls:         ['wrapper', 'fullScreen', 'callContainer'],
   threads:       ['uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton'],
@@ -1141,24 +1141,43 @@ const MODULE_KEY_SETS = {
   effects:       ['profileEffects', 'hovered', 'effect'],
   search:        ['searchResultsWrap', 'stillIndexing', 'noResults'],
   tooltip:       ['menu', 'label', 'caret'],
-  preview:       ['popout', 'more', 'title', 'timestamp', 'name'],
+  preview:       ['popout', 'title', 'timestamp', 'name'],
   channels:      ['channel', 'closeIcon', 'dm'],
   activity:      ['itemCard', 'emptyCard', 'emptyText'],
   game:          ['openOnHover', 'userSection', 'thumbnail'],
   callButtons:   ['controlButton', 'wrapper', 'buttonContainer'],
   userAreaButtons: ['krispLogo', 'actionButtons', 'buttonIcon'],
   scroller:      ['wrapper', 'scroller', 'discoveryIcon'],
-  profileWrappers: ['header', 'footerButton', 'backdrop', 'wishlistBreadcrumb'],
+  profileWrappers: ['header', 'backdrop', 'wishlistBreadcrumb'],
 };
 
 // getBulk walks the webpack module cache once for all queries together.
 function bulkResolveModules() {
   const names = Object.keys(MODULE_KEY_SETS);
-  const queries = names.map(name => ({
-    filter: runtime.api.Webpack.Filters.byKeys(...MODULE_KEY_SETS[name]),
-  }));
+  const cache = new WeakMap();
+  const normalize = (exports) => {
+    if (!exports || typeof exports !== 'object') return exports;
+    if (cache.has(exports)) return cache.get(exports);
+
+    let normalized = exports;
+    const values = Object.values(exports);
+    if (values.length && values.every(value => typeof value === 'string')) {
+      normalized = { ...exports };
+      // CSS export keys may be mangled; class values still retain their names.
+      for (let value of values) {
+        const name = value.match(/^([a-zA-Z][a-zA-Z0-9]*)_[a-zA-Z0-9_-]+(?: |$)/)?.[1];
+        if (name && !Object.hasOwn(normalized, name)) normalized[name] = value;
+      }
+    }
+    cache.set(exports, normalized);
+    return normalized;
+  };
+  const queries = names.map((name) => {
+    const filter = runtime.api.Webpack.Filters.byKeys(...MODULE_KEY_SETS[name]);
+    return { filter: exports => filter(normalize(exports)) };
+  });
   const resolved = runtime.api.Webpack.getBulk(...queries);
-  return Object.fromEntries(names.map((name, i) => [name, resolved[i]]));
+  return Object.fromEntries(names.map((name, i) => [name, normalize(resolved[i])]));
 }
 
 // Abstract webpack modules
@@ -1181,7 +1200,7 @@ const modules = new Proxy(_moduleCache, {
 
 const elements = {
   get inviteToolbar() { return document.querySelector(`.${modules.social?.inviteToolbar}`); },
-  get searchBar() { return document.querySelector(`.${modules.toolbar?.search}`); },
+  get searchBar() { return elements.toolbar?.querySelector(`.${modules.toolbar?.search}`)?.closest(`.${modules.icons?.toolbar} > *`); },
   get toolbar() { return document.querySelector(`.${modules.icons?.toolbar}`); },
   get membersList() { return document.querySelector(`.${modules.members?.membersWrap}`); },
   get userProfile() { return document.querySelector(`.${modules.guilds?.content} .${modules.panel?.inner}`); },
@@ -2365,7 +2384,7 @@ const styles = {
       hidden: false,
       init: function () {
         runtime.api.DOM.addStyle(`${runtime.meta.name}-settingsButtons_init_col`, `
-          .${modules.user?.avatarWrapper} {
+          .${modules.user?.avatarWrapper ?? modules.user?.accountPopoutButtonWrapper} {
             flex-grow: 1 !important;
           }
 

@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description A feature-rich BetterDiscord plugin that reworks the Discord UI to be significantly more modular
- * @version 12.3.5
+ * @version 12.4.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-CollapsibleUI
@@ -155,14 +155,19 @@ const settings = {
 const config = {
   changelog: [
     {
-      title: '12.3.5',
+      title: '12.4.0',
       type: 'added',
       items: [
-        'Fixed performance issues',
+        '@madebyspook - Fixed webpack module resolution on new Discord versions',
+        'Improved profile panel styling',
+        'Fixed resize handle offset on channels list',
+        'Fixed voice chat panel overlapping the rest of voice chat',
+        'Fixed crash on rapidly collapsing and expanding VC text chat',
+        'Improved handling of missing webpack modules',
       ],
     },
     {
-      title: '1.0.0 - 12.3.4',
+      title: '1.0.0 - 12.3.5',
       type: 'added',
       items: [
         'See the full changelog here: https://programmer2514.github.io/?l=cui-changelog',
@@ -1125,29 +1130,29 @@ const constants = {
 
 // Key sets for all required webpack modules
 const MODULE_KEY_SETS = {
-  members:       ['membersWrap', 'hiddenMembers', 'roleIcon'],
-  icons:         ['selected', 'iconWrapper', 'clickable', 'icon'],
-  social:        ['inviteToolbar', 'peopleColumn', 'addFriend'],
-  toolbar:       ['search', 'searchBar', 'focused'],
-  panel:         ['outer', 'inner', 'overlay'],
-  guilds:        ['chatContent', 'noChat', 'parentChannelName'],
-  frame:         ['bar', 'title', 'winButtons'],
-  calls:         ['wrapper', 'fullScreen', 'callContainer'],
-  threads:       ['uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton'],
-  user:          ['avatar', 'nameTag', 'customStatus', 'emoji', 'buttons'],
-  input:         ['channelTextArea', 'attachButton', 'emojiButton'],
-  popout:        ['chatLayerWrapper', 'container', 'chatTarget'],
-  sidebar:       ['sidebar', 'activityPanel', 'sidebarListRounded'],
-  effects:       ['profileEffects', 'hovered', 'effect'],
-  search:        ['searchResultsWrap', 'stillIndexing', 'noResults'],
-  tooltip:       ['menu', 'label', 'caret'],
-  preview:       ['popout', 'title', 'timestamp', 'name'],
-  channels:      ['channel', 'closeIcon', 'dm'],
-  activity:      ['itemCard', 'emptyCard', 'emptyText'],
-  game:          ['openOnHover', 'userSection', 'thumbnail'],
-  callButtons:   ['controlButton', 'wrapper', 'buttonContainer'],
+  members: ['membersWrap', 'hiddenMembers', 'roleIcon'],
+  icons: ['selected', 'iconWrapper', 'clickable', 'icon'],
+  social: ['inviteToolbar', 'peopleColumn', 'addFriend'],
+  toolbar: ['search', 'searchBar', 'focused'],
+  panel: ['outer', 'inner', 'overlay'],
+  guilds: ['chatContent', 'noChat', 'parentChannelName'],
+  frame: ['bar', 'title', 'winButtons'],
+  calls: ['wrapper', 'fullScreen', 'callContainer'],
+  threads: ['uploadArea', 'newMemberBanner', 'mainCard', 'newPostsButton'],
+  user: ['avatar', 'nameTag', 'customStatus', 'emoji', 'buttons'],
+  input: ['channelTextArea', 'attachButton', 'emojiButton'],
+  popout: ['chatLayerWrapper', 'container', 'chatTarget'],
+  sidebar: ['sidebar', 'activityPanel', 'sidebarListRounded'],
+  effects: ['profileEffects', 'hovered', 'effect'],
+  search: ['searchResultsWrap', 'stillIndexing', 'noResults'],
+  tooltip: ['menu', 'label', 'caret'],
+  preview: ['popout', 'title', 'timestamp', 'name'],
+  channels: ['channel', 'closeIcon', 'dm'],
+  activity: ['itemCard', 'emptyCard', 'emptyText'],
+  game: ['openOnHover', 'userSection', 'thumbnail'],
+  callButtons: ['controlButton', 'wrapper', 'buttonContainer'],
   userAreaButtons: ['krispLogo', 'actionButtons', 'buttonIcon'],
-  scroller:      ['wrapper', 'scroller', 'discoveryIcon'],
+  scroller: ['wrapper', 'scroller', 'discoveryIcon'],
   profileWrappers: ['header', 'backdrop', 'wishlistBreadcrumb'],
 };
 
@@ -1155,27 +1160,42 @@ const MODULE_KEY_SETS = {
 function bulkResolveModules() {
   const names = Object.keys(MODULE_KEY_SETS);
   const cache = new WeakMap();
+
+  let hasUndefinedModule = false;
+  for (let name of names) {
+    if (!_moduleCache._data[name]) {
+      hasUndefinedModule = true;
+      break;
+    }
+  }
+  if (!hasUndefinedModule) return _moduleCache._data;
+
   const normalize = (exports) => {
     if (!exports || typeof exports !== 'object') return exports;
     if (cache.has(exports)) return cache.get(exports);
 
     let normalized = exports;
     const values = Object.values(exports);
+
     if (values.length && values.every(value => typeof value === 'string')) {
       normalized = { ...exports };
+
       // CSS export keys may be mangled; class values still retain their names.
       for (let value of values) {
         const name = value.match(/^([a-zA-Z][a-zA-Z0-9]*)_[a-zA-Z0-9_-]+(?: |$)/)?.[1];
         if (name && !Object.hasOwn(normalized, name)) normalized[name] = value;
       }
     }
+
     cache.set(exports, normalized);
     return normalized;
   };
+
   const queries = names.map((name) => {
     const filter = runtime.api.Webpack.Filters.byKeys(...MODULE_KEY_SETS[name]);
     return { filter: exports => filter(normalize(exports)) };
   });
+
   const resolved = runtime.api.Webpack.getBulk(...queries);
   return Object.fromEntries(names.map((name, i) => [name, normalize(resolved[i])]));
 }
@@ -1185,14 +1205,17 @@ const _moduleCache = { _resolved: false, _data: {} };
 const modules = new Proxy(_moduleCache, {
   get(target, prop) {
     if (prop.startsWith('_')) return target[prop];
-    if (!target._resolved) {
+    if (!target._resolved && !target._data[prop]) {
       target._data = bulkResolveModules();
       target._resolved = true;
     }
     return target._data[prop];
   },
   set(target, prop, value) {
-    if (prop.startsWith('_')) { target[prop] = value; return true; }
+    if (prop.startsWith('_')) {
+      target[prop] = value;
+      return true;
+    }
     target._data[prop] = value;
     return true;
   },
@@ -1497,7 +1520,7 @@ const styles = {
       get _init() {
         return this.__init ?? (this.__init = [`${runtime.meta.name}-channelList_init`, `
           :root {
-            --cui-channel-list-handle-offset: calc(var(--cui-channel-list-width) - 12px);
+            --cui-channel-list-handle-offset: calc(var(--cui-channel-list-width) - 12px + (var(--cui-compat-hsl) * var(--cui-server-list-toggled) * 70px));
             --cui-channel-list-handle-transition: left var(--cui-transition-speed);
             --cui-channel-list-toggled: 1;
           }
@@ -1733,7 +1756,10 @@ const styles = {
             width: var(--cui-user-profile-width) !important;
             min-width: var(--cui-user-profile-width) !important;
             transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
-            min-height: 100% !important;
+            min-height: calc(100% - 16px) !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            margin-right: 0 !important;
           }
 
           ${panelPath} .${modules.panel?.inner} {
@@ -1793,9 +1819,10 @@ const styles = {
           .${modules.guilds?.content} .${modules.panel?.outer} {
             position: absolute !important;
             z-index: 190 !important;
-            max-height: 100% !important;
-            height: 100% !important;
-            right: 0 !important;
+            min-height: calc(100% - 20px) !important;
+            max-height: calc(100% - 20px) !important;
+            height: calc(100% - 20px) !important;
+            right: 8px !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2206,15 +2233,11 @@ const styles = {
             --transition: max-width var(--cui-transition-speed), width var(--cui-transition-speed), min-width var(--cui-transition-speed);
           }
 
-          .${modules.guilds?.content}:after,
-          .${modules.calls?.noChat}:after {
-            content: "";
-            display: ${(elements.forumPopout) ? 'block' : 'none'};
-            height: 100%;
-            max-width: var(--width);
-            width: var(--width);
-            min-width: var(--width);
-            transition: var(--transition);
+          .${modules.guilds?.content},
+          .${modules.calls?.noChat} {
+            max-width: ${(elements.forumPopout) ? 'calc(100% - var(--width))' : '100%'};
+            width: ${(elements.forumPopout) ? 'calc(100% - var(--width))' : '100%'};
+            min-width: ${(elements.forumPopout) ? 'calc(100% - var(--width))' : '100%'};
           }
 
           .${modules.popout?.floating} {
@@ -2259,21 +2282,21 @@ const styles = {
             --uirr-forum-panel-width: var(--cui-collapse-size);
           }
 
-          .${modules.guilds?.content}:after,
-          .${modules.calls?.noChat}:after {
-            max-width: var(--cui-collapse-size);
-            width: var(--cui-collapse-size);
-            min-width: var(--cui-collapse-size);
+          .${modules.guilds?.content},
+          .${modules.calls?.noChat} {
+            max-width: 100%;
+            width: 100%;
+            min-width: 100%;
           }
         `.replace(/\s+/g, ' ')]);
       },
       get _float() {
         return this.__float ?? (this.__float = [`${runtime.meta.name}-forumPopout_float`, `
-          .${modules.guilds?.content}:after,
-          .${modules.calls?.noChat}:after {
-            max-width: 0 !important;
-            width: 0 !important;
-            min-width: 0 !important;
+          .${modules.guilds?.content},
+          .${modules.calls?.noChat} {
+            max-width: 100% !important;
+            width: 100% !important;
+            min-width: 100% !important;
           }
         `.replace(/\s+/g, ' ')]);
       },
@@ -2612,6 +2635,9 @@ const styles = {
         if (!settings.buttonsActive[panel._index]) panel.toggle();
       }
     }
+
+    _moduleCache._resolved = false;
+    this.update();
   },
 
   // Remove all added element styles
@@ -2943,7 +2969,7 @@ module.exports = class CollapsibleUI {
         if (e.target.classList.contains(modules.popout?.chatLayerWrapper)) {
           elements.chatWrapper?.style.setProperty('--transition', 'none');
           elements.noChat?.style.setProperty('--transition', 'none');
-          for (let e of e.target.childNodes) e.style.setProperty('transition', 'none');
+          for (let el of e.target.childNodes) el.style.setProperty('transition', 'none');
         }
       }
     }, { passive: true, signal: runtime.controller.signal });
@@ -3001,8 +3027,9 @@ module.exports = class CollapsibleUI {
 
       // Handle left clicks
       else {
-        let dragging = null;
+        let dragging;
         let target = null;
+
         if (runtime.dragging) {
           dragging = runtime.dragging;
           runtime.dragging = null;
@@ -3270,14 +3297,14 @@ module.exports = class CollapsibleUI {
   // Check if the cursor is within the given distance of an element
   isNear = (element, distance, x, y) => {
     if (!element) return false;
-	
+
     const rect = element.getBoundingClientRect();
     const frameBar = modules.frame?.bar;
-    const top    = rect.top    - distance;
-    const left   = rect.left   - distance;
-    const right  = (frameBar && element.classList.contains(frameBar) ? window.innerWidth : rect.right) + distance;
+    const top = rect.top - distance;
+    const left = rect.left - distance;
+    const right = (frameBar && element.classList.contains(frameBar) ? window.innerWidth : rect.right) + distance;
     const bottom = rect.bottom + distance;
-	
+
     return x >= left && x <= right && y >= top && y <= bottom;
   };
 

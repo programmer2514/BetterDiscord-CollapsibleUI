@@ -1,5 +1,13 @@
 # CollapsibleUI Patch Notes
 
+### v12.4.0:
+* @madebyspook - Fixed webpack module resolution on new Discord versions
+* Improved profile panel styling
+* Fixed resize handle offset on channels list
+* Fixed voice chat panel overlapping the rest of voice chat
+* Fixed crash on rapidly collapsing and expanding VC text chat
+* Improved handling of missing webpack modules
+
 ### v12.3.5:
 * Fixed performance issues
 
